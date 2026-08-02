@@ -106,7 +106,10 @@ aws s3 cp dist/manifest.webmanifest "s3://$BUCKET/manifest.webmanifest" \
   --content-type "application/manifest+json"
 
 echo "── 4/4 · purge du cache CloudFront ──"
-ID=$(aws cloudfront create-invalidation \
+# MSYS_NO_PATHCONV : sous Git Bash, « /index.html » est pris pour un chemin
+# absolu et réécrit en « C:/Program Files/Git/index.html ». CloudFront rejette
+# alors la requête avec « invalid invalidation paths ».
+ID=$(MSYS_NO_PATHCONV=1 aws cloudfront create-invalidation \
   --distribution-id "$DISTRIBUTION" \
   --paths "/index.html" "/sw.js" "/manifest.webmanifest" \
   --query 'Invalidation.Id' --output text)
