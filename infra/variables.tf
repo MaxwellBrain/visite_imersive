@@ -1,11 +1,18 @@
 variable "domain" {
-  description = "Domaine racine du projet, sans protocole ni point final."
+  description = <<-EOT
+    Domaine racine du projet, sans protocole ni point final.
+
+    ⚠️ Il doit s'agir d'un domaine que vous POSSÉDEZ et dont vous pouvez changer
+    les serveurs de noms chez le registrar. La validation du certificat ACM se
+    fait par DNS : sur un domaine qui ne vous appartient pas, elle reste en
+    PENDING_VALIDATION indéfiniment — aucun délai d'attente n'y changera rien.
+  EOT
   type        = string
-  default     = "musea.space"
+  default     = "nexacode.space"
 
   validation {
     condition     = can(regex("^[a-z0-9.-]+\\.[a-z]{2,}$", var.domain))
-    error_message = "Le domaine doit ressembler à « musea.space », sans https:// ni barre oblique."
+    error_message = "Le domaine doit ressembler à « nexacode.space », sans https:// ni barre oblique."
   }
 }
 

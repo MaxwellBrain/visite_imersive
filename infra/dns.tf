@@ -67,8 +67,19 @@ resource "aws_acm_certificate_validation" "site" {
   certificate_arn         = aws_acm_certificate.site.arn
   validation_record_fqdns = [for r in aws_route53_record.validation : r.fqdn]
 
+  # 45 minutes : de quoi absorber la propagation DNS après délégation.
+  #
+  # Mais que ce soit clair — allonger ce délai ne sauve JAMAIS une délégation
+  # absente. AWS interroge le DNS public du domaine ; si le registrar pointe
+  # encore ailleurs, il ne trouvera jamais l'enregistrement de validation, et le
+  # certificat restera en PENDING_VALIDATION pour toujours.
+  #
+  # D'où la marche à suivre en deux temps (voir DEPLOY.md) :
+  #   1. terraform apply -target=aws_route53_zone.principale
+  #   2. déléguer chez le registrar, vérifier avec nslookup
+  #   3. terraform apply
   timeouts {
-    create = "20m"
+    create = "45m"
   }
 }
 

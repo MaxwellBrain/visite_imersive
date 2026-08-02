@@ -59,42 +59,50 @@ gérées étant des constantes globales, ils sont désormais écrits en dur dans
 
 ---
 
-## 1. Monter l'infrastructure
+## 1. Monter l'infrastructure — EN DEUX TEMPS
+
+L'ordre compte. La validation du certificat ACM se fait par DNS : elle ne peut
+aboutir que si le domaine est **déjà délégué** à la zone Route 53. Tout appliquer
+d'un coup mène à 45 minutes d'attente puis à un échec.
+
+### 1a. Créer la zone DNS, et rien d'autre
 
 ```bash
 cd infra
-cp terraform.tfvars.example terraform.tfvars   # puis adapter
+cp terraform.tfvars.example terraform.tfvars   # vérifier le domaine !
 terraform init
-terraform plan      # LIRE la sortie avant d'appliquer
+terraform apply -target=aws_route53_zone.principale
+terraform output serveurs_de_noms
+```
+
+### 1b. Déléguer chez le registrar — étape manuelle
+
+Recopiez les quatre serveurs affichés chez votre registrar, **en remplacement**
+des siens. C'est l'étape qui conditionne tout le reste.
+
+Vérifiez que la délégation est effective avant de continuer :
+
+```bash
+nslookup -type=NS nexacode.space 8.8.8.8
+```
+
+Vous devez voir les serveurs `awsdns`. Comptez de quelques minutes à quelques
+heures. Tant qu'ils n'apparaissent pas, ne lancez pas la suite.
+
+### 1c. Monter le reste
+
+```bash
 terraform apply
 ```
 
-Ce qui est créé : un bucket S3 privé, une distribution CloudFront, un certificat
-ACM couvrant `musea.space` **et** `*.musea.space`, la zone Route 53 avec ses
-enregistrements joker, et le rôle de déploiement GitHub.
+Le certificat se valide alors en quelques minutes, et la distribution CloudFront
+se déploie (comptez 5 à 15 minutes de plus).
 
-> **`terraform apply` va rester bloqué** sur la validation du certificat. C'est
-> normal, et c'est l'étape 2 qui le débloque.
-
----
-
-## 2. Déléguer le domaine — étape manuelle
-
-Terraform affiche en sortie :
-
-```
-serveurs_de_noms = [ "ns-xxx.awsdns-xx.com", … ]
-```
-
-Recopiez ces quatre serveurs chez votre **registrar**, en remplacement des siens.
-Tant que ce n'est pas fait, rien ne répond sur `musea.space` et le certificat
-reste en attente. Comptez de quelques minutes à quelques heures de propagation.
-
-Vérification :
-
-```bash
-dig +short NS musea.space
-```
+> **Le piège rencontré en vrai** : un certificat demandé pour un domaine qu'on ne
+> possède pas reste en `PENDING_VALIDATION` indéfiniment. AWS interroge le DNS
+> public ; si le registrar pointe ailleurs, l'enregistrement de validation posé
+> dans votre zone Route 53 n'est jamais lu. **Allonger le délai d'attente ne sert
+> à rien** — c'est la délégation qu'il faut corriger, ou le domaine.
 
 ---
 

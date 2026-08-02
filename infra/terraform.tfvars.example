@@ -1,7 +1,7 @@
 # Copier en terraform.tfvars puis adapter.
 # terraform.tfvars est ignoré par git : il décrit VOTRE compte.
 
-domain      = "musea.space"
+domain      = "nexacode.space"
 environment = "production"
 region      = "eu-west-3"
 
