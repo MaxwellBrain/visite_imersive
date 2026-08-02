@@ -2,16 +2,16 @@
 //
 // Priorité voulue : le nom d'hôte d'abord (sous-domaine ou domaine personnalisé),
 // le chemin /c/:slug conservé en repli local (dev, aperçu). Le domaine plateforme
-// est configurable via VITE_PLATFORM_DOMAIN (défaut « musea.nexacode.store »).
+// est configurable via VITE_PLATFORM_DOMAIN (défaut « musea.nexacoode.space »).
 //
 // Le domaine de plateforme peut compter plusieurs niveaux : la comparaison porte
-// sur la chaîne entière, donc « bandjoun.musea.nexacode.store » est résolu
+// sur la chaîne entière, donc « bandjoun.musea.nexacoode.space » est résolu
 // correctement sans traitement particulier.
 //
-// La mise en service DNS/CloudFront (joker *.musea.nexacode.store) est décrite
+// La mise en service DNS/CloudFront (joker *.musea.nexacoode.space) est décrite
 // dans infra/ ; ce module en est la couche applicative.
 
-export const PLATFORM_DOMAIN = (import.meta.env.VITE_PLATFORM_DOMAIN || 'musea.nexacode.store').toLowerCase()
+export const PLATFORM_DOMAIN = (import.meta.env.VITE_PLATFORM_DOMAIN || 'musea.nexacoode.space').toLowerCase()
 
 // Sous-domaines système réservés (miroir de la table `slugs_reserves`) : jamais une organisation.
 export const RESERVED_SUBDOMAINS = new Set([
