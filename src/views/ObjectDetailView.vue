@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Button from 'primevue/button'
@@ -29,6 +29,16 @@ const chef = computed(() => (lien.value ? genealogy.getIndividu(lien.value.indiv
 const personnes = computed(() => normalise(genealogy.individus))
 
 const viewer = reactive({ visible: false })
+
+// La liste ne transporte plus les médias lourds : cette fiche les demande pour
+// le seul objet consulté. Sans cela, la photo et le bouton 3D disparaîtraient.
+watch(
+  object,
+  (o) => {
+    if (o && o.photo === undefined) objectStore.chargerMedias(o.id).catch(() => {})
+  },
+  { immediate: true }
+)
 </script>
 
 <template>

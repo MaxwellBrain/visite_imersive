@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/useAuthStore'
 import { useAccessStore } from '@/stores/useAccessStore'
 import { pubMuseums } from '@/services/publicApi'
 import { useSiteLink } from '@/composables/useSiteLink'
+import { qrSvg } from '@/services/qrcode'
 
 // Liens internes : reste sur le site consulte (/site ou /c/<slug>)
 const { to } = useSiteLink()
@@ -30,7 +31,9 @@ const museums = ref([])
 onMounted(async () => {
   await auth.ensureReady()
   if (!auth.user) {
-    router.replace({ path: '/login', query: { redirect: route.fullPath } })
+    // On reste DANS le site de l'organisation : sa propre page de connexion,
+    // à ses couleurs. `/login` est la porte de la plateforme, pas celle du tenant.
+    router.replace({ path: to('/connexion'), query: { redirect: route.fullPath } })
     return
   }
   await loadAccount()
@@ -50,9 +53,27 @@ async function loadAccount() {
 
 function museumName(id) { return id == null ? t('account.allMuseums') : museums.value.find((m) => m.id === id)?.nom || t('account.museumN', { id }) }
 function fmtDate(d) { return d ? new Intl.DateTimeFormat(locale.value === 'en' ? 'en-GB' : 'fr-FR', { dateStyle: 'medium' }).format(new Date(d)) : '' }
-// QR du billet — service gratuit, sans clé ni compte.
-function qrUrl(code) {
-  return `https://api.qrserver.com/v1/create-qr-code/?size=264x264&margin=8&data=${encodeURIComponent(code)}`
+// QR du billet.
+//
+// Deux défauts corrigés ici :
+//
+//  1. Le code encodé était le NUMÉRO DE BILLET NU. Scanné avec l'appareil photo
+//     d'un téléphone, il n'affichait qu'une suite de caractères et ne menait
+//     nulle part. On encode désormais une ADRESSE : le visiteur qui scanne son
+//     propre billet arrive sur son compte, et le contrôleur reste libre de
+//     lire le code à l'œil, toujours affiché sous l'image.
+//
+//  2. L'image venait d'api.qrserver.com — un service tiers gratuit, donc une
+//     dépendance réseau hors de notre contrôle, et le numéro de billet de
+//     chaque visiteur envoyé à un inconnu. On le fabrique nous-mêmes avec
+//     services/qrcode.js, déjà écrit pour la réalité augmentée.
+function qrSvgBillet(code) {
+  const base = typeof window !== 'undefined' ? window.location.origin : ''
+  try {
+    return qrSvg(`${base}${to('/compte')}?billet=${encodeURIComponent(code)}`, { size: 132 })
+  } catch {
+    return '' // un QR absent n'empêche pas de lire le code écrit dessous
+  }
 }
 
 async function logout() {
@@ -91,7 +112,7 @@ async function logout() {
             <span v-else class="tk__ok"><i class="pi pi-check" /> {{ $t('account.active') }}</span>
           </div>
           <div v-if="a.ticket_code" class="tk__qr">
-            <img :src="qrUrl(a.ticket_code)" :alt="a.ticket_code" width="132" height="132" loading="lazy" />
+            <div class="tk__qrimg" v-html="qrSvgBillet(a.ticket_code)" />
             <code>{{ a.ticket_code }}</code>
           </div>
         </article>
@@ -135,6 +156,8 @@ async function logout() {
   border-left: 5px solid var(--site-primary, #0e6f5c); position: relative; overflow: hidden;
 }
 .tk.is-used { border-left-color: #b9beb8; opacity: 0.72; }
+.tk__qrimg { line-height: 0; background: #fff; border-radius: 6px; }
+.tk__qrimg :deep(svg) { display: block; width: 132px; height: 132px; }
 .tk__main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.25rem; }
 .tk__type { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--site-primary, #0e6f5c); }
 .tk__museum { font-size: 1.05rem; font-weight: 800; color: #101210; line-height: 1.25; }

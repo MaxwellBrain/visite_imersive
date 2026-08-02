@@ -9,11 +9,11 @@ variable "zone_domain" {
     indéfiniment — aucun délai d'attente n'y changera rien.
   EOT
   type        = string
-  default     = "nexacode.space"
+  default     = "nexacode.store"
 
   validation {
     condition     = can(regex("^[a-z0-9.-]+\\.[a-z]{2,}$", var.zone_domain))
-    error_message = "Le domaine doit ressembler à « nexacode.space », sans https:// ni barre oblique."
+    error_message = "Le domaine doit ressembler à « nexacode.store », sans https:// ni barre oblique."
   }
 }
 
@@ -21,8 +21,8 @@ variable "subdomain" {
   description = <<-EOT
     Sous-domaine occupé par le site à l'intérieur de la zone.
 
-    « musea » ⇒ le site vit sur musea.nexacode.space, et les organisations sur
-    bandjoun.musea.nexacode.space. Chaîne vide ⇒ le site occupe la racine de la
+    « musea » ⇒ le site vit sur musea.nexacode.store, et les organisations sur
+    bandjoun.musea.nexacode.store. Chaîne vide ⇒ le site occupe la racine de la
     zone, ce qui déplacerait tout ce qui y répond déjà : à n'utiliser que sur
     une zone dédiée.
   EOT

@@ -22,6 +22,7 @@ import { useGenealogyStore } from '@/stores/useGenealogyStore'
 import { OBJECT_CHEF_RELATIONS } from '@/constants/options'
 import { improveDescription, generateSeo } from '@/services/aiService'
 import ImageUploader from '@/components/common/ImageUploader.vue'
+import { vignette } from '@/services/image'
 import Object3DViewer from '@/components/objects/Object3DViewer.vue'
 
 const props = defineProps({
@@ -52,6 +53,7 @@ const form = reactive({
   nomCommun: '',
   description: '',
   photo: '',
+  photoThumb: null,
   model3d: null,
   model3dName: '',
   model3dIos: null,
@@ -100,6 +102,7 @@ function reset() {
   form.nomCommun = obj?.nomCommun ?? ''
   form.description = obj?.description ?? ''
   form.photo = obj?.photo ?? ''
+  form.photoThumb = obj?.photoThumb ?? null
   form.model3d = obj?.model3d ?? null
   form.model3dName = obj?.model3dName ?? ''
   form.model3dIos = obj?.model3dIos ?? null
@@ -120,10 +123,36 @@ function reset() {
   activeTab.value = '0'
 }
 
+const chargementMedias = ref(false)
+
 watch(
   () => props.visible,
-  (open) => {
-    if (open) reset()
+  async (open) => {
+    if (!open) return
+    reset()
+    // La liste ne transporte plus les médias lourds (voir useObjectStore) :
+    // on les récupère à l'ouverture de la fiche, et pour ce seul objet.
+    if (props.object?.id && props.object.photo === undefined) {
+      chargementMedias.value = true
+      try {
+        const m = await store.chargerMedias(props.object.id)
+        form.photo = m.photo || ''
+        form.model3d = m.model3d || null
+        form.model3dIos = m.model3d_ios || null
+      } catch { /* la fiche reste modifiable sans ses médias */ } finally {
+        chargementMedias.value = false
+      }
+    }
+  }
+)
+
+// La vignette suit la photo. Elle est produite ici, une fois, plutôt qu'à
+// chaque affichage de la liste : ~8 Ko qui évitent de charger des centaines de
+// kilo-octets par ligne de tableau.
+watch(
+  () => form.photo,
+  async (photo) => {
+    form.photoThumb = photo ? await vignette(photo) : null
   }
 )
 
@@ -213,18 +242,29 @@ function close() {
   emit('update:visible', false)
 }
 
+// VERROU ANTI-DOUBLE-ENVOI.
+//
+// L'enregistrement pouvait durer plusieurs secondes ; pendant ce temps le
+// bouton restait actif, et un second clic créait un DEUXIÈME objet. Ce n'était
+// pas de l'impatience de l'utilisateur mais un défaut de l'interface : un
+// bouton qui reste cliquable annonce qu'il reste quelque chose à faire.
+const saving = ref(false)
+
 async function save() {
+  if (saving.value) return // garde-fou, même si le bouton est déjà désactivé
   submitted.value = true
   if (!valid.value) {
     activeTab.value = '0'
     return
   }
+  saving.value = true
   const payload = {
     sectorId: form.sectorId,
     nom: form.nom,
     nomCommun: form.nomCommun,
     description: form.description,
     photo: form.photo,
+    photoThumb: form.photoThumb,
     model3d: form.model3d,
     model3dName: form.model3dName,
     model3dIos: form.model3dIos,
@@ -250,6 +290,8 @@ async function save() {
     close()
   } catch (e) {
     toast.add({ severity: 'error', summary: t('admin.museums.saveFailed'), detail: e.message, life: 3500 })
+  } finally {
+    saving.value = false
   }
 }
 </script>
@@ -529,8 +571,14 @@ async function save() {
     </Tabs>
 
     <template #footer>
-      <Button :label="$t('admin.common.cancel')" severity="secondary" text @click="close" />
-      <Button :label="$t('admin.common.save')" icon="pi pi-check" @click="save" />
+      <Button :label="$t('admin.common.cancel')" severity="secondary" text :disabled="saving" @click="close" />
+      <Button
+        :label="$t('admin.common.save')"
+        icon="pi pi-check"
+        :loading="saving"
+        :disabled="saving"
+        @click="save"
+      />
     </template>
 
     <Object3DViewer

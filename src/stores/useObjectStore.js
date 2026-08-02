@@ -12,6 +12,7 @@ const fromRow = (r) => ({
   nomCommun: r.nom_commun,
   description: r.description,
   photo: r.photo,
+  photoThumb: r.photo_thumb || null,
   model3d: r.model3d,
   model3dName: r.model3d_name,
   // Réalité augmentée (migration 20260801_object_ar.sql)
@@ -30,6 +31,7 @@ const toRow = (o) => ({
   nom_commun: o.nomCommun ?? null,
   description: o.description ?? null,
   photo: o.photo ?? null,
+  photo_thumb: o.photoThumb ?? null,
   model3d: o.model3d ?? null,
   model3d_name: o.model3dName ?? null,
   model3d_ios: o.model3dIos ?? null,
@@ -76,19 +78,53 @@ export const useObjectStore = defineStore('objects', () => {
   const items = ref([])
   const loading = ref(false)
 
+  // Colonnes de la LISTE. `photo`, `model3d` et `model3d_ios` en sont ABSENTS :
+  // ce sont des data URL en base64 pesant des centaines de kilo-octets chacune.
+  // Un `select('*')` sur vingt objets téléchargeait plusieurs méga-octets
+  // uniquement pour afficher un tableau de noms.
+  //
+  // La vignette vient de `photo_thumb`, une miniature de 240 px produite au
+  // téléversement (~8 Ko). Le tableau reste illustré, sans le poids.
+  // Les médias complets ne sont chargés qu'à l'ouverture d'une fiche,
+  // par `chargerMedias()`.
+  const COLONNES_LISTE =
+    'id, sector_id, nom, nom_commun, description, published, published_at, seo, created_at,' +
+    ' photo_thumb, model3d_name, model3d_ios_name, ar_placement, ar_echelle'
+
   async function load() {
     loading.value = true
-    const { data, error } = await scopeToTenant(supabase.from('objects').select('*')).order('id')
+    const { data, error } = await scopeToTenant(
+      supabase.from('objects').select(COLONNES_LISTE)
+    ).order('id')
     if (error) console.error('[objects] load', error.message)
     else items.value = data.map(fromRow)
     loading.value = false
+  }
+
+  // Charge les médias lourds d'UN objet, à l'ouverture de sa fiche seulement.
+  async function chargerMedias(id) {
+    const { data, error } = await supabase
+      .from('objects').select('photo, model3d, model3d_ios').eq('id', id).single()
+    if (error) throw error
+    const i = items.value.findIndex((x) => x.id === id)
+    if (i !== -1) {
+      items.value[i] = {
+        ...items.value[i],
+        photo: data.photo,
+        model3d: data.model3d,
+        model3dIos: data.model3d_ios
+      }
+    }
+    return data
   }
 
   async function add(data) {
     const row = toRow(data)
     if (row.published && !row.published_at) row.published_at = today()
     const r = await ecrire((avecAr) =>
-      supabase.from('objects').insert(avecAr ? row : sansAr(row)).select().single()
+      // On ne redemande PAS la photo : la renvoyer doublerait le poids de
+      // l aller-retour pour une donnee qu on vient nous-meme d envoyer.
+      supabase.from('objects').insert(avecAr ? row : sansAr(row)).select(COLONNES_LISTE).single()
     )
     const o = fromRow(r)
     items.value.push(o)
@@ -100,10 +136,11 @@ export const useObjectStore = defineStore('objects', () => {
     const existing = getById(id)
     if (row.published && !existing?.publishedAt) row.published_at = today()
     const r = await ecrire((avecAr) =>
-      supabase.from('objects').update(avecAr ? row : sansAr(row)).eq('id', id).select().single()
+      supabase.from('objects').update(avecAr ? row : sansAr(row)).eq('id', id).select(COLONNES_LISTE).single()
     )
     const i = items.value.findIndex((x) => x.id === id)
-    if (i !== -1) items.value[i] = fromRow(r)
+    // fromRow(r) n a pas les medias (non redemandes) : on garde ceux en memoire.
+    if (i !== -1) items.value[i] = { ...items.value[i], ...fromRow(r), photo: row.photo, model3d: row.model3d }
   }
 
   async function remove(id) {
@@ -118,7 +155,7 @@ export const useObjectStore = defineStore('objects', () => {
     const published = !o.published
     const patch = { published }
     if (published && !o.publishedAt) patch.published_at = today()
-    const { data: r, error } = await supabase.from('objects').update(patch).eq('id', id).select().single()
+    const { data: r, error } = await supabase.from('objects').update(patch).eq('id', id).select(COLONNES_LISTE).single()
     if (error) throw error
     const i = items.value.findIndex((x) => x.id === id)
     if (i !== -1) items.value[i] = fromRow(r)
@@ -126,5 +163,5 @@ export const useObjectStore = defineStore('objects', () => {
 
   const getById = (id) => items.value.find((o) => o.id === id)
 
-  return { items, loading, load, add, update, remove, togglePublished, getById }
+  return { items, loading, load, chargerMedias, add, update, remove, togglePublished, getById }
 })

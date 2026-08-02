@@ -378,3 +378,31 @@ export async function myMemberships() {
     role: r.role, accepteEmails: r.accepte_emails, depuis: r.depuis
   }))
 }
+
+// ————— Rareté d'une œuvre (Mémoire Réunifiée) —————
+// Moins une œuvre a de frères recensés dans le monde, plus elle est rare.
+// La vue `object_rarity` applique la RLS de l'appelant : un visiteur ne compte
+// que les correspondances validées d'objets publiés.
+export async function pubObjectRarity(objectId) {
+  const { data, error } = await supabase
+    .from('object_rarity').select('*').eq('object_id', objectId).maybeSingle()
+  if (error) { console.warn('[rarete]', error.message); return null }
+  return data && {
+    nbFreres: data.nb_freres, nbPays: data.nb_pays,
+    niveau: data.niveau, score: data.score_rarete
+  }
+}
+
+// Rareté de plusieurs œuvres en UNE requête (catalogue, accueil) : évite le N+1.
+export async function pubRarityFor(objectIds) {
+  const ids = (objectIds || []).filter((i) => i != null)
+  if (!ids.length) return {}
+  const { data, error } = await supabase
+    .from('object_rarity').select('*').in('object_id', ids)
+  if (error) { console.warn('[rarete]', error.message); return {} }
+  const map = {}
+  for (const r of data || []) {
+    map[r.object_id] = { nbFreres: r.nb_freres, nbPays: r.nb_pays, niveau: r.niveau, score: r.score_rarete }
+  }
+  return map
+}

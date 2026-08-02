@@ -7,7 +7,7 @@ Refonte demandée le 2026-07-31. Le multi-tenant V1 isolait les données du staf
 mais ne constituait pas une plateforme de souscription. Ce document reprend
 l'architecture depuis les fondations.
 
-**Domaine cible : `musea.space`** — chaque organisation sur `<slug>.musea.space`.
+**Domaine cible : `musea.nexacode.store`** — chaque organisation sur `<slug>.musea.nexacode.store`.
 
 ---
 
@@ -93,22 +93,22 @@ généalogie, Mémoire Réunifiée + globe), `RESUME_PROJET.md`, `HANDOFF.md`.
 - [ ] **RESTE** : formulaire de souscription multi-étapes côté public exploitant tous ces champs
       (`views/platform/SignupView.vue` ne demande encore que nom/type/slug/e-mail/tél)
 
-## Phase 2 — Sous-domaines `<slug>.musea.space` 🟡 (couche code faite, DNS/AWS à brancher)
+## Phase 2 — Sous-domaines `<slug>.musea.nexacode.store` 🟡 (couche code faite, DNS/AWS à brancher)
 - [x] **Résolution par nom d'hôte en priorité** — `src/services/host.js` (`parseHost` →
       `local` | `platform` | `reserved` | `subdomain` | `custom`, domaine plateforme
-      configurable via `VITE_PLATFORM_DOMAIN`, défaut `musea.space`). Store
+      configurable via `VITE_PLATFORM_DOMAIN`, défaut `musea.nexacode.store`). Store
       `usePublicTenantStore.resolveByHost()` : sous-domaine → `resolveBySlug`, domaine
       perso → `resolveByDomain`. `PublicLayout` applique **l'hôte d'abord**, `/c/:slug`
-      conservé en repli local. *Testé : localhost/vercel → local, `x.musea.space` → slug x,
-      `api/app.musea.space` → réservé, `chefferie.cm` → custom.*
+      conservé en repli local. *Testé : localhost/vercel → local, `x.musea.nexacode.store` → slug x,
+      `api/app.musea.nexacode.store` → réservé, `chefferie.cm` → custom.*
 - [x] **Réservation des sous-domaines système** — `RESERVED_SUBDOMAINS` (miroir de
       `slugs_reserves`) : www, api, admin, app… ne désignent jamais une organisation.
 - [x] **Canonical** — `<link rel=canonical>` posé par `PublicLayout` vers l'URL canonique
-      de l'organisation (`canonicalOrigin` : domaine perso vérifié, sinon `<slug>.musea.space`),
+      de l'organisation (`canonicalOrigin` : domaine perso vérifié, sinon `<slug>.musea.nexacode.store`),
       préfixes `/c/:slug` et `/site` retirés. Redirection racine `/` → site de l'org sur un
       hôte d'organisation (guard routeur). *Vérifié : `/c/fondation/musees` → canonical
-      `https://fondation.musea.space/musees`, `/site` → `https://fondation.musea.space`.*
-- [ ] **RESTE (AWS, à brancher par l'utilisateur)** : Route 53 wildcard `*.musea.space`,
+      `https://fondation.musea.nexacode.store/musees`, `/site` → `https://fondation.musea.nexacode.store`.*
+- [ ] **RESTE (AWS, à brancher par l'utilisateur)** : Route 53 wildcard `*.musea.nexacode.store`,
       CloudFront, certificat ACM, et la **redirection canonique HTTP côté edge** (servir les
       pages publiques à la racine du sous-domaine sans le préfixe `/site`). La couche
       applicative est prête ; il ne manque que l'infrastructure et le domaine.

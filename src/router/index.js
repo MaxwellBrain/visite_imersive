@@ -19,6 +19,9 @@ const publicChildren = (suffix = '') => [
   { path: 'genealogie', name: `pub-genealogy${suffix}`, component: () => import('@/views/public/PublicGenealogy.vue') },
   { path: 'personnages/:id', name: `pub-personnage${suffix}`, component: () => import('@/views/public/PublicPersonnage.vue') },
   { path: 'panier', name: `pub-cart${suffix}`, component: () => import('@/views/public/PublicCart.vue') },
+  // Porte d'entrée du site de l'organisation : un seul formulaire, visiteur ET
+  // personnel. C'est le rôle du compte qui décide de la suite (site ou ERP).
+  { path: 'connexion', name: `pub-login${suffix}`, component: () => import('@/views/public/PublicLogin.vue') },
   { path: 'compte', name: `pub-account${suffix}`, component: () => import('@/views/public/PublicAccount.vue') }
 ]
 
@@ -199,12 +202,22 @@ router.beforeEach(async (to) => {
     return auth.isStaff ? { name: 'dashboard' } : '/site/compte'
   }
 
-  // Phase 2 — sur un hôte d'ORGANISATION (sous-domaine <slug>.musea.space ou domaine
+  // Phase 2 — sur un hôte d'ORGANISATION (sous-domaine <slug>.musea.nexacode.store ou domaine
   // personnalisé), la racine et l'inscription mènent au site de l'organisation, pas à
   // la vitrine de la plateforme. En local/plateforme (kind 'local'/'platform'), rien ne change.
   if (to.name === 'platform-home' || to.name === 'platform-signup') {
     const kind = parseHost().kind
     if ((kind === 'subdomain' || kind === 'custom') && !auth.isStaff) return { name: 'pub-home' }
+  }
+
+  // Sur un hôte d'organisation, `/login` (porte de la PLATEFORME) n'a pas lieu d'être :
+  // le site du tenant a sa propre page de connexion, à ses couleurs, qui sert aussi
+  // bien le visiteur que le personnel. On y renvoie pour n'avoir qu'une seule porte.
+  if (to.name === 'login') {
+    const kind = parseHost().kind
+    if (kind === 'subdomain' || kind === 'custom') {
+      return { name: 'pub-login', query: to.query }
+    }
   }
   return true
 })

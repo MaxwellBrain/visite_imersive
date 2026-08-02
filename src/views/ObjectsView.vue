@@ -125,7 +125,7 @@ function remove(obj) {
         <div v-if="filtered.length" class="vi-grid">
           <article v-for="o in filtered" :key="o.id" class="obj-card">
             <div class="obj-card__media">
-              <img v-if="o.photo" :src="o.photo" :alt="o.nom" />
+              <img v-if="o.photoThumb || o.photo" :src="o.photoThumb || o.photo" :alt="o.nom" />
               <div v-else class="obj-card__placeholder"><i class="pi pi-box" /></div>
               <Tag
                 :value="o.published ? $t('admin.common.published') : $t('admin.common.draft')"

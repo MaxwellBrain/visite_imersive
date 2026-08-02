@@ -4,11 +4,11 @@
 # Zone Route 53 EXISTANTE et déjà déléguée chez le registrar.
 # Terraform ne la crée pas : il s'y greffe et n'y ajoute que ses propres
 # enregistrements. Le reste de la zone n'est pas touché.
-zone_domain = "nexacode.space"
+zone_domain = "nexacode.store"
 
 # Sous-domaine du site à l'intérieur de cette zone.
-#   "musea" ⇒ site sur musea.nexacode.space
-#             organisations sur bandjoun.musea.nexacode.space
+#   "musea" ⇒ site sur musea.nexacode.store
+#             organisations sur bandjoun.musea.nexacode.store
 #   ""      ⇒ le site occupe la racine de la zone (déplacerait ce qui y répond déjà)
 subdomain = "musea"
 

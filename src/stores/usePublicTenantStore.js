@@ -43,7 +43,7 @@ export const usePublicTenantStore = defineStore('publicTenant', () => {
     return tenant.value
   }
 
-  // Résolution par NOM D'HÔTE (Phase 2). Priorité au sous-domaine <slug>.musea.space
+  // Résolution par NOM D'HÔTE (Phase 2). Priorité au sous-domaine <slug>.musea.nexacode.store
   // puis au domaine personnalisé. Renvoie true si l'hôte désigne une organisation
   // précise (sous-domaine ou domaine perso), false si l'hôte est neutre
   // (plateforme, réservé, local) → l'appelant enchaîne alors sur le repli /c/:slug.

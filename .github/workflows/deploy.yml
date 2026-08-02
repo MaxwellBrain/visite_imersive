@@ -131,7 +131,7 @@ jobs:
       - name: Vérifier le site en ligne
         run: |
           set -e
-          BASE="https://${{ vars.PLATFORM_DOMAIN || 'musea.space' }}"
+          BASE="https://${{ vars.PLATFORM_DOMAIN || 'musea.nexacode.store' }}"
 
           echo "── Page d'accueil ──"
           curl -fsS -o /dev/null -w "%{http_code}\n" "$BASE/" | grep -q 200

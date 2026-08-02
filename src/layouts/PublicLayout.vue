@@ -161,6 +161,13 @@ function go(to) { drawer.value = false; router.push(to) }
 
       <div class="topbar__actions">
         <LangSwitcher variant="light" />
+        <!-- Raccourci vers l'ERP : visible UNIQUEMENT par le personnel de l'organisation.
+             Un membre du personnel peut consulter son site public sans se déconnecter,
+             et revenir à son back-office d'un clic. Invisible pour tout visiteur. -->
+        <router-link v-if="auth.isStaff" to="/dashboard" class="ic ic--erp" :title="$t('publicLayout.goErp')">
+          <i class="pi pi-th-large" />
+          <span class="ic--erp-txt">{{ $t('publicLayout.erp') }}</span>
+        </router-link>
         <button class="ic" :aria-label="$t('publicLayout.account')" @click="go(to('/compte'))"><i class="pi pi-user" /></button>
         <button class="ic ic--cart" :aria-label="$t('publicLayout.cart')" @click="go(to('/panier'))">
           <i class="pi pi-shopping-bag" />
@@ -320,6 +327,14 @@ function go(to) { drawer.value = false; router.push(to) }
   font-size: 0.62rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
 }
 .topbar__actions { justify-self: end; display: flex; align-items: center; gap: 0.15rem; }
+.ic--erp {
+  display: inline-flex; align-items: center; gap: 0.4rem; width: auto;
+  padding: 0.4rem 0.75rem; margin-right: 0.35rem; border-radius: 999px;
+  background: var(--site-primary, #0e6f5c); color: #fff; text-decoration: none;
+  font-size: 0.78rem; font-weight: 700; white-space: nowrap;
+}
+.ic--erp:hover { filter: brightness(1.1); }
+@media (max-width: 700px) { .ic--erp-txt { display: none; } .ic--erp { padding: 0.4rem 0.55rem; } }
 
 .logo { justify-self: center; display: flex; align-items: center; gap: 0.6rem; line-height: 1; }
 .logo__mark {

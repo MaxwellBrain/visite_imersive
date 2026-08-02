@@ -4,7 +4,8 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Object3DViewer from '@/components/objects/Object3DViewer.vue'
 import GuideInline from '@/components/public/GuideInline.vue'
-import { pubObject, pubObjectChefs, pubDispersion } from '@/services/publicApi'
+import { pubObject, pubObjectChefs, pubDispersion, pubObjectRarity } from '@/services/publicApi'
+import RarityBadge from '@/components/public/RarityBadge.vue'
 import { useAccessStore } from '@/stores/useAccessStore'
 import { useSiteLink } from '@/composables/useSiteLink'
 
@@ -17,6 +18,7 @@ const route = useRoute()
 const object = ref(null)
 const chefs = ref([])
 const dispersion = ref({ total: 0, pays: [], freres: [] })
+const rarity = ref(null)
 const loading = ref(true)
 const viewer = reactive({ visible: false })
 
@@ -24,13 +26,16 @@ async function load() {
   loading.value = true
   object.value = await pubObject(Number(route.params.id))
   if (object.value) {
-    ;[chefs.value, dispersion.value] = await Promise.all([
+    // En parallèle : une seule attente au lieu de trois allers-retours en cascade.
+    ;[chefs.value, dispersion.value, rarity.value] = await Promise.all([
       pubObjectChefs(object.value.id),
-      pubDispersion(object.value.id)
+      pubDispersion(object.value.id),
+      pubObjectRarity(object.value.id)
     ])
   } else {
     chefs.value = []
     dispersion.value = { total: 0, pays: [], freres: [] }
+    rarity.value = null
   }
   access.load()
   loading.value = false
@@ -40,17 +45,28 @@ watch(() => route.params.id, load)
 
 function chefName(p) { return p.prenom ? `${p.nom}, ${p.prenom}` : p.nom }
 
-// Paywall « histoire complète » (§2.4⑤) : aperçu libre, suite réservée aux abonnés.
-const APERCU = 140
 const museumId = computed(() => object.value?.sectors?.museum_id ?? null)
+
+// CE QUI EST RÉSERVÉ AUX ABONNÉS — et ce qui ne l'est pas.
+//
+// La description et l'histoire de l'objet sont LIBRES. Elles étaient tronquées
+// à 140 caractères derrière un « l'histoire complète est réservée aux abonnés » :
+// c'était faux, et contraire au propos du projet. Un musée qui documente un
+// patrimoine dispersé ne monnaye pas la connaissance de cet objet.
+//
+// Sont réservés le GUIDE conversationnel et la VISUALISATION 3D / réalité
+// augmentée : des services qui coûtent (modèle de langage, numérisation).
 const unlocked = computed(() => access.hasMuseum(museumId.value))
-const isTruncated = computed(
-  () => !unlocked.value && (object.value?.description || '').length > APERCU
+
+// Les paragraphes saisis dans l'ERP doivent rester des paragraphes. Le texte
+// arrivait collé en un seul bloc parce qu'il était rendu tel quel dans un <p>,
+// où HTML réduit toute suite d'espaces et de sauts de ligne à un espace unique.
+const paragraphes = computed(() =>
+  String(object.value?.description || '')
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
 )
-const shownDesc = computed(() => {
-  const d = object.value?.description || ''
-  return isTruncated.value ? d.slice(0, APERCU).trimEnd() + '…' : d
-})
 const suggestions = computed(() =>
   object.value ? [t('object.guideSug1', { name: object.value.nom }), t('object.guideSug2')] : []
 )
@@ -75,23 +91,32 @@ const suggestions = computed(() =>
           <span class="ps-over">{{ $t('home.workFallback') }}</span>
           <h1>{{ object.nom }}</h1>
           <p v-if="object.nom_commun" class="obj__common">{{ object.nom_commun }}</p>
-          <p class="obj__desc">{{ shownDesc || $t('object.descriptionSoon') }}</p>
-          <div v-if="isTruncated" class="paywall">
-            <i class="pi pi-lock" />
-            <span>{{ $t('object.paywall') }}</span>
-            <router-link :to="to('/panier')" class="ps-btn ps-btn--sm">{{ $t('object.choosePass') }}</router-link>
+          <RarityBadge v-if="rarity" :rarity="rarity" class="obj__rarity" />
+
+          <!-- Histoire de l'objet : libre d'accès, et paragraphée. -->
+          <div class="obj__desc">
+            <p v-for="(p, i) in paragraphes" :key="i">{{ p }}</p>
+            <p v-if="!paragraphes.length" class="obj__desc--vide">{{ $t('object.descriptionSoon') }}</p>
           </div>
 
+          <!-- 3D et réalité augmentée : réservées aux abonnés. -->
           <div class="obj__actions">
-            <!-- La réalité augmentée reste proposée même sans numérisation : la
-                 visionneuse affiche alors une pièce de démonstration et le dit. -->
-            <router-link :to="to(`/ar/${object.id}`)" class="ps-btn">
-              <i class="pi pi-mobile" /> {{ $t('ar.cta') }}
-            </router-link>
-            <button v-if="object.model3d" class="ps-btn ps-btn--line" @click="viewer.visible = true">
-              <i class="pi pi-box" /> {{ $t('object.view3d') }}
-            </button>
-            <span class="freebie"><i class="pi pi-gift" /> {{ $t('common.freePreview') }}</span>
+            <template v-if="unlocked">
+              <router-link :to="to(`/ar/${object.id}`)" class="ps-btn">
+                <i class="pi pi-mobile" /> {{ $t('ar.cta') }}
+              </router-link>
+              <button v-if="object.model3d" class="ps-btn ps-btn--line" @click="viewer.visible = true">
+                <i class="pi pi-box" /> {{ $t('object.view3d') }}
+              </button>
+            </template>
+            <div v-else class="locked">
+              <i class="pi pi-lock" />
+              <div>
+                <strong>{{ $t('object.lockedTitle') }}</strong>
+                <span>{{ $t('object.lockedText') }}</span>
+              </div>
+              <router-link :to="to('/panier')" class="ps-btn ps-btn--sm">{{ $t('object.choosePass') }}</router-link>
+            </div>
           </div>
 
           <div v-if="chefs.length" class="chefs">
@@ -185,10 +210,30 @@ const suggestions = computed(() =>
   font-size: clamp(1.7rem, 3.4vw, 2.6rem); line-height: 1.08; margin: 0.15rem 0 0.3rem; color: #101210;
 }
 .obj__common { font-style: italic; color: #7c817b; margin: 0 0 1rem; }
-.obj__desc { line-height: 1.75; color: #3c403c; }
+.obj__rarity { margin: 0 0 1.1rem; }
+/* La lisibilité tient à trois choses : une mesure courte, un interlignage
+   généreux, et de vrais paragraphes séparés. */
+.obj__desc { max-width: 65ch; }
+.obj__desc p { line-height: 1.8; color: #3c403c; margin: 0 0 1.05rem; font-size: 1.02rem; }
+.obj__desc p:last-child { margin-bottom: 0; }
+/* Lettrine : donne au texte l'allure d'une notice de musée. */
+.obj__desc p:first-child::first-letter {
+  float: left; font-family: 'Anton', 'Inter', sans-serif; font-size: 3.1rem;
+  line-height: 0.82; padding: 0.1rem 0.6rem 0 0; color: var(--site-primary, #0e6f5c);
+}
+.obj__desc--vide { color: #9aa09a; font-style: italic; }
+.obj__desc--vide::first-letter { float: none; font-size: inherit; padding: 0; color: inherit; }
+
+.locked {
+  display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap; width: 100%;
+  background: #faf9f6; border-left: 4px solid var(--gold, #c9a227);
+  padding: 0.9rem 1.1rem; border-radius: 0 10px 10px 0;
+}
+.locked > i { color: var(--gold, #c9a227); font-size: 1.15rem; }
+.locked strong { display: block; font-size: 0.95rem; color: #101210; }
+.locked span { font-size: 0.85rem; color: #5c615c; }
+.locked .ps-btn { margin-left: auto; }
 .obj__actions { display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0; flex-wrap: wrap; }
-.freebie { color: #5c615c; font-size: 0.85rem; }
-.freebie i { color: var(--site-primary); }
 
 .chefs { margin-top: 1.6rem; border-top: 1px solid #e8e9e6; padding-top: 1.3rem; }
 .chef { display: flex; align-items: center; gap: 0.9rem; padding: 0.75rem 0.95rem; margin-bottom: 0.6rem; }
@@ -225,13 +270,6 @@ const suggestions = computed(() =>
 .disp__note i { color: var(--gold, #c9a227); }
 
 .obj-guide { margin-top: 2.2rem; }
-.paywall {
-  display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
-  background: #fff; border: 1px dashed var(--site-primary); border-radius: 10px;
-  padding: 0.8rem 1rem; margin-top: 0.9rem; font-size: 0.88rem; color: #5c615c;
-}
-.paywall > i { color: var(--site-primary); }
-.paywall .ps-btn { margin-left: auto; }
 .guide-lock { display: flex; align-items: center; gap: 0.9rem; border-left: 4px solid var(--site-primary); padding: 1.05rem 1.2rem; flex-wrap: wrap; }
 .guide-lock > i { color: var(--site-primary); font-size: 1.3rem; }
 .guide-lock strong { display: block; font-weight: 800; color: #101210; }

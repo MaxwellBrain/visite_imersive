@@ -27,8 +27,8 @@
 fondation, association) souscrit, obtient **son ERP** et **son site public**, et
 gère seule ses collections, sa billetterie, sa boutique, ses visiteurs et ses e-mails.
 
-**Domaine cible : `musea.space`.** Chaque organisation vit sur
-**`<slug>.musea.space`** (ex. `bandjoun.musea.space`), avec `/c/<slug>` conservé
+**Domaine cible : `musea.nexacode.store`.** Chaque organisation vit sur
+**`<slug>.musea.nexacode.store`** (ex. `bandjoun.musea.nexacode.store`), avec `/c/<slug>` conservé
 comme repli local de développement.
 
 ### Les cinq promesses
@@ -122,14 +122,14 @@ Supabase (Postgres 17 + Auth + RLS + Edge Functions) · D3 (généalogie) ·
 ## 3. Architecture multi-tenant (la règle qui prime sur tout)
 
 ```
-                    musea.space                 → vitrine plateforme + /inscription
-            bandjoun.musea.space                → site public du tenant « bandjoun »
-    bandjoun.musea.space/dashboard              → ERP du tenant « bandjoun »
+                    musea.nexacode.store                 → vitrine plateforme + /inscription
+            bandjoun.musea.nexacode.store                → site public du tenant « bandjoun »
+    bandjoun.musea.nexacode.store/dashboard              → ERP du tenant « bandjoun »
 ```
 
 **Résolution** (`src/services/host.js` → `parseHost()`), par ordre :
 
-1. `subdomain` — `<slug>.musea.space` → `resolveBySlug(slug)`
+1. `subdomain` — `<slug>.musea.nexacode.store` → `resolveBySlug(slug)`
 2. `custom` — domaine propre vérifié → `resolveByDomain(host)`
 3. `reserved` — `www`, `api`, `admin`, `app`… → jamais une organisation
 4. `local` / `platform` → repli `/c/<slug>`, sinon site historique
@@ -171,15 +171,31 @@ Supabase (Postgres 17 + Auth + RLS + Edge Functions) · D3 (généalogie) ·
 - [x] Adhésion automatique du visiteur (`join_tenant`) + écran ERP « Mes visiteurs »
       (`views/AudienceView.vue`, export CSV)
 
-### Phase 2 — Sous-domaines `<slug>.musea.space` 🟡 (code fait, AWS à brancher)
+### Phase 2 — Sous-domaines `<slug>.musea.nexacode.store` ✅ (EN LIGNE)
 
 - [x] `src/services/host.js` — `parseHost()`, `canonicalOrigin()`,
       `RESERVED_SUBDOMAINS`, domaine configurable via `VITE_PLATFORM_DOMAIN`
 - [x] `usePublicTenantStore.resolveByHost()` + priorité hôte dans `PublicLayout`
 - [x] `<link rel="canonical">` (préfixes `/c/:slug` et `/site` retirés) + garde de
       route : sur un hôte d'organisation, `/` mène au site du tenant
-- [ ] **RESTE (AWS)** : Route 53 wildcard `*.musea.space`, CloudFront, certificat ACM,
-      et la réécriture edge pour servir les pages à la racine du sous-domaine.
+- [x] **AWS appliqué le 2026-08-02** — 19 ressources créées, site **en ligne** :
+      | Vérification | Résultat |
+      |---|---|
+      | `https://musea.nexacode.store/` | **200** |
+      | `https://musea.nexacode.store/site` | **200** (repli SPA) |
+      | `https://bandjoun.musea.nexacode.store/` | **200** ← le joker fonctionne |
+      | Certificat | valide (`ssl_verify_result=0`) |
+
+      Zone Route 53 `nexacode.store` = `Z03037321AVZ4G6C1Z7E7` ·
+      bucket `musea-production-007fc014` · distribution `E20HJ21DOVYTE2`.
+
+      ⚠️ **Piège vécu, à ne pas refaire** : une *hosted zone* Route 53 peut être créée
+      pour n'importe quel nom — ça ne prouve aucune possession. La première tentative
+      visait `nexacode.space`, **domaine non enregistré** : ACM interroge le DNS
+      **public**, recevait NXDOMAIN, et `aws_acm_certificate_validation` a expiré au
+      bout de 30 min. Diagnostic : `nslookup -type=NS <domaine> 8.8.8.8` doit renvoyer
+      les 4 serveurs `awsdns` **avant** tout `apply`. NXDOMAIN = non enregistré ;
+      SERVFAIL = enregistré mais délégation cassée.
 
 ### Phase 3 — ERP : design & édition totale du site ✅
 
@@ -446,15 +462,15 @@ avertissement en console) : ne pas avoir passé la migration ne bloque pas l'ERP
 - [x] **Passerelle depuis la visite immersive** : objet → chef → lignée. L'adresse
       porte la personne au centre (`/genealogie?p=12`), donc un état est partageable.
 
-### Phase 8 — DevOps & déploiement AWS ✅ (code écrit et validé ; à appliquer)
+### Phase 8 — DevOps & déploiement AWS ✅ (APPLIQUÉ — site en ligne le 2026-08-02)
 
 > Voir **`DEPLOY.md`** pour la marche à suivre. Aucun identifiant n'est demandé
 > ni stocké : tout se joue avec les accès de l'utilisateur, depuis son poste.
 
 - [x] **`infra/`** — Terraform complet, **`terraform validate` passe**, 29 ressources :
       S3 privé (chiffré, versionné, purge à 30 j), CloudFront avec *Origin Access
-      Control*, ACM `musea.space` **+** `*.musea.space`, Route 53 avec
-      enregistrements **joker** — c'est lui qui fait exister `bandjoun.musea.space`
+      Control*, ACM `musea.nexacode.store` **+** `*.musea.nexacode.store`, Route 53 avec
+      enregistrements **joker** — c'est lui qui fait exister `bandjoun.musea.nexacode.store`
       sans créer un enregistrement par organisation (Phase 2).
 - [x] **Repli SPA** : `custom_error_response` 403 **et** 404 → `/index.html` en **200**.
       S3 répond 403 (pas 404) sur une clé absente quand le bucket est privé : les
@@ -494,7 +510,7 @@ alors que le front fonctionnera parfaitement.
 - [ ] `.github/workflows/deploy.yml` : push image → déploiement, avec environnements
       séparés (`staging` / `production`) et secrets GitHub.
 - [ ] **Terraform** : S3 + CloudFront (ou ECS Fargate), **Route 53 avec wildcard
-      `*.musea.space`**, certificat ACM `*.musea.space` (région `us-east-1` pour CloudFront).
+      `*.musea.nexacode.store`**, certificat ACM `*.musea.nexacode.store` (région `us-east-1` pour CloudFront).
 - [ ] Variables d'environnement par environnement, sauvegardes Supabase, journalisation.
 - [ ] ⚠️ **Identifiants AWS à connecter par l'utilisateur plus tard** — préparer le
       terrain sans jamais demander de secrets.

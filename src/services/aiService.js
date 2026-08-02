@@ -34,6 +34,32 @@
 
 const API_BASE = import.meta.env.VITE_AI_API_BASE || ''
 
+// Edge Function « object-ai » (Groq, clé serveur). C'est elle qui fait le
+// travail : le simulacre local d'autrefois se contentait d'ajouter une phrase
+// toute faite, et aplatissait les paragraphes au passage.
+const SUPA_URL = import.meta.env.VITE_SUPABASE_URL
+const SUPA_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+async function appelerObjectAi(payload) {
+  if (!SUPA_URL) return { ok: false, error: 'no_backend' }
+  try {
+    const res = await fetch(`${SUPA_URL}/functions/v1/object-ai`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SUPA_KEY,
+        Authorization: `Bearer ${SUPA_KEY}`
+      },
+      body: JSON.stringify(payload)
+    })
+    if (!res.ok) return { ok: false, error: `http_${res.status}` }
+    return await res.json()
+  } catch (e) {
+    console.warn('[object-ai]', e.message)
+    return { ok: false, error: 'network' }
+  }
+}
+
 function slugify(text) {
   return (text || '')
     .toString()
@@ -64,15 +90,17 @@ export async function improveDescription({ nom, description }) {
     return data.text
   }
 
-  // Fallback local (mock) — petites corrections de présentation + enrichissement léger.
-  await delay(700)
-  const cleaned = description.trim().replace(/\s+/g, ' ')
-  const phrase = cleaned.endsWith('.') ? cleaned : `${cleaned}.`
-  return (
-    `${capitalize(phrase)} ` +
-    `Pièce emblématique${nom ? ` autour de « ${nom} »` : ''}, elle invite le visiteur ` +
-    `à découvrir son histoire et son contexte de création. (Texte amélioré — démo IA locale)`
-  )
+  const r = await appelerObjectAi({ action: 'description', nom, description })
+  if (r.ok && r.texte) return r.texte
+
+  // Sans clé ou en cas d'échec, on RENVOIE LE TEXTE INTACT.
+  //
+  // L'ancienne version fabriquait ici une fausse amélioration : elle collait une
+  // phrase générique et aplatissait les sauts de ligne. Mieux vaut ne rien faire
+  // et le dire que de dégrader le travail du conservateur en prétendant l'aider.
+  const err = new Error(r.error === 'no_api_key' ? 'ai_no_key' : 'ai_unavailable')
+  err.code = r.error
+  throw err
 }
 
 /** Génère les métadonnées SEO à partir du nom + description. */

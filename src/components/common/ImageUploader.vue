@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Button from 'primevue/button'
+import { compresserImage, poidsLisible } from '@/services/image'
 
 const { t } = useI18n()
 
@@ -15,24 +16,35 @@ const emit = defineEmits(['update:modelValue'])
 
 const inputRef = ref(null)
 const failed = ref(false)
+const busy = ref(false)
+const poids = ref('')
 
 function pick() {
   inputRef.value?.click()
 }
 
-function onFile(event) {
+// L'image est REDIMENSIONNÉE avant d'être encodée. Sans cela, la photo d'un
+// téléphone part en base64 à sa taille d'origine : ~360 Ko mesurés en
+// production pour une seule image, d'où plus de dix secondes d'enregistrement.
+async function onFile(event) {
   const file = event.target.files?.[0]
   if (!file) return
-  const reader = new FileReader()
-  reader.onload = () => {
+  busy.value = true
+  try {
+    const dataUrl = await compresserImage(file)
     failed.value = false
-    emit('update:modelValue', reader.result)
+    poids.value = poidsLisible(dataUrl)
+    emit('update:modelValue', dataUrl)
+  } catch {
+    failed.value = true
+  } finally {
+    busy.value = false
   }
-  reader.readAsDataURL(file)
 }
 
 function clear() {
   emit('update:modelValue', '')
+  poids.value = ''
   if (inputRef.value) inputRef.value.value = ''
 }
 </script>
@@ -54,6 +66,10 @@ function clear() {
         <i class="pi pi-image" />
         <span>{{ $t('uploader.clickToLoad', { label: effLabel.toLowerCase() }) }}</span>
       </div>
+
+      <div v-if="busy" class="uploader__busy">
+        <i class="pi pi-spin pi-spinner" /> {{ $t('uploader.optimizing') }}
+      </div>
     </div>
 
     <div class="uploader__actions">
@@ -62,9 +78,11 @@ function clear() {
         size="small"
         :label="modelValue ? $t('uploader.change') : $t('uploader.choose')"
         icon="pi pi-upload"
+        :loading="busy"
         outlined
         @click="pick"
       />
+      <span v-if="poids" class="uploader__poids">{{ poids }}</span>
       <Button
         v-if="modelValue"
         type="button"
@@ -88,7 +106,15 @@ function clear() {
 </template>
 
 <style scoped>
+.uploader__busy {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  background: color-mix(in srgb, var(--vi-surface, #fff) 82%, transparent);
+  font-size: 0.85rem; color: var(--vi-muted);
+}
+.uploader__poids { font-size: 0.75rem; color: var(--vi-muted); align-self: center; }
 .uploader__preview {
+  position: relative;
   border: 2px dashed var(--vi-border);
   border-radius: 12px;
   overflow: hidden;
