@@ -1,15 +1,15 @@
 # ============================================================================
 # DNS et certificat — sur une zone Route 53 DÉJÀ EXISTANTE
 # ----------------------------------------------------------------------------
-# La zone `nexacoode.space` existe et est déjà déléguée chez le registrar :
+# La zone `nexacode.space` existe et est déjà déléguée chez le registrar :
 # Terraform ne la crée pas, il s'y greffe. Le site occupe un sous-domaine,
-# « musea.nexacoode.space », et l'on ne touche à aucun autre enregistrement.
+# « musea.nexacode.space », et l'on ne touche à aucun autre enregistrement.
 #
 # Le certificat couvre DEUX entrées :
 #
-#   musea.nexacoode.space     — le site lui-même
-#   *.musea.nexacoode.space   — les sous-domaines d'organisation
-#                              (bandjoun.musea.nexacoode.space…)
+#   musea.nexacode.space     — le site lui-même
+#   *.musea.nexacode.space   — les sous-domaines d'organisation
+#                              (bandjoun.musea.nexacode.space…)
 #
 # Un joker ne couvre PAS le nom qu'il préfixe, ni plus d'un niveau : d'où les
 # deux entrées, et le fait que les slugs d'organisation doivent rester plats.
@@ -116,7 +116,7 @@ resource "aws_route53_record" "site_aaaa" {
   }
 }
 
-# Le joker : c'est lui qui fait exister bandjoun.musea.nexacoode.space sans qu'on
+# Le joker : c'est lui qui fait exister bandjoun.musea.nexacode.space sans qu'on
 # ait à créer un enregistrement par organisation. L'application résout ensuite
 # le locataire à partir du nom d'hôte (src/services/host.js).
 resource "aws_route53_record" "joker_a" {
