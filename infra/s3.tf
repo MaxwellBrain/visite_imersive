@@ -15,6 +15,9 @@ resource "aws_s3_bucket" "site" {
   # Les noms de bucket sont uniques sur TOUT AWS, pas seulement dans le compte :
   # un suffixe aléatoire évite l'échec au premier apply.
   bucket = "musea-${var.environment}-${random_id.suffixe.hex}"
+
+  # Voir la variable : à laisser à false en production.
+  force_destroy = var.force_destroy
 }
 
 resource "aws_s3_bucket_public_access_block" "site" {

@@ -22,4 +22,6 @@ create_github_oidc_provider = true
 # PriceClass_100 : Europe + Amérique du Nord, le meilleur rapport coût/couverture.
 # PriceClass_All : ajoute l'Afrique, l'Asie et l'Amérique du Sud — pertinent si
 # le public visé est majoritairement au Cameroun.
+force_destroy = true
+
 price_class = "PriceClass_100"

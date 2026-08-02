@@ -65,6 +65,24 @@ variable "create_github_oidc_provider" {
   default     = true
 }
 
+variable "force_destroy" {
+  description = <<-EOT
+    Autorise `terraform destroy` à supprimer le bucket même s'il contient encore
+    des fichiers.
+
+    Pourquoi cela existe : dès que le site est publié, le bucket contient ~180
+    objets, et le versionnement en garde toutes les versions. `terraform destroy`
+    échoue alors sur « BucketNotEmpty », et il faut vider le bucket à la main
+    avant de pouvoir recommencer.
+
+    true  : pratique tant qu'on monte et démonte l'infrastructure.
+    false : indispensable en production — c'est le garde-fou qui empêche
+            d'effacer le site d'un `destroy` malheureux.
+  EOT
+  type        = bool
+  default     = false
+}
+
 variable "price_class" {
   description = "Étendue géographique de CloudFront. PriceClass_100 = Europe + Amérique du Nord, le meilleur rapport coût/couverture pour une soutenance. PriceClass_All pour servir l'Afrique depuis des points de présence locaux."
   type        = string
