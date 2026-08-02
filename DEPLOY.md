@@ -30,6 +30,35 @@ directement à Supabase en HTTPS. Rien à héberger entre les deux.
 
 ---
 
+## 0. Droits de l'utilisateur Terraform
+
+`terraform plan` ne vérifie **que les droits de lecture**. Les permissions de
+création ne sont éprouvées qu'au moment de l'`apply` : un plan qui passe ne
+garantit donc rien.
+
+Le plus simple pour un compte de travail : attacher ces quatre politiques gérées
+par AWS à l'utilisateur qui exécute Terraform.
+
+| Politique | Pour |
+|---|---|
+| `AmazonS3FullAccess` | bucket, chiffrement, versionnement, cycle de vie |
+| `CloudFrontFullAccess` | distribution, OAC, politique d'en-têtes |
+| `AWSCertificateManagerFullAccess` | certificat et sa validation |
+| `AmazonRoute53FullAccess` | zone DNS et enregistrements |
+
+Ajouter `IAMFullAccess` **uniquement** si vous renseignez `github_repository` —
+c'est ce qui crée le fournisseur OIDC et le rôle de déploiement.
+
+> Ces politiques sont larges. Pour un compte partagé ou de production, remplacez-les
+> par une politique sur mesure limitée aux ressources du projet.
+
+**Piège rencontré** : `cloudfront:ListCachePolicies`. Rechercher une politique de
+cache par son nom oblige AWS à les lister toutes. Les identifiants des politiques
+gérées étant des constantes globales, ils sont désormais écrits en dur dans
+`cloudfront.tf` — cette permission n'est plus nécessaire.
+
+---
+
 ## 1. Monter l'infrastructure
 
 ```bash

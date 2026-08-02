@@ -22,12 +22,22 @@ resource "aws_cloudfront_origin_access_control" "site" {
   signing_protocol                  = "sigv4"
 }
 
-data "aws_cloudfront_cache_policy" "optimise" {
-  name = "Managed-CachingOptimized"
-}
+# Politiques de cache gérées par AWS.
+#
+# Ces identifiants sont des CONSTANTES GLOBALES : ils sont identiques dans tous
+# les comptes AWS, toutes régions confondues. On les écrit en dur volontairement.
+#
+# La forme élégante — `data "aws_cloudfront_cache_policy" { name = "…" }` —
+# oblige AWS à LISTER toutes les politiques du compte pour retrouver celle qui
+# porte ce nom, et réclame donc la permission `cloudfront:ListCachePolicies`.
+# Exiger un droit supplémentaire pour retrouver une valeur connue d'avance est
+# un mauvais échange : on perd en robustesse ce qu'on gagne en lisibilité.
+locals {
+  # Managed-CachingOptimized — compression, TTL long, aucun en-tête transmis.
+  cache_policy_optimise = "658327ea-f89d-4fab-a63d-7e88639e58f6"
 
-data "aws_cloudfront_cache_policy" "desactive" {
-  name = "Managed-CachingDisabled"
+  # Managed-CachingDisabled — rien n'est mis en cache.
+  cache_policy_desactive = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
 }
 
 resource "aws_cloudfront_response_headers_policy" "securite" {
@@ -106,7 +116,7 @@ resource "aws_cloudfront_distribution" "site" {
     cached_methods         = ["GET", "HEAD"]
     compress               = true
 
-    cache_policy_id            = data.aws_cloudfront_cache_policy.desactive.id
+    cache_policy_id            = local.cache_policy_desactive
     response_headers_policy_id = aws_cloudfront_response_headers_policy.securite.id
   }
 
@@ -119,7 +129,7 @@ resource "aws_cloudfront_distribution" "site" {
     cached_methods         = ["GET", "HEAD"]
     compress               = true
 
-    cache_policy_id            = data.aws_cloudfront_cache_policy.optimise.id
+    cache_policy_id            = local.cache_policy_optimise
     response_headers_policy_id = aws_cloudfront_response_headers_policy.securite.id
   }
 
@@ -132,7 +142,7 @@ resource "aws_cloudfront_distribution" "site" {
     cached_methods         = ["GET", "HEAD"]
     compress               = false # un .glb est déjà compressé
 
-    cache_policy_id            = data.aws_cloudfront_cache_policy.optimise.id
+    cache_policy_id            = local.cache_policy_optimise
     response_headers_policy_id = aws_cloudfront_response_headers_policy.securite.id
   }
 
@@ -146,7 +156,7 @@ resource "aws_cloudfront_distribution" "site" {
     cached_methods         = ["GET", "HEAD"]
     compress               = true
 
-    cache_policy_id            = data.aws_cloudfront_cache_policy.desactive.id
+    cache_policy_id            = local.cache_policy_desactive
     response_headers_policy_id = aws_cloudfront_response_headers_policy.securite.id
   }
 
