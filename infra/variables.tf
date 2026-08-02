@@ -1,19 +1,43 @@
-variable "domain" {
+variable "zone_domain" {
   description = <<-EOT
-    Domaine racine du projet, sans protocole ni point final.
+    Domaine de la zone Route 53 **existante et déjà déléguée**, sans protocole
+    ni point final. Terraform ne la crée pas : il s'y greffe et n'y touche
+    qu'aux enregistrements du projet.
 
-    ⚠️ Il doit s'agir d'un domaine que vous POSSÉDEZ et dont vous pouvez changer
-    les serveurs de noms chez le registrar. La validation du certificat ACM se
-    fait par DNS : sur un domaine qui ne vous appartient pas, elle reste en
-    PENDING_VALIDATION indéfiniment — aucun délai d'attente n'y changera rien.
+    ⚠️ La validation du certificat ACM se fait par DNS. Si le registrar de ce
+    domaine ne pointe pas vers cette zone, elle restera en PENDING_VALIDATION
+    indéfiniment — aucun délai d'attente n'y changera rien.
   EOT
   type        = string
   default     = "nexacode.space"
 
   validation {
-    condition     = can(regex("^[a-z0-9.-]+\\.[a-z]{2,}$", var.domain))
+    condition     = can(regex("^[a-z0-9.-]+\\.[a-z]{2,}$", var.zone_domain))
     error_message = "Le domaine doit ressembler à « nexacode.space », sans https:// ni barre oblique."
   }
+}
+
+variable "subdomain" {
+  description = <<-EOT
+    Sous-domaine occupé par le site à l'intérieur de la zone.
+
+    « musea » ⇒ le site vit sur musea.nexacode.space, et les organisations sur
+    bandjoun.musea.nexacode.space. Chaîne vide ⇒ le site occupe la racine de la
+    zone, ce qui déplacerait tout ce qui y répond déjà : à n'utiliser que sur
+    une zone dédiée.
+  EOT
+  type        = string
+  default     = "musea"
+}
+
+variable "hosted_zone_id" {
+  description = <<-EOT
+    Identifiant exact de la zone Route 53, utile lorsque plusieurs zones portent
+    le même nom dans le compte et que la recherche par nom devient ambiguë.
+    Ex. « Z09846002SPODNLULHFY6 ». Vide ⇒ recherche par nom.
+  EOT
+  type        = string
+  default     = ""
 }
 
 variable "environment" {
@@ -33,15 +57,6 @@ variable "region" {
   default     = "eu-west-3"
 }
 
-variable "create_hosted_zone" {
-  description = <<-EOT
-    true  : Terraform crée la zone Route 53 ; il faudra alors déléguer le domaine
-            chez le registrar en y recopiant les 4 serveurs de noms affichés en sortie.
-    false : la zone existe déjà, Terraform la retrouve par son nom.
-  EOT
-  type        = bool
-  default     = true
-}
 
 variable "github_repository" {
   description = <<-EOT

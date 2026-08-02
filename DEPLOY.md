@@ -25,7 +25,7 @@ directement à Supabase en HTTPS. Rien à héberger entre les deux.
 
 - Un compte AWS et l'AWS CLI configurée (`aws sts get-caller-identity` doit répondre)
 - Terraform ≥ 1.6
-- Le domaine `musea.space` acheté chez un registrar
+- Une zone Route 53 existante et déléguée (`nexacode.space`)
 - Un dépôt Git (voir l'avertissement en fin de page)
 
 ---
@@ -59,52 +59,64 @@ gérées étant des constantes globales, ils sont désormais écrits en dur dans
 
 ---
 
-## 1. Monter l'infrastructure — EN DEUX TEMPS
+## 1. Monter l'infrastructure
 
-L'ordre compte. La validation du certificat ACM se fait par DNS : elle ne peut
-aboutir que si le domaine est **déjà délégué** à la zone Route 53. Tout appliquer
-d'un coup mène à 45 minutes d'attente puis à un échec.
+Le site s'installe sur un **sous-domaine d'une zone Route 53 existante** :
 
-### 1a. Créer la zone DNS, et rien d'autre
+```
+nexacode.space                     <- votre zone, deja deleguee, intacte
+  musea.nexacode.space             <- le site
+    bandjoun.musea.nexacode.space  <- une organisation (joker)
+```
+
+Terraform **ne cree pas la zone** et n'y touche qu'a ses propres enregistrements.
 
 ```bash
 cd infra
-cp terraform.tfvars.example terraform.tfvars   # vérifier le domaine !
+cp terraform.tfvars.example terraform.tfvars   # verifier zone_domain et subdomain
 terraform init
-terraform apply -target=aws_route53_zone.principale
-terraform output serveurs_de_noms
-```
-
-### 1b. Déléguer chez le registrar — étape manuelle
-
-Recopiez les quatre serveurs affichés chez votre registrar, **en remplacement**
-des siens. C'est l'étape qui conditionne tout le reste.
-
-Vérifiez que la délégation est effective avant de continuer :
-
-```bash
-nslookup -type=NS nexacode.space 8.8.8.8
-```
-
-Vous devez voir les serveurs `awsdns`. Comptez de quelques minutes à quelques
-heures. Tant qu'ils n'apparaissent pas, ne lancez pas la suite.
-
-### 1c. Monter le reste
-
-```bash
+terraform plan      # LIRE la sortie avant d'appliquer
 terraform apply
 ```
 
-Le certificat se valide alors en quelques minutes, et la distribution CloudFront
-se déploie (comptez 5 à 15 minutes de plus).
+La zone etant deja deleguee, le certificat se valide en quelques minutes. La
+distribution CloudFront demande ensuite 5 a 15 minutes pour se deployer.
 
-> **Le piège rencontré en vrai** : un certificat demandé pour un domaine qu'on ne
-> possède pas reste en `PENDING_VALIDATION` indéfiniment. AWS interroge le DNS
-> public ; si le registrar pointe ailleurs, l'enregistrement de validation posé
-> dans votre zone Route 53 n'est jamais lu. **Allonger le délai d'attente ne sert
-> à rien** — c'est la délégation qu'il faut corriger, ou le domaine.
+> **Le piege rencontre en vrai** : un certificat demande pour un domaine dont on
+> ne controle pas la delegation reste en `PENDING_VALIDATION` indefiniment. AWS
+> interroge le DNS **public** ; si le registrar pointe ailleurs, l'enregistrement
+> de validation pose dans la zone Route 53 n'est jamais lu. **Allonger le delai
+> d'attente ne sert a rien** -- c'est la delegation qu'il faut corriger.
+>
+> Verification prealable, en une commande :
+>
+> ```bash
+> nslookup -type=NS nexacode.space 8.8.8.8
+> ```
+>
+> Vous devez y voir des serveurs `awsdns`.
 
 ---
+
+## 2. Domaine du site
+
+Le domaine effectif est calcule a partir de `zone_domain` et `subdomain`, et
+ressort en sortie :
+
+```bash
+terraform output site_domain      # musea.nexacode.space
+terraform output zone_utilisee    # la zone touchee, pour verification
+```
+
+Cette valeur doit etre reportee a DEUX endroits, sans quoi la resolution du
+locataire par nom d'hote ne fonctionnera pas :
+
+- variable GitHub `PLATFORM_DOMAIN`
+- variable de compilation `VITE_PLATFORM_DOMAIN` (elle est inscrite dans le
+  bundle par Vite, donc necessaire des la compilation)
+
+---
+
 
 ## 3. Configurer Supabase — étape manuelle
 
@@ -114,11 +126,11 @@ parfaitement, mais la connexion Google et les liens e-mail renvoient vers
 
 Supabase → **Authentication → URL Configuration** :
 
-- **Site URL** : `https://musea.space`
-- **Redirect URLs** : ajouter `https://musea.space/**` **et** `https://*.musea.space/**`
+- **Site URL** : `https://musea.nexacode.space`
+- **Redirect URLs** : ajouter `https://musea.nexacode.space/**` **et** `https://*.musea.nexacode.space/**`
 
 Le second motif est indispensable : sans lui, un visiteur qui se connecte depuis
-`bandjoun.musea.space` est renvoyé sur le mauvais domaine.
+`bandjoun.musea.nexacode.space` est renvoyé sur le mauvais domaine.
 
 ---
 
@@ -136,7 +148,7 @@ Dans GitHub → Settings → Secrets and variables → Actions.
 | `VITE_SUPABASE_URL` | fichier `.env` |
 | `VITE_SUPABASE_ANON_KEY` | fichier `.env` |
 
-**Variables** : `PLATFORM_DOMAIN` = `musea.space`, `AWS_REGION` = `eu-west-3`
+**Variables** : `PLATFORM_DOMAIN` = `musea.nexacode.space`, `AWS_REGION` = `eu-west-3`
 
 Un `push` sur `main` déclenche alors la compilation, la publication et la purge
 du cache. Aucune clé AWS durable n'est stockée : GitHub prouve son identité par
@@ -151,13 +163,13 @@ en cas de doute :
 
 ```bash
 # Le repli SPA — de lui dépendent les QR codes de réalité augmentée
-curl -o /dev/null -w "%{http_code}\n" https://musea.space/site/ar/demo   # attendu 200
+curl -o /dev/null -w "%{http_code}\n" https://musea.nexacode.space/site/ar/demo   # attendu 200
 
 # Le type MIME du modèle 3D — sinon la RA échoue en silence sur mobile
-curl -sI https://musea.space/modeles/tabouret.glb | grep -i content-type  # model/gltf-binary
+curl -sI https://musea.nexacode.space/modeles/tabouret.glb | grep -i content-type  # model/gltf-binary
 
 # Un sous-domaine d'organisation
-curl -o /dev/null -w "%{http_code}\n" https://bandjoun.musea.space/       # attendu 200
+curl -o /dev/null -w "%{http_code}\n" https://bandjoun.musea.nexacode.space/       # attendu 200
 ```
 
 ---
@@ -182,8 +194,8 @@ repli SPA, types MIME, durées de cache — pour que ce qui marche ici marche l�
 CloudFront n'en accepte aucune autre. C'est déjà traité par le fournisseur
 `aws.us_east_1` dans `versions.tf`.
 
-**Un joker ne couvre qu'un seul niveau.** `*.musea.space` ne couvre pas
-`musea.space` : le certificat déclare les deux, et ce n'est pas une redondance.
+**Un joker ne couvre qu'un seul niveau.** `*.musea.nexacode.space` ne couvre pas
+`musea.nexacode.space` : le certificat déclare les deux, et ce n'est pas une redondance.
 
 **Les variables sont figées à la compilation.** Vite inscrit
 `VITE_SUPABASE_URL` dans le bundle. Changer de clé impose de **recompiler**, pas

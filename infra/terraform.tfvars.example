@@ -1,27 +1,39 @@
 # Copier en terraform.tfvars puis adapter.
 # terraform.tfvars est ignoré par git : il décrit VOTRE compte.
 
-domain      = "nexacode.space"
+# Zone Route 53 EXISTANTE et déjà déléguée chez le registrar.
+# Terraform ne la crée pas : il s'y greffe et n'y ajoute que ses propres
+# enregistrements. Le reste de la zone n'est pas touché.
+zone_domain = "nexacode.space"
+
+# Sous-domaine du site à l'intérieur de cette zone.
+#   "musea" ⇒ site sur musea.nexacode.space
+#             organisations sur bandjoun.musea.nexacode.space
+#   ""      ⇒ le site occupe la racine de la zone (déplacerait ce qui y répond déjà)
+subdomain = "musea"
+
+# À renseigner uniquement si plusieurs zones portent le même nom dans le compte
+# et que la recherche par nom devient ambiguë. Ex. "Z09846002SPODNLULHFY6".
+hosted_zone_id = ""
+
 environment = "production"
 region      = "eu-west-3"
-
-# true si vous partez de zéro. Terraform crée alors la zone DNS et affiche en
-# sortie les 4 serveurs de noms à recopier chez votre registrar.
-# false si la zone Route 53 existe déjà.
-create_hosted_zone = true
 
 # Dépôt autorisé à déployer, au format « proprietaire/depot ».
 # C'est cette valeur qui verrouille le rôle IAM : laissée vide, aucun rôle de
 # déploiement n'est créé (l'infrastructure se monte quand même).
+# Nécessite la politique IAMFullAccess sur l'utilisateur Terraform.
 github_repository = ""
 
 # false si votre compte AWS déploie DÉJÀ depuis GitHub : le fournisseur OIDC
 # est unique par compte, le recréer échouerait.
 create_github_oidc_provider = true
 
+# true tant qu'on monte et démonte l'infrastructure : autorise `terraform
+# destroy` à vider le bucket. À repasser à false une fois en production.
+force_destroy = true
+
 # PriceClass_100 : Europe + Amérique du Nord, le meilleur rapport coût/couverture.
 # PriceClass_All : ajoute l'Afrique, l'Asie et l'Amérique du Sud — pertinent si
 # le public visé est majoritairement au Cameroun.
-force_destroy = true
-
 price_class = "PriceClass_100"

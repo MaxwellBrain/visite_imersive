@@ -100,7 +100,7 @@ resource "aws_cloudfront_distribution" "site" {
   default_root_object = "index.html"
   price_class         = var.price_class
 
-  aliases = [var.domain, "*.${var.domain}"]
+  aliases = [local.site_domain, local.site_wildcard]
 
   origin {
     domain_name              = aws_s3_bucket.site.bucket_regional_domain_name

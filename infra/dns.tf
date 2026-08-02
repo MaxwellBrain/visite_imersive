@@ -1,39 +1,46 @@
 # ============================================================================
-# DNS et certificat
+# DNS et certificat — sur une zone Route 53 DÉJÀ EXISTANTE
 # ----------------------------------------------------------------------------
-# Le certificat couvre DEUX entrées, et c'est indispensable :
+# La zone `nexacode.space` existe et est déjà déléguée chez le registrar :
+# Terraform ne la crée pas, il s'y greffe. Le site occupe un sous-domaine,
+# « musea.nexacode.space », et l'on ne touche à aucun autre enregistrement.
 #
-#   musea.space     — le domaine nu. Un joker ne le couvre PAS.
-#   *.musea.space   — tous les sous-domaines d'organisation (bandjoun.musea.space…),
-#                     c'est-à-dire l'architecture multi-tenant de la Phase 2.
+# Le certificat couvre DEUX entrées :
 #
-# Un joker ne descend que d'un seul niveau : « a.b.musea.space » ne serait pas
-# couvert. Sans importance ici, les slugs d'organisation étant plats.
+#   musea.nexacode.space     — le site lui-même
+#   *.musea.nexacode.space   — les sous-domaines d'organisation
+#                              (bandjoun.musea.nexacode.space…)
+#
+# Un joker ne couvre PAS le nom qu'il préfixe, ni plus d'un niveau : d'où les
+# deux entrées, et le fait que les slugs d'organisation doivent rester plats.
 # ============================================================================
 
-resource "aws_route53_zone" "principale" {
-  count = var.create_hosted_zone ? 1 : 0
-  name  = var.domain
+locals {
+  # Domaine du site. Sous-domaine vide ⇒ on s'installe sur la racine de la zone.
+  site_domain = var.subdomain == "" ? var.zone_domain : "${var.subdomain}.${var.zone_domain}"
 
-  comment = "MUSÉA — zone gérée par Terraform"
+  # Motif joker pour les organisations.
+  site_wildcard = "*.${local.site_domain}"
 }
 
-data "aws_route53_zone" "existante" {
-  count        = var.create_hosted_zone ? 0 : 1
-  name         = "${var.domain}."
+# La zone existe déjà : on la retrouve. `hosted_zone_id` permet de lever
+# l'ambiguïté si plusieurs zones portent le même nom dans le compte.
+data "aws_route53_zone" "principale" {
+  count        = var.hosted_zone_id == "" ? 1 : 0
+  name         = "${var.zone_domain}."
   private_zone = false
 }
 
 locals {
-  zone_id = var.create_hosted_zone ? aws_route53_zone.principale[0].zone_id : data.aws_route53_zone.existante[0].zone_id
+  zone_id = var.hosted_zone_id != "" ? var.hosted_zone_id : data.aws_route53_zone.principale[0].zone_id
 }
 
 # ---------------------------------------------------------------- certificat
 resource "aws_acm_certificate" "site" {
-  provider = aws.us_east_1 # obligatoire pour CloudFront
+  provider = aws.us_east_1 # CloudFront n'accepte que us-east-1
 
-  domain_name               = var.domain
-  subject_alternative_names = ["*.${var.domain}"]
+  domain_name               = local.site_domain
+  subject_alternative_names = [local.site_wildcard]
   validation_method         = "DNS"
 
   lifecycle {
@@ -41,23 +48,28 @@ resource "aws_acm_certificate" "site" {
   }
 }
 
-# Enregistrements de validation. La déduplication par nom est nécessaire : le
-# domaine nu et le joker produisent souvent le MÊME enregistrement de validation,
-# et Terraform refuserait deux ressources de même clé.
+# Enregistrements de validation, posés dans la zone existante.
+#
+# La déduplication par nom est nécessaire : le domaine et son joker produisent
+# souvent le MÊME enregistrement de validation, et Terraform refuserait deux
+# ressources partageant une clé. Le `...` regroupe les doublons en liste.
 resource "aws_route53_record" "validation" {
   for_each = {
-    for o in aws_acm_certificate.site.domain_validation_options : o.domain_name => {
+    for o in aws_acm_certificate.site.domain_validation_options : o.resource_record_name => {
       name  = o.resource_record_name
       type  = o.resource_record_type
       value = o.resource_record_value
     }...
   }
 
-  zone_id         = local.zone_id
-  name            = each.value[0].name
-  type            = each.value[0].type
-  records         = [each.value[0].value]
-  ttl             = 60
+  zone_id = local.zone_id
+  name    = each.value[0].name
+  type    = each.value[0].type
+  records = [each.value[0].value]
+  ttl     = 60
+
+  # La zone contient d'autres projets : on écrase sans hésiter un enregistrement
+  # de validation homonyme, mais jamais rien d'autre.
   allow_overwrite = true
 }
 
@@ -67,28 +79,18 @@ resource "aws_acm_certificate_validation" "site" {
   certificate_arn         = aws_acm_certificate.site.arn
   validation_record_fqdns = [for r in aws_route53_record.validation : r.fqdn]
 
-  # 45 minutes : de quoi absorber la propagation DNS après délégation.
-  #
-  # Mais que ce soit clair — allonger ce délai ne sauve JAMAIS une délégation
-  # absente. AWS interroge le DNS public du domaine ; si le registrar pointe
-  # encore ailleurs, il ne trouvera jamais l'enregistrement de validation, et le
-  # certificat restera en PENDING_VALIDATION pour toujours.
-  #
-  # D'où la marche à suivre en deux temps (voir DEPLOY.md) :
-  #   1. terraform apply -target=aws_route53_zone.principale
-  #   2. déléguer chez le registrar, vérifier avec nslookup
-  #   3. terraform apply
+  # La zone étant déjà déléguée, la validation aboutit en quelques minutes.
   timeouts {
-    create = "45m"
+    create = "30m"
   }
 }
 
 # ------------------------------------------------------------ enregistrements
-# Alias A/AAAA plutôt que CNAME : seul l'alias fonctionne sur un domaine nu,
-# et il est facturé zéro requête.
-resource "aws_route53_record" "apex_a" {
+# Alias plutôt que CNAME : facturé zéro requête, et seul l'alias fonctionne sur
+# une racine de zone (utile si `subdomain` est un jour laissé vide).
+resource "aws_route53_record" "site_a" {
   zone_id = local.zone_id
-  name    = var.domain
+  name    = local.site_domain
   type    = "A"
 
   alias {
@@ -98,9 +100,9 @@ resource "aws_route53_record" "apex_a" {
   }
 }
 
-resource "aws_route53_record" "apex_aaaa" {
+resource "aws_route53_record" "site_aaaa" {
   zone_id = local.zone_id
-  name    = var.domain
+  name    = local.site_domain
   type    = "AAAA"
 
   alias {
@@ -110,12 +112,12 @@ resource "aws_route53_record" "apex_aaaa" {
   }
 }
 
-# Le joker : c'est lui qui fait exister bandjoun.musea.space sans qu'on ait à
-# créer un enregistrement par organisation. L'application résout ensuite le
-# locataire à partir du nom d'hôte (src/services/host.js).
+# Le joker : c'est lui qui fait exister bandjoun.musea.nexacode.space sans qu'on
+# ait à créer un enregistrement par organisation. L'application résout ensuite
+# le locataire à partir du nom d'hôte (src/services/host.js).
 resource "aws_route53_record" "joker_a" {
   zone_id = local.zone_id
-  name    = "*.${var.domain}"
+  name    = local.site_wildcard
   type    = "A"
 
   alias {
@@ -127,7 +129,7 @@ resource "aws_route53_record" "joker_a" {
 
 resource "aws_route53_record" "joker_aaaa" {
   zone_id = local.zone_id
-  name    = "*.${var.domain}"
+  name    = local.site_wildcard
   type    = "AAAA"
 
   alias {
