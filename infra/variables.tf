@@ -9,11 +9,11 @@ variable "zone_domain" {
     indéfiniment — aucun délai d'attente n'y changera rien.
   EOT
   type        = string
-  default     = "nexacode.space"
+  default     = "nexacode.store"
 
   validation {
     condition     = can(regex("^[a-z0-9.-]+\\.[a-z]{2,}$", var.zone_domain))
-    error_message = "Le domaine doit ressembler à « nexacode.space », sans https:// ni barre oblique."
+    error_message = "Le domaine doit ressembler à « nexacode.store », sans https:// ni barre oblique."
   }
 }
 
@@ -32,9 +32,12 @@ variable "subdomain" {
 
 variable "hosted_zone_id" {
   description = <<-EOT
-    Identifiant exact de la zone Route 53, utile lorsque plusieurs zones portent
-    le même nom dans le compte et que la recherche par nom devient ambiguë.
-    Ex. « Z09846002SPODNLULHFY6 ». Vide ⇒ recherche par nom.
+    Identifiant exact de la zone Route 53. Vide ⇒ recherche par nom.
+
+    À renseigner si la recherche par nom échoue ou devient ambiguë (plusieurs
+    zones homonymes dans le compte). La zone `nexacode.store` du compte porte
+    l'identifiant « Z09846002SPODNLULHFY6 » — renseigner directement cette valeur
+    évite un appel de découverte et lève toute ambiguïté.
   EOT
   type        = string
   default     = ""
