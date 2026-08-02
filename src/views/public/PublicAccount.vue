@@ -8,6 +8,7 @@ import { useAccessStore } from '@/stores/useAccessStore'
 import { pubMuseums } from '@/services/publicApi'
 import { useSiteLink } from '@/composables/useSiteLink'
 import { qrSvg } from '@/services/qrcode'
+import { formatMontant } from '@/constants/options'
 
 // Liens internes : reste sur le site consulte (/site ou /c/<slug>)
 const { to } = useSiteLink()
@@ -126,10 +127,10 @@ async function logout() {
             <strong>{{ $t('account.orderN', { id: o.id }) }}</strong>
             <span class="order__st" :class="`st-${o.statut}`">{{ o.statut === 'payee' ? $t('account.paid') : o.statut }}</span>
             <span class="order__date">{{ fmtDate(o.created_at) }}</span>
-            <strong class="order__total">{{ Number(o.total) }} €</strong>
+            <strong class="order__total">{{ formatMontant(o.total, o.devise) }}</strong>
           </div>
           <ul>
-            <li v-for="it in o.order_items" :key="it.id">{{ it.label }} — {{ Number(it.montant) }} €</li>
+            <li v-for="it in o.order_items" :key="it.id">{{ it.label }} — {{ formatMontant(it.montant, o.devise) }}</li>
           </ul>
         </div>
       </div>

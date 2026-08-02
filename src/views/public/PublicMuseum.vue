@@ -1,4 +1,5 @@
 <script setup>
+import { formatMontant } from '@/constants/options'
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -60,7 +61,7 @@ function addVoice() {
   if (!voice.value) return
   cart.add({
     type: 'assistant_vocal', refId: voice.value.id, museumId: museum.value.id,
-    label: `${t('audioguide.title')} — ${museum.value.nom}`, montant: Number(voice.value.prix), devise: voice.value.devise || '€'
+    label: `${t('audioguide.title')} — ${museum.value.nom}`, montant: Number(voice.value.prix), devise: voice.value.devise || 'FCFA'
   })
   added.value = 'voice'
 }
@@ -140,7 +141,7 @@ const suggestions = computed(() => [t('museum.guideSug1'), t('museum.guideSug2')
               <strong>{{ $t('museum.fullVisit') }}</strong>
               <span v-if="access.hasMuseum(museum.id)" class="offer__ok"><i class="pi pi-check" /> {{ $t('museum.accessActive') }}</span>
               <template v-else-if="planMusee">
-                <span class="ps-price">{{ Number(planMusee.prix) }} {{ planMusee.devise }} <small>{{ $t('museum.perDays', { n: planMusee.duree_jours }) }}</small></span>
+                <span class="ps-price">{{ formatMontant(planMusee.prix, planMusee.devise) }} <small>{{ $t('museum.perDays', { n: planMusee.duree_jours }) }}</small></span>
                 <button class="ps-btn ps-btn--sm" @click="addPass">
                   <i class="pi pi-shopping-bag" /> {{ added === 'pass' ? $t('common.added') : $t('museum.addToCart') }}
                 </button>
@@ -152,7 +153,7 @@ const suggestions = computed(() => [t('museum.guideSug1'), t('museum.guideSug2')
             <span class="offer__ic"><i class="pi pi-volume-up" /></span>
             <div class="offer__b">
               <strong>{{ voice.titre || $t('museum.audioguideDefault') }}</strong>
-              <span class="ps-price">{{ Number(voice.prix) }} {{ voice.devise || '€' }}</span>
+              <span class="ps-price">{{ formatMontant(voice.prix, voice.devise) }}</span>
               <span class="offer__lock"><i class="pi pi-lock" /> {{ $t('museum.locked') }}</span>
               <button class="ps-btn ps-btn--sm" @click="addVoice">
                 <i class="pi pi-shopping-bag" /> {{ added === 'voice' ? $t('common.added') : $t('museum.buyAudioguide') }}

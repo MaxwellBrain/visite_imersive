@@ -20,7 +20,7 @@ export const useCartStore = defineStore('cart', () => {
       (x) => x.type === item.type && x.refId === item.refId && (x.museumId ?? null) === (item.museumId ?? null)
     )
     if (dup) return false
-    items.value.push({ devise: '€', ...item })
+    items.value.push({ devise: 'FCFA', ...item })
     return true
   }
   function remove(index) { items.value.splice(index, 1) }

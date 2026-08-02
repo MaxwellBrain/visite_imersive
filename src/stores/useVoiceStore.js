@@ -32,7 +32,7 @@ const aTo = (a) => ({
   titre: a.titre ?? null,
   source: a.sourceType === 'audio' ? 'import' : 'synthese',
   prix: a.prix === '' || a.prix == null ? null : a.prix,
-  devise: a.devise ?? '€',
+  devise: a.devise ?? 'FCFA',
   actif: a.actif ?? false,
   langues: a.langues && a.langues.length ? a.langues : ['fr'],
   mode_interaction: a.modeInteraction ?? 'narration',

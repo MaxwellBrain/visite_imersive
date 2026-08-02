@@ -19,7 +19,7 @@ import Message from 'primevue/message'
 import { useToast } from 'primevue/usetoast'
 import { usePricingStore } from '@/stores/usePricingStore'
 import { useObjectStore } from '@/stores/useObjectStore'
-import { VISIT_TYPES, CURRENCIES } from '@/constants/options'
+import { VISIT_TYPES, CURRENCIES, formatMontant } from '@/constants/options'
 
 const { t } = useI18n()
 const pricing = usePricingStore()
@@ -35,10 +35,10 @@ const objectNameOptions = computed(() => [
 
 /* ---- Dialog : tarif objet ---- */
 const tariffDialog = ref(false)
-const tariffForm = reactive({ objectLabel: '', typeVisite: 'Visite guidée', dureeMin: 30, prix: 0, devise: '€' })
+const tariffForm = reactive({ objectLabel: '', typeVisite: 'Visite guidée', dureeMin: 30, prix: 0, devise: 'FCFA' })
 
 function openTariff() {
-  Object.assign(tariffForm, { objectLabel: '', typeVisite: 'Visite guidée', dureeMin: 30, prix: 0, devise: '€' })
+  Object.assign(tariffForm, { objectLabel: '', typeVisite: 'Visite guidée', dureeMin: 30, prix: 0, devise: 'FCFA' })
   tariffDialog.value = true
 }
 async function saveTariff() {
@@ -57,10 +57,10 @@ async function saveTariff() {
 
 /* ---- Dialog : palier de donation ---- */
 const donationDialog = ref(false)
-const donationForm = reactive({ label: '', montant: 20, devise: '€', description: '' })
+const donationForm = reactive({ label: '', montant: 20, devise: 'FCFA', description: '' })
 
 function openDonation() {
-  Object.assign(donationForm, { label: '', montant: 20, devise: '€', description: '' })
+  Object.assign(donationForm, { label: '', montant: 20, devise: 'FCFA', description: '' })
   donationDialog.value = true
 }
 async function saveDonation() {
@@ -151,7 +151,7 @@ async function saveDonation() {
             </template>
             <Column field="label" :header="$t('admin.pricing.colTier')" sortable />
             <Column field="montant" :header="$t('admin.pricing.colAmount')" sortable>
-              <template #body="{ data }"><strong>{{ data.montant }} {{ data.devise }}</strong></template>
+              <template #body="{ data }"><strong>{{ formatMontant(data.montant, data.devise) }}</strong></template>
             </Column>
             <Column field="description" :header="$t('admin.pricing.colBenefit')" />
             <Column header="" style="width: 4rem">

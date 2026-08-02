@@ -1,4 +1,5 @@
 <script setup>
+import { formatMontant } from '@/constants/options'
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import DataTable from 'primevue/datatable'
@@ -60,7 +61,7 @@ function remove(a) {
       <Column :header="$t('admin.voice.colSource')"><template #body="{ data }">{{ SOURCE_LABEL[data.source] || data.source }}</template></Column>
       <Column :header="$t('admin.voice.colPrice')">
         <template #body="{ data }">
-          <strong v-if="data.prix != null">{{ data.prix }} {{ data.devise }}</strong>
+          <strong v-if="data.prix != null">{{ formatMontant(data.prix, data.devise) }}</strong>
           <Tag v-else :value="$t('admin.voice.notOffered')" severity="warn" />
         </template>
       </Column>

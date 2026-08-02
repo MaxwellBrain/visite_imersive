@@ -75,7 +75,7 @@ const form = reactive({
   sourceType: 'texte', scriptTexte: '', provider: 'elevenlabs', timbreVoix: 'standard', debit: 1, ton: 'neutre', voiceId: null,
   audioSourceUrl: '', audioTraitement: 'tel_quel',
   personnalisationNominative: true, modeleSalutation: 'Bonjour {prenom}, bienvenue au {musee}.',
-  modeInteraction: 'narration', prix: null, devise: '€'
+  modeInteraction: 'narration', prix: null, devise: 'FCFA'
 })
 
 function reset() {
@@ -99,7 +99,7 @@ function reset() {
     modeleSalutation: a?.modeleSalutation ?? 'Bonjour {prenom}, bienvenue au {musee}.',
     modeInteraction: a?.modeInteraction ?? 'narration',
     prix: a?.prix ?? null,
-    devise: a?.devise ?? '€'
+    devise: a?.devise ?? 'FCFA'
   })
   submitted.value = false
   activeTab.value = '0'

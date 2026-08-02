@@ -17,7 +17,24 @@ export const VISIT_TYPES = [
   'Atelier pédagogique'
 ]
 
-export const CURRENCIES = ['€', '$', '£', 'FCFA']
+// Devise du projet. Le patrimoine documenté est camerounais, le public visé
+// aussi : le franc CFA d'Afrique centrale (XAF) est la devise par défaut, et
+// c'est elle qu'on affiche partout où rien n'est précisé.
+export const DEVISE_DEFAUT = 'FCFA'
+
+// Les autres restent proposées pour une organisation qui vendrait à l'étranger.
+export const CURRENCIES = ['FCFA', '€', '$', '£']
+
+// Le franc CFA ne s'écrit pas avec de décimales, et se lit par tranches de
+// mille. `Intl` avec un espace insécable fine évite « 4000FCFA ».
+export function formatMontant(valeur, devise = DEVISE_DEFAUT) {
+  const n = Number(valeur || 0)
+  const decimales = devise === DEVISE_DEFAUT ? 0 : 2
+  return `${n.toLocaleString('fr-FR', {
+    minimumFractionDigits: decimales,
+    maximumFractionDigits: decimales
+  })} ${devise}`
+}
 
 // Un secteur peut être une salle interne ou un espace en plein air
 // (ex. les cases Mousgoum reconstituées dans l'enceinte du musée).

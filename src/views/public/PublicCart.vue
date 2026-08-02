@@ -1,4 +1,5 @@
 <script setup>
+import { formatMontant } from '@/constants/options'
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -60,7 +61,7 @@ async function handleReturn(orderId) {
   pending.value = true
   const articles = cart.items.map((i) => ({ label: i.label, montant: i.montant }))
   const montantTotal = cart.total
-  const deviseCmd = cart.items[0]?.devise || '€'
+  const deviseCmd = cart.items[0]?.devise || 'FCFA'
   for (let i = 0; i < 6; i++) {
     if ((await orderStatus(orderId)) === 'payee') {
       cart.clear()
@@ -104,7 +105,7 @@ async function checkout() {
   // On garde une copie : le panier est vidé avant l'envoi du reçu.
   const articles = cart.items.map((i) => ({ label: i.label, montant: i.montant }))
   const montantTotal = cart.total
-  const deviseCmd = cart.items[0]?.devise || '€'
+  const deviseCmd = cart.items[0]?.devise || 'FCFA'
   try {
     const order = await createOrder(auth.user.id, cart.items, cart.total)
 
@@ -172,12 +173,12 @@ async function checkout() {
               <strong>{{ i.label }}</strong>
               <span v-if="i.museumId">{{ museumName(i.museumId) }}</span>
             </div>
-            <span class="ps-price">{{ i.montant }} {{ i.devise }}</span>
+            <span class="ps-price">{{ formatMontant(i.montant, i.devise) }}</span>
             <button class="citem__del" :aria-label="$t('cart.removeAria')" @click="cart.remove(idx)"><i class="pi pi-times" /></button>
           </div>
           <div class="ctotal">
             <span>{{ $t('cart.total') }}</span>
-            <strong>{{ cart.total }} €</strong>
+            <strong>{{ formatMontant(cart.total, cart.items[0]?.devise) }}</strong>
           </div>
           <p v-if="error" class="err"><i class="pi pi-exclamation-triangle" /> {{ error }}</p>
           <button class="ps-btn btn-pay" :disabled="paying" @click="checkout">
@@ -193,7 +194,7 @@ async function checkout() {
         <div class="plans">
           <div v-for="p in plans.filter(x => x.code !== 'free' && x.code !== 'per_museum')" :key="p.id" class="plan ps-card">
             <strong>{{ p.nom }}</strong>
-            <span class="ps-price plan__price">{{ Number(p.prix) }} {{ p.devise }} <small>{{ $t('cart.perDays', { n: p.duree_jours }) }}</small></span>
+            <span class="ps-price plan__price">{{ formatMontant(p.prix, p.devise) }} <small>{{ $t('cart.perDays', { n: p.duree_jours }) }}</small></span>
             <p>{{ p.description }}</p>
             <button class="ps-btn ps-btn--sm" @click="addPlan(p)"><i class="pi pi-plus" /> {{ $t('cart.addToCart') }}</button>
           </div>
@@ -209,7 +210,7 @@ async function checkout() {
         <h2 class="ps-title">{{ $t('cart.supportTitle') }}</h2>
         <div class="dons ps-chips">
           <button v-for="d in dons" :key="d.id" class="don" @click="addDon(d)">
-            <i class="pi pi-heart" /> {{ d.label }} — <strong>{{ Number(d.montant) }} {{ d.devise }}</strong>
+            <i class="pi pi-heart" /> {{ d.label }} — <strong>{{ formatMontant(d.montant, d.devise) }}</strong>
           </button>
         </div>
       </template>

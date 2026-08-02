@@ -602,7 +602,7 @@ export default {
     perDays: '/ {n} j',
     addToCart: 'Ajouter au panier',
     passMuseum: 'Pass Musée',
-    passMuseumPrice: '6 €',
+    passMuseumPrice: '4 000 FCFA',
     passMuseumSub: "S'ajoute depuis la page du musée de votre choix.",
     chooseMuseum: 'Choisir un musée',
     supportTitle: 'Soutenir la Fondation',

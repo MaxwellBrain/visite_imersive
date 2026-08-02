@@ -602,7 +602,7 @@ export default {
     perDays: '/ {n} d',
     addToCart: 'Add to cart',
     passMuseum: 'Museum Pass',
-    passMuseumPrice: '€6',
+    passMuseumPrice: '4,000 FCFA',
     passMuseumSub: 'Added from the page of the museum of your choice.',
     chooseMuseum: 'Choose a museum',
     supportTitle: 'Support the Foundation',

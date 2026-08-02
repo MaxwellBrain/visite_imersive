@@ -16,7 +16,7 @@ const toTariff = (t) => ({
   type_visite: t.typeVisite ?? null,
   duree_min: t.dureeMin ?? null,
   prix: t.prix ?? 0,
-  devise: t.devise ?? '€'
+  devise: t.devise ?? 'FCFA'
 })
 const fromDon = (r) => ({
   id: r.id,
@@ -28,7 +28,7 @@ const fromDon = (r) => ({
 const toDon = (d) => ({
   label: d.label,
   montant: d.montant ?? 0,
-  devise: d.devise ?? '€',
+  devise: d.devise ?? 'FCFA',
   description: d.description ?? null
 })
 

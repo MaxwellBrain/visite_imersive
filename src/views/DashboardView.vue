@@ -1,4 +1,5 @@
 <script setup>
+import { formatMontant } from '@/constants/options'
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -29,7 +30,7 @@ onMounted(() => {
 })
 
 // ---- Indicateurs commerce ----
-function money(v) { return `${Number(v || 0).toLocaleString('fr-FR')} €` }
+function money(v) { return formatMontant(v) }
 
 const commerceStats = computed(() => [
   { label: t('admin.dashboard.statRevenue'), value: money(orderStore.revenue), icon: 'pi pi-wallet', to: '/commandes', tone: 'green' },

@@ -1,4 +1,5 @@
 <script setup>
+import { formatMontant } from '@/constants/options'
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import DataTable from 'primevue/datatable'
@@ -34,7 +35,7 @@ const rows = computed(() =>
   statusFilter.value ? store.items.filter((x) => x.statut === statusFilter.value) : store.items
 )
 
-function money(v) { return `${Number(v || 0).toLocaleString('fr-FR')} €` }
+function money(v) { return formatMontant(v) }
 function dateFmt(d) { return d ? new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }) : '—' }
 function publicUrl(slug) { return `${window.location.origin}/c/${slug}` }
 

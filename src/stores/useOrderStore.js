@@ -10,7 +10,7 @@ const fromRow = (r) => ({
   statut: r.statut,                       // paiement : en_attente | payee | echouee
   fulfillment: r.fulfillment || 'nouvelle', // logistique : nouvelle | preparee | livree | annulee
   total: r.total == null ? 0 : Number(r.total),
-  devise: r.devise || '€',
+  devise: r.devise || 'FCFA',
   moyenPaiement: r.moyen_paiement,
   paymentProvider: r.payment_provider,
   createdAt: r.created_at,
