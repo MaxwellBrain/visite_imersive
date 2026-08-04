@@ -247,6 +247,20 @@ export async function pubMuseumChefs(museumId) {
   return [...seen.values()]
 }
 
+// Noms d'affichage des institutions. La base ne stocke qu'une clé technique :
+// écrire « met » sous une planche du cabinet ne dirait rien à un visiteur.
+const MUSEES = {
+  met: 'The Metropolitan Museum of Art',
+  artic: 'Art Institute of Chicago',
+  cleveland: 'Cleveland Museum of Art',
+  vam: 'Victoria & Albert Museum',
+  wikidata: 'Wikidata',
+  europeana: 'Europeana',
+  rijksmuseum: 'Rijksmuseum',
+  smithsonian: 'Smithsonian',
+  harvard: 'Harvard Art Museums'
+}
+
 // ---------- Mémoire réunifiée : dispersion publique (Phase 5) ----------
 // Ne remonte QUE les correspondances validées par un conservateur (RLS :
 // statut = 'valide'). La recherche automatique propose, l'humain décide — et
@@ -254,7 +268,8 @@ export async function pubMuseumChefs(museumId) {
 export async function pubSiblings(objectId) {
   const { data, error } = await scoped(supabase
     .from('object_siblings')
-    .select('id, source, external_id, titre, culture, pays, image_url, source_url, score'))
+    .select('id, source, external_id, titre, culture, pays, image_url, source_url, ' +
+            'score, type_lien, justification'))
     .eq('object_id', objectId)
     .order('score', { ascending: false })
   if (error) { console.error('[public] siblings', error.message); return [] }
@@ -267,7 +282,13 @@ export async function pubSiblings(objectId) {
     pays: r.pays || '',
     image: r.image_url || '',
     url: r.source_url || '',
-    score: r.score
+    score: r.score,
+    // La justification est ce qui distingue une salle de musée d'une grille
+    // d'images : elle dit POURQUOI ces deux objets sont côte à côte.
+    typeLien: r.type_lien || null,
+    justification: r.justification || '',
+    // Nom lisible de l'institution, à défaut la clé technique de la source.
+    musee: MUSEES[r.source] || r.source
   }))
 }
 
@@ -405,4 +426,65 @@ export async function pubRarityFor(objectIds) {
     map[r.object_id] = { nbFreres: r.nb_freres, nbPays: r.nb_pays, niveau: r.niveau, score: r.score_rarete }
   }
   return map
+}
+
+// ————— Parcours musée → secteur → objets —————
+// Le visiteur entre dans un musée, choisit une salle, et n'y voit que SES œuvres.
+// La cascade de publication s'applique : la salle n'existe pour le public que si
+// le musée est publié, et l'œuvre que si sa salle l'est.
+export async function pubSector(id) {
+  const { data, error } = await scoped(
+    supabase.from('sectors').select('*, museums(id, nom, published)')
+  ).eq('id', id).eq('published', true).maybeSingle()
+  if (error) { console.error('[public] secteur', error.message); return null }
+  if (!data || !data.museums?.published) return null
+  return data
+}
+
+export async function pubObjectsForSector(sectorId) {
+  const { data, error } = await scoped(supabase.from('objects').select('*'))
+    .eq('sector_id', sectorId).eq('published', true).order('id')
+  if (error) { console.error('[public] objets du secteur', error.message); return [] }
+  return data || []
+}
+
+// Nombre d'œuvres par salle, en UNE requête : la fiche musée annonce ainsi
+// « 4 œuvres » sur chaque carte sans déclencher un appel par salle (N+1).
+export async function pubObjectCountBySector(sectorIds) {
+  const ids = (sectorIds || []).filter((i) => i != null)
+  if (!ids.length) return {}
+  const { data, error } = await scoped(supabase.from('objects').select('id, sector_id'))
+    .in('sector_id', ids).eq('published', true)
+  if (error) { console.error('[public] comptage', error.message); return {} }
+  const map = {}
+  for (const o of data || []) map[o.sector_id] = (map[o.sector_id] || 0) + 1
+  return map
+}
+
+// ————— Consultations (mise en avant automatique) —————
+// Enregistrement silencieux : une mesure d'audience ne doit jamais faire échouer
+// l'affichage d'une fiche. En cas d'erreur, on se tait.
+export async function marquerVue(objectId) {
+  if (!objectId) return
+  try { await supabase.rpc('vue_oeuvre', { p_object_id: objectId }) } catch { /* sans effet */ }
+}
+
+// Œuvres les plus consultées. `museumId` null = tous les musées de l'organisation.
+//
+// Le cloisonnement passe ici par un ARGUMENT et non par scoped() : une RPC ne
+// se filtre pas avec .eq(). Sans lui, l'accueil d'une chefferie mettrait en
+// avant les œuvres d'une autre — la RPC ne connaît pas l'organisation affichée.
+// `tenantId` explicite (l'ERP passe la sienne) sinon celle du site en cours.
+export async function oeuvresPopulaires(museumId = null, jours = 30, limite = 6, tenantId = undefined) {
+  const { data, error } = await supabase.rpc('oeuvres_populaires', {
+    p_museum_id: museumId,
+    p_jours: jours,
+    p_limite: limite,
+    p_tenant_id: tenantId === undefined ? publicTenantId : tenantId
+  })
+  if (error) { console.warn('[populaires]', error.message); return [] }
+  return (data || []).map((o) => ({
+    id: o.object_id, nom: o.nom, photo: o.photo,
+    musee: o.musee, museumId: o.museum_id, vues: Number(o.vues)
+  }))
 }

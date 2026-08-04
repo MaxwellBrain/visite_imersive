@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '@/stores/useSettingsStore'
-import { pubMuseums, pubFeaturedObjects, pubFeaturedProducts } from '@/services/publicApi'
+import { pubMuseums, pubFeaturedObjects, pubFeaturedProducts, oeuvresPopulaires } from '@/services/publicApi'
 import ProductCard from '@/components/public/ProductCard.vue'
 import InstallPwa from '@/components/public/InstallPwa.vue'
 import EventsSection from '@/components/public/EventsSection.vue'
@@ -27,7 +27,26 @@ onMounted(async () => {
   ;[museums.value, objects.value, products.value] = await Promise.all([
     pubMuseums(), pubFeaturedObjects(6), pubFeaturedProducts(4)
   ])
+  // MISE EN AVANT AUTOMATIQUE — les œuvres les plus consultées passent devant.
+  // On ne remplace la sélection que si l'audience mesurée est SUFFISANTE : avec
+  // deux ou trois visites, un « classement » ne serait que du bruit présenté comme
+  // une tendance. En dessous du seuil, on garde la sélection éditoriale.
+  const pop = await oeuvresPopulaires(null, 30, 6)
+  const credible = pop.filter((o) => o.vues >= SEUIL_VUES)
+  if (credible.length >= 3) {
+    populaires.value = credible
+    // On complète avec la sélection habituelle pour garder une grille pleine.
+    const dejaLa = new Set(credible.map((o) => o.id))
+    objects.value = [...credible, ...objects.value.filter((o) => !dejaLa.has(o.id))].slice(0, 6)
+  }
 })
+
+// En dessous de ce nombre de consultations, une œuvre n'est pas « populaire » :
+// elle a juste été vue une fois. Mieux vaut la sélection du conservateur qu'un
+// classement fondé sur trois clics.
+const SEUIL_VUES = 5
+const populaires = ref([])
+const estPopulaire = (id) => populaires.value.some((o) => o.id === id)
 
 const s = computed(() => settings.settings || {})
 const heroImage = computed(() => s.value.heroImage || s.value.imageFond || HERO_DEFAUT)
@@ -132,6 +151,8 @@ function toggleFav(id) {
               <i :class="favorites.has(o.id) ? 'pi pi-heart-fill' : 'pi pi-heart'" />
             </button>
             <span v-if="o.model3d" class="work__3d">3D · AR</span>
+            <!-- Mise en avant automatique : l'œuvre est là parce que le public la regarde. -->
+            <span v-if="estPopulaire(o.id)" class="work__hot"><i class="pi pi-chart-line" /> {{ $t('home.popular') }}</span>
           </div>
           <div class="work__b">
             <strong>{{ o.nom }}</strong>
@@ -280,6 +301,9 @@ function toggleFav(id) {
 .work:hover .work__img img { transform: scale(1.05); }
 .work__fav { position: absolute; top: 0.7rem; right: 0.7rem; width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(255,255,255,0.92); color: #c0392b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; }
 .work__fav.on { background: #c0392b; color: #fff; }
+.work__hot { position: absolute; top: 0.7rem; left: 0.7rem; display: inline-flex; align-items: center; gap: 0.3rem;
+  background: #fdf3e0; color: #7a5a10; border: 1px solid #e8c97a; font-size: 0.66rem; font-weight: 800;
+  letter-spacing: 0.04em; padding: 0.24rem 0.55rem; border-radius: 999px; }
 .work__3d { position: absolute; bottom: 0.7rem; left: 0.7rem; background: var(--site-primary); color: #fff; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.08em; padding: 0.28rem 0.6rem; border-radius: 4px; }
 .work__b { padding: 0.9rem 1rem 1.05rem; }
 .work__b strong { font-size: 1rem; font-weight: 700; display: block; color: #101210; }

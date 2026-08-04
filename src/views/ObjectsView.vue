@@ -13,6 +13,7 @@ import { useSectorStore } from '@/stores/useSectorStore'
 import { useMuseumStore } from '@/stores/useMuseumStore'
 import ObjectFormDialog from '@/components/objects/ObjectFormDialog.vue'
 import Object3DViewer from '@/components/objects/Object3DViewer.vue'
+import ShareCardDialog from '@/components/objects/ShareCardDialog.vue'
 
 const { t } = useI18n()
 const store = useObjectStore()
@@ -25,6 +26,7 @@ const router = useRouter()
 const dialogVisible = ref(false)
 const editing = ref(null)
 const viewer = reactive({ visible: false, src: '', title: '' })
+const partage = reactive({ visible: false, objet: null, lieu: '' })
 
 const museumOptions = computed(() => museumStore.items.map((m) => ({ label: m.nom, value: m.id })))
 const statusOptions = computed(() => [
@@ -74,6 +76,13 @@ function view3d(obj) {
   viewer.src = obj.model3d || ''
   viewer.title = obj.nom
   viewer.visible = true
+}
+// Carte de partage WhatsApp. Le lieu est passé ici et non recalculé dans le
+// dialogue : c'est cette vue qui connaît déjà les stores musée et salle.
+function partager(obj) {
+  partage.objet = obj
+  partage.lieu = locationLabel(obj)
+  partage.visible = true
 }
 async function togglePublish(obj) {
   const nowPublished = !obj.published
@@ -151,6 +160,7 @@ function remove(obj) {
               />
               <div class="obj-card__actions-right">
                 <Button icon="pi pi-id-card" size="small" text :aria-label="$t('admin.objects.detail')" v-tooltip.top="$t('admin.objects.detail')" @click="router.push('/objets/' + o.id)" />
+                <Button icon="pi pi-whatsapp" size="small" text :aria-label="$t('share.action')" v-tooltip.top="$t('share.action')" @click="partager(o)" />
                 <Button icon="pi pi-box" size="small" text :aria-label="$t('admin.objects.view3d')" v-tooltip.top="$t('admin.objects.view3d')" @click="view3d(o)" />
                 <Button icon="pi pi-pencil" size="small" text @click="openEdit(o)" />
                 <Button icon="pi pi-trash" size="small" text severity="danger" @click="remove(o)" />
@@ -205,6 +215,7 @@ function remove(obj) {
 
     <ObjectFormDialog v-model:visible="dialogVisible" :object="editing" />
     <Object3DViewer v-model:visible="viewer.visible" :src="viewer.src" :title="viewer.title" />
+    <ShareCardDialog v-model:visible="partage.visible" :object="partage.objet" :lieu="partage.lieu" />
   </div>
 </template>
 

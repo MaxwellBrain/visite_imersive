@@ -4,7 +4,8 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Object3DViewer from '@/components/objects/Object3DViewer.vue'
 import GuideInline from '@/components/public/GuideInline.vue'
-import { pubObject, pubObjectChefs, pubDispersion, pubObjectRarity } from '@/services/publicApi'
+import CabinetFreres from '@/components/public/CabinetFreres.vue'
+import { pubObject, pubObjectChefs, pubDispersion, pubObjectRarity, marquerVue } from '@/services/publicApi'
 import RarityBadge from '@/components/public/RarityBadge.vue'
 import { useAccessStore } from '@/stores/useAccessStore'
 import { useSiteLink } from '@/composables/useSiteLink'
@@ -39,6 +40,9 @@ async function load() {
   }
   access.load()
   loading.value = false
+  // Consultation enregistrée APRÈS l'affichage, sans être attendue : la mesure
+  // d'audience ne doit jamais retarder ni faire échouer la fiche.
+  if (object.value) marquerVue(object.value.id)
 }
 onMounted(load)
 watch(() => route.params.id, load)
@@ -149,22 +153,16 @@ const suggestions = computed(() =>
         </h2>
         <p class="disp__lead">{{ $t('object.dispersionLead') }}</p>
 
-        <ul class="disp__list">
-          <li v-for="f in dispersion.freres" :key="f.id">
-            <a :href="f.url || undefined" target="_blank" rel="noopener noreferrer" :class="{ off: !f.url }">
-              <img v-if="f.image" :src="f.image" :alt="f.titre" />
-              <span v-else class="disp__ph"><i class="pi pi-box" /></span>
-              <span class="disp__b">
-                <strong>{{ f.titre || $t('object.dispersionUntitled') }}</strong>
-                <small v-if="f.pays"><i class="pi pi-map-marker" /> {{ f.pays }}</small>
-                <small class="disp__inv">
-                  {{ f.inventaire ? $t('object.dispersionInv', { n: f.inventaire }) : $t('object.dispersionNoInv') }}
-                </small>
-              </span>
-              <i v-if="f.url" class="pi pi-external-link" />
-            </a>
-          </li>
-        </ul>
+        <!-- LE CABINET remplace la grille d'images. La différence n'est pas
+             décorative : chaque planche porte la phrase qui dit POURQUOI cet
+             objet est là. Une grille montre des ressemblances, un cabinet
+             montre des parentés. -->
+        <CabinetFreres
+          :object-id="object.id"
+          :nom="object.nom"
+          :photo="object.photo"
+          :deja="dispersion.freres"
+        />
         <p class="disp__note"><i class="pi pi-info-circle" /> {{ $t('object.dispersionNote') }}</p>
       </section>
 
@@ -177,6 +175,7 @@ const suggestions = computed(() =>
           :suggestions="suggestions"
           :museum-id="museumId"
           :sector-id="object.sector_id || object.sectors?.id || null"
+          :object-id="object.id"
         />
         <div v-else class="guide-lock ps-card">
           <i class="pi pi-sparkles" />

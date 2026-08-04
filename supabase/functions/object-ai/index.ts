@@ -8,9 +8,14 @@
 // rien. Pire, il appliquait `replace(/\s+/g, ' ')` : il écrasait les
 // paragraphes que le conservateur venait de saisir.
 //
-// Deux actions : `description` (réécriture) et `seo` (métadonnées).
-// LLM : Groq, clé serveur. Sans clé → { ok:false } et la saisie manuelle
-// continue de fonctionner : jamais bloquant.
+// Trois actions : `description` (réécriture), `seo` (métadonnées) et `annonce`
+// (le message WhatsApp qui accompagne la carte de partage de l'œuvre).
+//
+// Deux moteurs : Claude via Amazon Bedrock d'abord — il écrit un bien meilleur
+// français —, Groq en repli. Sans aucune clé → { ok:false }, et la saisie
+// manuelle continue de fonctionner : jamais bloquant.
+
+import { appelerBedrock, bedrockConfigure, MODELES } from '../_shared/bedrock.ts'
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -19,6 +24,36 @@ const CORS = {
 }
 const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...CORS, 'Content-Type': 'application/json' } })
+
+// DEUX FOURNISSEURS, DANS CET ORDRE.
+//
+// Claude (via Bedrock) écrit un bien meilleur français que Llama : c'est
+// exactement ce qu'on attend d'un cartel de musée. Mais il est facturé, et il
+// exige que le formulaire d'usage Anthropic ait été soumis dans la console.
+// Groq reste donc en second : gratuit, rapide, et déjà éprouvé ici.
+//
+// Le repli est SILENCIEUX pour l'utilisateur mais TRACÉ dans les journaux :
+// une dégradation qu'on ne voit pas est une dégradation qu'on ne corrige jamais.
+async function rediger(system: string, user: string, maxTokens = 900): Promise<
+  { texte: string; moteur: string } | null
+> {
+  if (bedrockConfigure()) {
+    try {
+      const texte = await appelerBedrock({
+        modele: MODELES.rapide,
+        systeme: system,
+        messages: [{ role: 'user', content: [{ text: user }] }],
+        maxTokens,
+        temperature: 0.5
+      })
+      if (texte) return { texte, moteur: 'claude-haiku-4.5' }
+    } catch (e) {
+      console.warn('[object-ai] Bedrock indisponible, repli sur Groq :', String(e).slice(0, 200))
+    }
+  }
+  const texte = await callGroq(system, user, maxTokens)
+  return texte ? { texte, moteur: 'groq-llama-3.3' } : null
+}
 
 async function callGroq(system: string, user: string, maxTokens = 900): Promise<string | null> {
   const key = Deno.env.get('GROQ_API_KEY') || Deno.env.get('GROK_API_KEY')
@@ -79,6 +114,31 @@ RÈGLES :
 Réponds UNIQUEMENT par un objet JSON valide :
 {"title": "...", "description": "...", "slug": "...", "keywords": ["..."]}`
 
+// ANNONCE — le texte qui part sur WhatsApp avec la carte de l'œuvre.
+//
+// Registre volontairement différent du cartel : on ne rédige pas une notice, on
+// donne envie de se déplacer. D'où les phrases courtes, le tutoiement du lecteur
+// interdit malgré tout (on s'adresse à un public, pas à un ami), et une seule
+// invitation finale — deux appels à l'action dans un message WhatsApp se
+// neutralisent.
+const SYSTEM_ANNONCE = `Tu écris le message WhatsApp qui accompagne la photo d'une œuvre d'un musée camerounais.
+
+CONTRAINTES DE FORME :
+- 250 caractères maximum, tout compris. Au-delà, WhatsApp replie le message et personne ne déplie.
+- 2 ou 3 phrases courtes, séparées par des retours à la ligne simples.
+- 1 à 3 émojis au total, jamais deux à la suite, jamais en début de ligne systématique.
+- Se termine par UNE invitation à venir voir l'œuvre. Une seule.
+
+CONTRAINTES DE FOND :
+- N'invente aucun fait : ni date, ni matière, ni nom de chef, ni prix, ni horaire. Tu n'as que ce qu'on te donne.
+- N'invente ni promotion, ni gratuité, ni événement.
+- Pas de superlatif creux (« incontournable », « à ne pas manquer », « chef-d'œuvre absolu »).
+- N'écris PAS le lien : il est ajouté après toi.
+- Pas de mot-dièse à rallonge : deux au maximum, ou aucun.
+
+Réponds UNIQUEMENT par un objet JSON valide :
+{"texte": "le message, retours à la ligne compris"}`
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
   if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405)
@@ -90,7 +150,10 @@ Deno.serve(async (req) => {
   const nom = String(body?.nom || '').trim().slice(0, 200)
   const texte = String(body?.description || body?.text || '').trim().slice(0, 4000)
 
-  if (!texte) return json({ ok: false, error: 'empty_text' }, 400)
+  // `annonce` fait exception : une œuvre fraîchement créée n'a souvent qu'un nom
+  // et une salle, et c'est précisément à ce moment-là qu'on veut l'annoncer.
+  if (!texte && action !== 'annonce') return json({ ok: false, error: 'empty_text' }, 400)
+  if (action === 'annonce' && !texte && !nom) return json({ ok: false, error: 'empty_text' }, 400)
 
   // ------------------------------------------------------------- description
   if (action === 'description') {
@@ -101,14 +164,15 @@ Deno.serve(async (req) => {
       texte
     ].filter(Boolean).join('\n')
 
-    let raw: string | null = null
+    let sortie: { texte: string; moteur: string } | null = null
     try {
-      raw = await callGroq(SYSTEM_DESCRIPTION, user)
+      sortie = await rediger(SYSTEM_DESCRIPTION, user, 900)
     } catch (e) {
       console.error('[object-ai/description]', String(e))
       return json({ ok: false, error: 'llm_error' })
     }
-    if (!raw) return json({ ok: false, error: 'no_api_key' })
+    if (!sortie) return json({ ok: false, error: 'no_api_key' })
+    const raw = sortie.texte
 
     try {
       const p = JSON.parse(raw)
@@ -116,7 +180,14 @@ Deno.serve(async (req) => {
       if (!out) return json({ ok: false, error: 'empty_result' })
       // Garde-fou : si le modèle a rendu un bloc compact malgré la consigne,
       // on ne prétend pas avoir amélioré la mise en forme.
-      return json({ ok: true, texte: out, paragraphes: out.split(/\n\s*\n/).length })
+      // `moteur` sert au diagnostic : il dit lequel des deux a réellement
+      // répondu, sans quoi un repli permanent sur Groq passerait inaperçu.
+      return json({
+        ok: true,
+        texte: out,
+        paragraphes: out.split(/\n\s*\n/).length,
+        moteur: sortie.moteur
+      })
     } catch {
       return json({ ok: false, error: 'bad_llm_json' })
     }
@@ -126,14 +197,15 @@ Deno.serve(async (req) => {
   if (action === 'seo') {
     const user = `Nom de l'objet : ${nom || '(non précisé)'}\n\nDescription :\n${texte}`
 
-    let raw: string | null = null
+    let sortie: { texte: string; moteur: string } | null = null
     try {
-      raw = await callGroq(SYSTEM_SEO, user, 400)
+      sortie = await rediger(SYSTEM_SEO, user, 400)
     } catch (e) {
       console.error('[object-ai/seo]', String(e))
       return json({ ok: false, error: 'llm_error' })
     }
-    if (!raw) return json({ ok: false, error: 'no_api_key' })
+    if (!sortie) return json({ ok: false, error: 'no_api_key' })
+    const raw = sortie.texte
 
     try {
       const p = JSON.parse(raw)
@@ -146,6 +218,45 @@ Deno.serve(async (req) => {
         slug: String(p?.slug || '').trim().slice(0, 80),
         keywords: mots
       })
+    } catch {
+      return json({ ok: false, error: 'bad_llm_json' })
+    }
+  }
+
+  // ----------------------------------------------------------------- annonce
+  if (action === 'annonce') {
+    const lieu = String(body?.lieu || '').trim().slice(0, 200)
+    const marque = String(body?.marque || '').trim().slice(0, 120)
+    const user = [
+      `Œuvre : ${nom || '(sans nom)'}`,
+      lieu ? `Où la voir : ${lieu}` : '',
+      marque ? `Institution : ${marque}` : '',
+      body?.has3d ? 'Particularité : cette œuvre est consultable en 3D et en réalité augmentée.' : '',
+      '',
+      texte ? `Notice :\n${texte}` : 'Aucune notice disponible : appuie-toi uniquement sur le nom et le lieu.'
+    ].filter(Boolean).join('\n')
+
+    let sortie: { texte: string; moteur: string } | null = null
+    try {
+      sortie = await rediger(SYSTEM_ANNONCE, user, 400)
+    } catch (e) {
+      console.error('[object-ai/annonce]', String(e))
+      return json({ ok: false, error: 'llm_error' })
+    }
+    if (!sortie) return json({ ok: false, error: 'no_api_key' })
+
+    try {
+      const p = JSON.parse(sortie.texte)
+      // La limite de 250 caractères est une CONSIGNE pour le modèle, pas une
+      // garantie : on coupe nous-mêmes, et sur un espace, pour ne pas trancher
+      // un mot au milieu.
+      let out = String(p?.texte || '').trim().replace(/\n{3,}/g, '\n\n')
+      if (!out) return json({ ok: false, error: 'empty_result' })
+      if (out.length > 260) {
+        const coupe = out.slice(0, 260)
+        out = coupe.slice(0, Math.max(coupe.lastIndexOf(' '), 200)).trimEnd() + '…'
+      }
+      return json({ ok: true, texte: out, moteur: sortie.moteur })
     } catch {
       return json({ ok: false, error: 'bad_llm_json' })
     }

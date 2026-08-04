@@ -1,6 +1,6 @@
 <script setup>
 import { formatMontant } from '@/constants/options'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Button from 'primevue/button'
@@ -12,6 +12,10 @@ import { useAuthStore } from '@/stores/useAuthStore'
 import { useOrderStore } from '@/stores/useOrderStore'
 import { useProductStore } from '@/stores/useProductStore'
 import { useReviewStore } from '@/stores/useReviewStore'
+import { supabase } from '@/services/supabase'
+import { scopeToTenant } from '@/services/tenant'
+import { oeuvresPopulaires } from '@/services/publicApi'
+import { themesFrequents } from '@/services/lacunes'
 
 const { t, locale } = useI18n()
 const router = useRouter()
@@ -27,7 +31,34 @@ onMounted(() => {
   if (!orderStore.items.length) orderStore.load()
   if (!productStore.items.length) productStore.load()
   if (!reviewStore.items.length) reviewStore.load()
+  chargerAudience()
 })
+
+// ---- CE QUE FAIT LE PUBLIC ----
+//
+// Deux mesures que le conservateur n'obtient par aucun autre moyen : ce qu'on
+// regarde, et ce qu'on demande sans obtenir de réponse. Elles ne vivent pas
+// dans les stores (elles ne sont pas éditables) — on les lit ici, une fois.
+//
+// Un échec ne casse rien : le tableau de bord se contente de ne pas afficher
+// la section. Une statistique manquante n'a jamais empêché de travailler.
+const populaires = ref([])
+const lacunes = ref([])
+
+async function chargerAudience() {
+  const [pop, q] = await Promise.all([
+    oeuvresPopulaires(null, 30, 5, auth.tenantId).catch(() => []),
+    scopeToTenant(supabase.from('guide_questions').select('question'))
+      .eq('repondu', false).order('created_at', { ascending: false }).limit(200)
+  ])
+  populaires.value = pop
+  lacunes.value = q.error ? [] : (q.data || [])
+}
+
+// Le conseil le plus demandé, tous objets confondus : c'est lui qui mérite la
+// bannière. Le détail par œuvre reste dans l'écran « Questions ».
+const lacunePrincipale = computed(() => themesFrequents(lacunes.value)[0] || null)
+const vuesTotal = computed(() => populaires.value.reduce((s, o) => s + o.vues, 0))
 
 // ---- Indicateurs commerce ----
 function money(v) { return formatMontant(v) }
@@ -116,6 +147,34 @@ function formatDate(d) {
         <span class="stat__value">{{ s.value }}</span>
       </button>
     </div>
+
+    <!-- L'ERP AVERTIT : le conservateur n'a pas à aller chercher ses lacunes. -->
+    <button v-if="lacunePrincipale" class="alerte" @click="router.push('/questions')">
+      <span class="alerte__icon"><i class="pi pi-comment" /></span>
+      <span class="alerte__txt">
+        <strong>{{ $t('admin.dashboard.gapTitle', { n: lacunes.length }) }}</strong>
+        <span>{{ $t('guideQuestions.advice.' + lacunePrincipale.cle) }}</span>
+      </span>
+      <i class="pi pi-arrow-right alerte__go" />
+    </button>
+
+    <!-- Ce que le public regarde vraiment, mesuré, sans que personne l'ait saisi -->
+    <template v-if="populaires.length">
+      <h2 class="dash-sec">{{ $t('admin.dashboard.audienceTitle') }}</h2>
+      <p class="dash-sub">{{ $t('admin.dashboard.audienceHint', { n: vuesTotal }) }}</p>
+      <ul class="pop">
+        <li v-for="(o, i) in populaires" :key="o.id" @click="router.push('/objets/' + o.id)">
+          <span class="pop__rank">{{ i + 1 }}</span>
+          <img v-if="o.photo" :src="o.photo" :alt="o.nom" class="pop__img" />
+          <span v-else class="pop__img pop__img--ph"><i class="pi pi-box" /></span>
+          <span class="pop__main">
+            <strong>{{ o.nom }}</strong>
+            <span>{{ o.musee }}</span>
+          </span>
+          <span class="pop__vues"><i class="pi pi-eye" /> {{ o.vues }}</span>
+        </li>
+      </ul>
+    </template>
 
     <!-- Commerce : recettes, commandes, boutique -->
     <h2 class="dash-sec">{{ $t('admin.dashboard.commerceTitle') }}</h2>
@@ -250,6 +309,38 @@ function formatDate(d) {
 }
 /* Indicateurs commerce */
 .dash-sec { font-size: 1.05rem; margin: 2rem 0 1rem; }
+.dash-sub { margin: -0.7rem 0 0.9rem; font-size: 0.83rem; color: var(--vi-muted); }
+
+/* Alerte « il manque une information » — cliquable en entier : on ne fait pas
+   chercher un lien à quelqu'un qu'on vient d'alerter. */
+.alerte {
+  display: flex; align-items: center; gap: 0.9rem; width: 100%; text-align: left;
+  background: #FBF6EA; border: 1px solid #E8D3A0; border-left: 4px solid #E8A33D;
+  border-radius: 12px; padding: 0.85rem 1.1rem; margin-bottom: 1.75rem;
+  cursor: pointer; font-family: inherit;
+}
+.alerte:hover { background: #F8F0DE; }
+.alerte__icon { width: 38px; height: 38px; border-radius: 10px; background: #E8A33D; color: #fff;
+  display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.alerte__txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.12rem; }
+.alerte__txt strong { font-size: 0.92rem; color: #5C4A1E; }
+.alerte__txt span { font-size: 0.83rem; color: #8A6A20; }
+.alerte__go { color: #8A6A20; }
+
+/* Œuvres les plus consultées */
+.pop { list-style: none; margin: 0 0 0.5rem; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.pop li { display: flex; align-items: center; gap: 0.75rem; background: var(--vi-surface);
+  border: 1px solid var(--vi-border); border-radius: 10px; padding: 0.55rem 0.85rem; cursor: pointer; }
+.pop li:hover { border-color: color-mix(in srgb, var(--p-primary-color) 35%, var(--vi-border)); }
+.pop__rank { width: 24px; height: 24px; border-radius: 50%; background: #0e6f5c; color: #fff;
+  font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.pop__img { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; flex: 0 0 auto; background: var(--vi-bg); }
+.pop__img--ph { display: flex; align-items: center; justify-content: center; color: var(--vi-muted); }
+.pop__main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pop__main strong { font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pop__main span { font-size: 0.78rem; color: var(--vi-muted); }
+.pop__vues { font-size: 0.85rem; font-weight: 700; color: var(--vi-muted); white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 0.3rem; }
 .stats--commerce { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
 .stat__icon--green { background: #e6f4ee; color: #0e6f5c; }
 .stat__icon--blue { background: #e7eefc; color: #2b5fd9; }

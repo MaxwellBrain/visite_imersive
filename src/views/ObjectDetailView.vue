@@ -12,6 +12,8 @@ import { normalise } from '@/services/genealogy'
 import GenealogyTree from '@/components/genealogy/GenealogyTree.vue'
 import Object3DViewer from '@/components/objects/Object3DViewer.vue'
 import SiblingsFinder from '@/components/objects/SiblingsFinder.vue'
+import FreresCabinet from '@/components/objects/FreresCabinet.vue'
+import ShareCardDialog from '@/components/objects/ShareCardDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -29,6 +31,8 @@ const chef = computed(() => (lien.value ? genealogy.getIndividu(lien.value.indiv
 const personnes = computed(() => normalise(genealogy.individus))
 
 const viewer = reactive({ visible: false })
+const partage = reactive({ visible: false })
+const lieu = computed(() => `${museum.value?.nom ?? '—'} › ${sector.value?.nom ?? '—'}`)
 
 // La liste ne transporte plus les médias lourds : cette fiche les demande pour
 // le seul objet consulté. Sans cela, la photo et le bouton 3D disparaîtraient.
@@ -75,6 +79,8 @@ watch(
             @click="viewer.visible = true"
           />
           <Button :label="$t('admin.objectDetail.editObject')" icon="pi pi-pencil" outlined @click="router.push('/objets')" />
+          <!-- Annoncer la pièce là où le public est vraiment : WhatsApp. -->
+          <Button :label="$t('share.action')" icon="pi pi-whatsapp" outlined @click="partage.visible = true" />
         </div>
       </section>
 
@@ -107,7 +113,13 @@ watch(
       </section>
     </div>
 
-    <!-- Mémoire réunifiée : les objets frères dispersés dans le monde -->
+    <!-- LE CABINET : la chaîne qui PERSISTE et qu'un humain valide.
+         C'est elle qui alimente le site public. -->
+    <FreresCabinet v-if="object" :objet="object" class="siblings" />
+
+    <!-- Mémoire réunifiée : exploration à la volée, rien n'est enregistré.
+         Reste utile pour dégrossir un objet dont on ignore encore la culture,
+         avant de lancer le cabinet. -->
     <SiblingsFinder v-if="object" :objet="object" class="siblings" />
 
     <div v-else class="vi-empty">
@@ -117,6 +129,7 @@ watch(
     </div>
 
     <Object3DViewer v-model:visible="viewer.visible" :src="object?.model3d || ''" :title="object?.nom || $t('viewer3d.defaultTitle')" />
+    <ShareCardDialog v-model:visible="partage.visible" :object="object" :lieu="lieu" />
   </div>
 </template>
 

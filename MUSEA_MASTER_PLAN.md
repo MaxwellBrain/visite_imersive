@@ -5,7 +5,7 @@
 > `PLAN_EVOLUTION.md` (V1), `PLAN_V2_PLATEFORME.md` (V2) et `HANDOFF.md`, qui
 > restent valables comme archives de détail.
 >
-> Dernière mise à jour : **2026-08-01**
+> Dernière mise à jour : **2026-08-04**
 > Langue de travail : **français**. Projet : `C:\Users\maxib\Desktop\visite_immersive`
 
 ---
@@ -59,16 +59,19 @@ Vue 3 `<script setup>` · Vite 5 · PrimeVue 4 · Pinia · Vue Router · vue-i18
 Supabase (Postgres 17 + Auth + RLS + Edge Functions) · D3 (généalogie) ·
 `@google/model-viewer` (3D/AR) · **aucune dépendance ajoutable** (npm HS sur ce poste).
 
-### Base de données — 27 tables
+### Base de données — 38 tables (relevé du 2026-08-04)
 
-`tenants` · `tenant_members` · `slugs_reserves` · `profiles` · `site_settings` ·
-`museums` · `sectors` · `objects` · `object_tariffs` · `personnages` ·
-`genealogy_links` · `migrations_historiques` · `object_personnage` · `faq` ·
-`voice_assistants` · `audio_tracks` · `ai_agent_config` · `products` · `orders` ·
-`order_items` · `user_access` · `subscription_plans` · `donation_tiers` · `events` ·
-`reviews` · `campaigns` · `email_log`
+`tenants` · `tenant_members` · `tenant_partnerships` · `slugs_reserves` ·
+`profiles` · `site_settings` · `museums` · `sectors` · `objects` ·
+`object_tariffs` · `object_rarity` · `object_siblings` · `object_views` ·
+`personnages` · `genealogy_links` · `migrations_historiques` ·
+`object_personnage` · `faq` · `guide_questions` · `voice_assistants` ·
+`audio_tracks` · `ai_agent_config` · `tours` · `tour_scenes` · `scene_hotspots` ·
+`quests` · `quest_steps` · `quest_progress` · `products` · `orders` ·
+`order_items` · `user_access` · `subscription_plans` · `donation_tiers` ·
+`events` · `reviews` · `campaigns` · `email_log`
 
-### Edge Functions déployées (6)
+### Edge Functions déployées (10)
 
 | Fonction | JWT | Rôle | État |
 |---|---|---|---|
@@ -79,6 +82,22 @@ Supabase (Postgres 17 + Auth + RLS + Edge Functions) · D3 (généalogie) ·
 | `payment-create` | oui | CinetPay (init) | ⚠️ clés absentes |
 | `payment-webhook` | non | CinetPay (vérif serveur) | ⚠️ non testé |
 | `memory-search` | oui | Enrichissement FR→EN + synthèse sourcée | ✅ Groq actif |
+| `setup-agent` | oui | **Installe l'organisation** par conversation (Groq + outils) | ✅ Groq actif |
+| `object-ai` | non | Notices, SEO et **annonce WhatsApp** (Bedrock → Groq) | ✅ testé le 2026-08-04, répond via Groq (Bedrock non configuré) |
+| `freres` | non | **Cabinet de comparaison** : requête structurée, plongements, jugement | 🟡 `requete` et `juger` testés en direct ; `plonger` jamais exercé avec une session personnel |
+| ~~`sonde-embeddings`~~ | oui | Outil de mesure jetable — **neutralisé**, à SUPPRIMER depuis le tableau de bord | ⚠️ une version antérieure écrivait avec la clé de service |
+
+> **`setup-agent` — le point de sécurité à ne jamais casser** : l'agent écrit avec le
+> **jeton de l'appelant**, jamais avec la clé de service. La RLS s'applique donc comme
+> si la personne cliquait elle-même : un agent détourné par une consigne malveillante
+> ne peut rien écrire hors de son organisation — *la base refuse, pas le prompt*.
+> Outils en liste blanche (créer musée/salle/œuvre/identité), aucune suppression,
+> 5 tours et 40 créations au maximum.
+>
+> ⚠️ **Le récapitulatif du modèle n'est pas fiable** : en essai, l'agent a annoncé deux
+> œuvres alors qu'une seule était enregistrée. L'interface affiche donc la liste
+> `cree` renvoyée par le serveur (issue des insertions réellement acceptées) comme
+> source de vérité, à côté du texte.
 
 ### Clés / secrets
 
@@ -514,6 +533,127 @@ alors que le front fonctionnera parfaitement.
 - [ ] Variables d'environnement par environnement, sauvegardes Supabase, journalisation.
 - [ ] ⚠️ **Identifiants AWS à connecter par l'utilisateur plus tard** — préparer le
       terrain sans jamais demander de secrets.
+
+### Phase 9 — « Petites mais utiles » ✅ (2026-08-04)
+
+Trois améliorations dont la valeur tient à ce qu'elles font TOUTES SEULES : le
+conservateur n'a rien à saisir, rien à consulter, rien à décider.
+
+**9.1 — Mise en avant automatique des œuvres populaires**
+
+- [x] `object_views` (une ligne par œuvre et par jour) + RPC `vue_oeuvre`
+      (`SECURITY DEFINER` ; l'organisation se déduit de l'œuvre, jamais d'un
+      paramètre) et `oeuvres_populaires`.
+- [x] `marquerVue()` appelée à l'ouverture d'une fiche publique
+      (`PublicObject.vue`) — silencieuse, jamais bloquante.
+- [x] `PublicHome.vue` remplace la sélection éditoriale par le classement réel,
+      **mais seulement au-dessus d'un seuil** (5 vues, 3 œuvres minimum).
+      En dessous, trois clics ne font pas une tendance : on garde le choix humain.
+- [x] Bloc « Ce que le public regarde » au tableau de bord de l'ERP.
+- [x] ⚠️ **Faille corrigée le 2026-08-04** : `oeuvres_populaires` ne filtrait
+      que sur `tenant_is_public()`, sans l'organisation affichée — l'accueil
+      d'une chefferie pouvait mettre en avant l'œuvre d'une autre. Argument
+      `p_tenant_id` ajouté (migration `oeuvres_populaires_cloisonnee_par_organisation`),
+      renseigné systématiquement par le client.
+
+**9.2 — Carte de partage WhatsApp**
+
+- [x] `src/services/carte.js` — carte **1080×1080** dessinée au canvas, zéro
+      dépendance : photo recadrée, nom, salle, marque, pastille 3D/AR et **QR**
+      vers la fiche publique. Le carré est un choix : WhatsApp recadre tout ce
+      qui ne l'est pas, et un 1200×630 perdrait le nom de l'œuvre.
+- [x] Repli si le canvas est « teinté » par une photo d'un autre domaine :
+      on redessine sans photo au lieu de laisser remonter la `SecurityError`.
+- [x] Action `annonce` dans l'Edge Function `object-ai` (Bedrock → Groq) :
+      message de 250 caractères, interdiction d'inventer un fait, le lien n'est
+      **jamais** rédigé par le modèle mais ajouté après lui.
+- [x] `ShareCardDialog.vue` — aperçu, message modifiable, partage natif (image)
+      sur téléphone, `wa.me` + téléchargement sur ordinateur (WhatsApp Web
+      n'accepte pas de pièce jointe par lien : on le dit au lieu de le taire).
+      Accessible depuis la liste des œuvres et depuis la fiche.
+
+**9.3 — Ce que les visiteurs demandent (statistiques du guide)**
+
+- [x] `guide_questions` + RPC `journaliser_question` — anonyme (aucune identité,
+      aucune IP, aucune session), organisation déduite du contexte.
+- [x] `src/services/lacunes.js` — classement des questions sans réponse en
+      **8 thèmes** (matière, datation, origine, usage, auteur, dimensions,
+      valeur, conservation) + visite. **Sans LLM, et c'est délibéré** : huit
+      catégories fermées, affichage instantané, et surtout ça marche quand la
+      clé API manque — ce qui est le cas courant ici.
+- [x] `GuideQuestionsView.vue` affiche un CONSEIL (« Précisez la matière et la
+      technique ») et non un comptage.
+- [x] **L'ERP avertit** : bannière cliquable au tableau de bord dès qu'une
+      lacune récurrente est détectée.
+
+> ⚠️ Pièges de sous-chaîne rencontrés dans le classificateur (corrigés, à ne pas
+> réintroduire) : `origin` est contenu dans « original », `age de` dans
+> « image de », `rite` dans « mérite », `cher` dans « chercher », `etat` est
+> trop court. Les mots-clés courts doivent être testés contre des pièges.
+
+### Phase 10 — Le Cabinet de comparaison 🟡 (2026-08-04, chaîne complète non éprouvée)
+
+Le « retrieve then rerank » : ramener large depuis les API de musées, **ordonner
+par le sens**, faire **justifier** par un modèle, faire **trancher** par un humain.
+
+**Ce qui est en place**
+
+- [x] `objets_externes` — catalogue mondial **GLOBAL, hors tenant**. Un masque du
+      Met est le même objet pour toutes les organisations : on l'interroge et on
+      le plonge **une seule fois**. Le coût par organisation baisse donc quand la
+      plateforme grandit. `embedding vector(384)`, index **HNSW cosinus**,
+      `depth_map_url` déjà prévu pour le 2.5D.
+- [x] `object_siblings` étendu (`externe_id`, `type_lien`, `justification`) : il
+      **est** le `lien_fraternite` par tenant, il portait déjà `statut`,
+      `decided_by`, `decided_at`. Les 11 correspondances existantes ont été
+      reprises et rattachées.
+- [x] Edge Function `freres` : `requete` (fiche FR → vocabulaire de catalogue EN),
+      `plonger` / `plonger_objet` (gte-small), `juger`.
+- [x] `src/services/freres.js` — orchestration des cinq temps.
+- [x] `FreresCabinet.vue` (ERP) — étape D : valider / écarter / **corriger la
+      justification**. Relancer une recherche ne piétine jamais une décision prise.
+- [x] `CabinetFreres.vue` (public) — l'œuvre au centre, les frères en arc de
+      planches, cartel avec musée et justification. Remplace la grille plate.
+
+**Trois mesures qui ont dicté la conception — ne pas les redécouvrir**
+
+1. **Il faut plonger en ANGLAIS.** Avec `gte-small`, une requête française
+   classait une peinture de moulin hollandais **devant** deux masques. En
+   anglais : vrais frères ≥ 0,898, bruit ≤ 0,779 (étendue 0,20 contre 0,13).
+   D'où le champ `texte_en` produit par l'action `requete`.
+2. **Le plafond de calcul des Edge Functions est bas.** 18 plongements passent
+   (1,7 s), **20 déclenchent `WORKER_RESOURCE_LIMIT`**. D'où des lots de 12.
+3. **L'arc du cabinet est plafonné à 96°.** À 150° d'étendue, les planches des
+   extrémités tombaient à −75°, presque de profil : ni image ni cartel lisibles.
+
+**Écarts assumés par rapport au cahier des charges (contraintes du poste)**
+
+| Prévu | Obstacle | Retenu |
+|---|---|---|
+| Three.js / React Three Fiber | npm HS (§6) **et** front en Vue, pas React | CSS 3D (`perspective` + `preserve-3d`) — GPU, texte accessible, zéro dépendance |
+| Embeddings SigLIP/CLIP sur l'image | ni GPU ni dépendance installable | `gte-small` du runtime Supabase, sur le **texte**. ⚠️ **La comparaison ne porte donc pas sur l'image** |
+| BullMQ / Celery + worker Python | pas d'infra worker | lots de 12 dans l'Edge Function + cache global |
+| Europeana, Rijksmuseum, Smithsonian, Harvard | **les quatre exigent une clé API** absente | liste blanche `source_externe_valide()` prête ; sources actives : Met, ARTIC, Cleveland, V&A, Wikidata |
+
+**RESTE**
+
+- [ ] **Éprouver la chaîne complète avec un compte du personnel.** Chaque maillon
+      a été vérifié séparément — `requete` et `juger` en direct (le jugement
+      écarte bien un masque Nô et une théière), `freres_reclasser` en SQL sur de
+      vrais vecteurs, le plafond de plongement mesuré — mais l'enchaînement
+      `cache → plonger → reclasser → proposer` n'a jamais tourné bout en bout,
+      faute de session personnel.
+- [ ] **Supprimer `sonde-embeddings`** depuis le tableau de bord Supabase. Elle
+      est neutralisée (corps vide, JWT obligatoire) mais une version antérieure
+      écrivait avec la clé de service : l'API de déploiement ne sait pas
+      supprimer une fonction, seulement la remplacer.
+- [ ] Brancher Bedrock sur `freres` : Llama rend des justifications laconiques
+      (« Même culture Bamiléké ») là où Claude rédigerait la phrase de cartel
+      attendue. Trois lignes, cf. le commentaire en tête de la fonction.
+- [ ] **Phase 2.5D** — volontairement remise à plus tard, comme prévu : segmentation
+      (rembg/SAM 2), carte de profondeur (Depth Anything V2), `displacementMap`.
+      Elle exigera WebGL, donc un moteur écrit à la main comme celui du panorama.
+      Rien de ce qui précède n'est à jeter : une colonne et un matériau à changer.
 
 ---
 

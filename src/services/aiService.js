@@ -103,6 +103,46 @@ export async function improveDescription({ nom, description }) {
   throw err
 }
 
+/**
+ * Rédige le message WhatsApp qui accompagne la carte de partage d'une œuvre.
+ *
+ * Renvoie toujours un texte, et dit LEQUEL des deux on a servi :
+ *   { texte, parIa: true }  → l'Edge Function a répondu
+ *   { texte, parIa: false } → repli factuel local (clé absente, réseau coupé)
+ *
+ * Le repli n'est pas un faux-semblant : il n'affirme rien qu'on ne sache déjà
+ * (le nom, le lieu, la 3D). L'interface indique clairement qu'il n'est pas de
+ * l'IA, à charge pour le conservateur de le retoucher — ce qu'il peut faire,
+ * puisque le champ reste modifiable.
+ */
+export async function annonceObjet({ nom, description, lieu, marque, has3d }) {
+  const r = await appelerObjectAi({
+    action: 'annonce',
+    nom,
+    description: description || '',
+    lieu: lieu || '',
+    marque: marque || '',
+    has3d: !!has3d
+  })
+  // Llama rend souvent « ligne 1 \n  ligne 2 » avec des espaces autour des sauts
+  // de ligne. Sur WhatsApp cela se voit : chaque ligne paraît mal alignée.
+  // On nettoie ici plutôt que dans la fonction serveur — c'est un défaut de
+  // rendu du modèle, il peut réapparaître avec n'importe lequel.
+  if (r.ok && r.texte) {
+    const propre = String(r.texte)
+      .split('\n').map((l) => l.trim()).filter(Boolean).join('\n')
+    return { texte: propre, parIa: true, moteur: r.moteur }
+  }
+
+  const ou = lieu ? `\nÀ voir ${lieu.includes('›') ? 'au ' + lieu.split('›')[0].trim() : lieu}.` : ''
+  const ar = has3d ? '\nVisible en 3D et en réalité augmentée depuis votre téléphone. 📱' : ''
+  return {
+    texte: `✨ ${nom || 'Nouvelle pièce'} rejoint la collection${marque ? ` de ${marque}` : ''}.${ou}${ar}`,
+    parIa: false,
+    erreur: r.error
+  }
+}
+
 /** Génère les métadonnées SEO à partir du nom + description. */
 export async function generateSeo({ nom, description }) {
   if (API_BASE) {
