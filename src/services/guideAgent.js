@@ -16,7 +16,24 @@ async function askRemote(question, scope = {}) {
   const { data, error } = await supabase.functions.invoke('guide-agent', { body })
   if (error) throw error
   if (!data || typeof data.text !== 'string') throw new Error('réponse invalide du guide')
-  return { text: data.text, links: Array.isArray(data.links) ? data.links : [] }
+  // `source` est conservé : c'est lui qui dit si le guide a VRAIMENT su répondre.
+  return { text: data.text, links: Array.isArray(data.links) ? data.links : [], source: data.source }
+}
+
+// Journal des questions — anonyme, et surtout jamais bloquant.
+//
+// `source === 'grounded'` signifie que rien n'a été trouvé dans le contenu publié :
+// le guide a servi sa réponse de repli. C'est exactement le signal utile pour le
+// conservateur — une question à laquelle SES notices ne répondent pas.
+function journaliser(question, scope, source) {
+  if (!scope?.museumId && !scope?.sectorId && !scope?.objectId) return
+  supabase.rpc('journaliser_question', {
+    p_question: question,
+    p_museum_id: scope.museumId ?? null,
+    p_sector_id: scope.sectorId ?? null,
+    p_object_id: scope.objectId ?? null,
+    p_repondu: source !== 'grounded'
+  }).then(() => {}, () => { /* un journal ne doit jamais gêner un visiteur */ })
 }
 
 // Point d'entrée : tente l'Edge Function, se rabat sur la recherche locale en cas d'échec.
@@ -25,10 +42,14 @@ export async function ask(question, scope = {}) {
   const q = (question || '').trim()
   if (!q) return { text: 'Posez-moi une question sur nos musées, nos objets ou la généalogie des chefs.', links: [] }
   try {
-    return await askRemote(q, scope)
+    const r = await askRemote(q, scope)
+    journaliser(q, scope, r.source)
+    return r
   } catch (e) {
     console.warn('[guide] Edge Function indisponible, repli local :', e?.message || e)
-    return askLocal(q, scope)
+    const r = await askLocal(q, scope)
+    journaliser(q, scope, 'grounded')   // repli local : on n'a pas su répondre par l'IA
+    return r
   }
 }
 

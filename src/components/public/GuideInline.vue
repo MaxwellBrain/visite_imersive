@@ -13,6 +13,7 @@ const props = defineProps({
   // Ancrage : réponses en rapport avec ce musée / cette salle
   museumId: { type: [Number, String], default: null },
   sectorId: { type: [Number, String], default: null },
+  objectId: { type: [Number, String], default: null },
   // Voix de l'assistant (musée ou secteur) pour lire la réponse à voix haute
   voiceId: { type: String, default: null },
   ton: { type: String, default: 'neutre' },
@@ -30,6 +31,7 @@ function scope() {
   const s = {}
   if (props.museumId) s.museumId = Number(props.museumId)
   if (props.sectorId) s.sectorId = Number(props.sectorId)
+  if (props.objectId) s.objectId = Number(props.objectId)
   return s
 }
 

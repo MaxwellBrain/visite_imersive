@@ -5,6 +5,10 @@ dist-ssr
 .env
 .env.*.local
 
+# Secrets destinés aux Edge Functions. Ce fichier contient des jetons en clair :
+# il ne doit JAMAIS être versionné, ni copié dans une conversation.
+supabase/.secrets.env
+
 # Certificat HTTPS de développement (scripts/dev-cert.sh) — jamais versionné :
 # il contient une clé privée et l'adresse IP du poste.
 certs/

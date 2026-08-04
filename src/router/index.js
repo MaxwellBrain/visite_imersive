@@ -11,6 +11,9 @@ const publicChildren = (suffix = '') => [
   { path: 'musees', name: `pub-catalog${suffix}`, component: () => import('@/views/public/PublicCatalog.vue') },
   { path: 'boutiques', name: `pub-boutiques${suffix}`, component: () => import('@/views/public/PublicBoutiques.vue') },
   { path: 'musees/:id', name: `pub-museum${suffix}`, component: () => import('@/views/public/PublicMuseum.vue') },
+  // Parcours voulu : musée → salle → œuvres. La salle est une étape à part entière,
+  // pas un simple libellé : c'est elle qui donne le sentiment de se déplacer.
+  { path: 'secteurs/:id', name: `pub-sector${suffix}`, component: () => import('@/views/public/PublicSector.vue') },
   { path: 'musees/:id/boutique', name: `pub-museum-boutique${suffix}`, component: () => import('@/views/public/PublicMuseumBoutique.vue') },
   { path: 'objets/:id', name: `pub-object${suffix}`, component: () => import('@/views/public/PublicObject.vue') },
   { path: 'visite/:id', name: `pub-tour${suffix}`, component: () => import('@/views/public/PublicTour.vue') },
@@ -22,6 +25,7 @@ const publicChildren = (suffix = '') => [
   // Porte d'entrée du site de l'organisation : un seul formulaire, visiteur ET
   // personnel. C'est le rôle du compte qui décide de la suite (site ou ERP).
   { path: 'connexion', name: `pub-login${suffix}`, component: () => import('@/views/public/PublicLogin.vue') },
+  { path: 'quetes/:id', name: `pub-quest${suffix}`, component: () => import('@/views/public/PublicQuest.vue') },
   { path: 'compte', name: `pub-account${suffix}`, component: () => import('@/views/public/PublicAccount.vue') }
 ]
 
@@ -143,6 +147,36 @@ const routes = [
         name: 'assistant-vocal',
         component: () => import('@/views/VoiceAssistantsView.vue'),
         meta: { title: 'admin.nav.voice', group: 'admin.groups.engagement', icon: 'pi pi-volume-up' }
+      },
+      {
+        path: 'assistant-installation',
+        name: 'assistant-installation',
+        component: () => import('@/views/SetupAgentView.vue'),
+        meta: { title: 'admin.nav.setupAgent', icon: 'pi pi-sparkles' }
+      },
+      {
+        path: 'questions',
+        name: 'questions',
+        component: () => import('@/views/GuideQuestionsView.vue'),
+        meta: { title: 'admin.nav.questions', group: 'admin.groups.engagement', icon: 'pi pi-comments' }
+      },
+      {
+        path: 'quetes',
+        name: 'quetes',
+        component: () => import('@/views/QuestsView.vue'),
+        meta: { title: 'admin.nav.quests', group: 'admin.groups.engagement', icon: 'pi pi-compass' }
+      },
+      {
+        path: 'reseau',
+        name: 'reseau',
+        component: () => import('@/views/NetworkView.vue'),
+        meta: { title: 'admin.nav.network', group: 'admin.groups.system', icon: 'pi pi-share-alt' }
+      },
+      {
+        path: 'brouillons',
+        name: 'brouillons',
+        component: () => import('@/views/DraftsView.vue'),
+        meta: { title: 'admin.nav.drafts', icon: 'pi pi-inbox' }
       },
       {
         path: 'campagnes',

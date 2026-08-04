@@ -1,75 +1,54 @@
 <script setup>
-import { formatMontant } from '@/constants/options'
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { useI18n } from 'vue-i18n'
-import GuideInline from '@/components/public/GuideInline.vue'
-import VoiceGuide from '@/components/public/VoiceGuide.vue'
 import EventsSection from '@/components/public/EventsSection.vue'
 import GuestBook from '@/components/public/GuestBook.vue'
-import { pubMuseum, pubObjectsForMuseum, pubMuseumChefs, pubVoiceOffer, getGuide, pubPlans, pubTours } from '@/services/publicApi'
-import { useCartStore } from '@/stores/useCartStore'
-import { useAccessStore } from '@/stores/useAccessStore'
+import { pubMuseum, pubSectors, pubMuseumChefs, pubTours, pubObjectCountBySector } from '@/services/publicApi'
 import { useSiteLink } from '@/composables/useSiteLink'
+
+// LA FICHE MUSÉE — première étape du parcours : musée → salle → œuvres.
+//
+// Elle présente le lieu, puis invite à entrer dans une salle. Elle ne liste
+// volontairement PAS les œuvres : on ne voit une œuvre qu'en entrant là où elle
+// est exposée. Le guide vocal et les offres d'accès n'y figurent plus non plus —
+// la page dit ce qu'est ce musée, rien d'autre.
 
 // Liens internes : reste sur le site consulte (/site ou /c/<slug>)
 const { to } = useSiteLink()
 
-const { t } = useI18n()
-const cart = useCartStore()
-const access = useAccessStore()
 const route = useRoute()
 const museum = ref(null)
 const sectors = ref([])
-const objects = ref([])
 const chefs = ref([])
-const tours = ref([])     // parcours immersifs publiés de ce musée
-const voice = ref(null)   // offre (nom + prix, sans script/audio)
-const guide = ref(null)   // guide complet (si accès actif) — contenu payant
-const planMusee = ref(null)
-const added = ref('')
+const tours = ref([])      // parcours immersifs publiés de ce musée
+const nbObjets = ref({})   // nombre d'œuvres par salle, pour l'annoncer sur la carte
 const loading = ref(true)
 
 async function load() {
   loading.value = true
-  guide.value = null
+  sectors.value = []
+  nbObjets.value = {}
   museum.value = await pubMuseum(Number(route.params.id))
   if (museum.value) {
-    const r = await pubObjectsForMuseum(museum.value.id)
-    sectors.value = r.sectors
-    objects.value = r.objects
-    chefs.value = await pubMuseumChefs(museum.value.id)
-    tours.value = await pubTours(museum.value.id)
-    voice.value = await pubVoiceOffer(museum.value.id)
-    planMusee.value = (await pubPlans()).find((p) => p.code === 'per_museum') || null
-    await access.load()
-    // Contenu payant : chargé côté serveur uniquement si l'accès est actif (RPC gated).
-    if (access.hasVoice(museum.value.id)) guide.value = await getGuide(museum.value.id)
+    // En parallèle : trois allers-retours simultanés au lieu d'une cascade.
+    const [secs, ch, trs] = await Promise.all([
+      pubSectors(museum.value.id),
+      pubMuseumChefs(museum.value.id),
+      pubTours(museum.value.id)
+    ])
+    sectors.value = secs
+    chefs.value = ch
+    tours.value = trs
+    // Une seule requête pour compter les œuvres de toutes les salles (pas de N+1).
+    nbObjets.value = await pubObjectCountBySector(secs.map((s) => s.id))
   }
   loading.value = false
 }
 
-function addPass() {
-  if (!planMusee.value) return
-  cart.add({
-    type: 'abonnement', refId: planMusee.value.id, museumId: museum.value.id,
-    label: `${planMusee.value.nom} — ${museum.value.nom}`, montant: Number(planMusee.value.prix), devise: planMusee.value.devise
-  })
-  added.value = 'pass'
-}
-function addVoice() {
-  if (!voice.value) return
-  cart.add({
-    type: 'assistant_vocal', refId: voice.value.id, museumId: museum.value.id,
-    label: `${t('audioguide.title')} — ${museum.value.nom}`, montant: Number(voice.value.prix), devise: voice.value.devise || 'FCFA'
-  })
-  added.value = 'voice'
-}
 onMounted(load)
 watch(() => route.params.id, load)
 
 const age = computed(() => (museum.value?.annee_fondation ? new Date().getFullYear() - museum.value.annee_fondation : null))
-const suggestions = computed(() => [t('museum.guideSug1'), t('museum.guideSug2')])
 </script>
 
 <template>
@@ -120,62 +99,29 @@ const suggestions = computed(() => [t('museum.guideSug1'), t('museum.guideSug2')
           </article>
         </section>
 
-        <div class="m-guide">
-          <GuideInline
-            :title="$t('museum.guideTitle')"
-            :context="museum.nom"
-            :suggestions="suggestions"
-            :museum-id="museum.id"
-            :voice-id="guide?.voiceId || voice?.voiceId || null"
-            :ton="guide?.ton || 'neutre'"
-            :timbre-voix="guide?.timbreVoix || 'standard'"
-            :debit="guide?.debit || 1"
-          />
-        </div>
-
-        <!-- Accès & audioguide (logique e-commerce §2.4③ / §5.3) -->
-        <div class="offers">
-          <div class="offer ps-card">
-            <span class="offer__ic"><i class="pi pi-ticket" /></span>
-            <div class="offer__b">
-              <strong>{{ $t('museum.fullVisit') }}</strong>
-              <span v-if="access.hasMuseum(museum.id)" class="offer__ok"><i class="pi pi-check" /> {{ $t('museum.accessActive') }}</span>
-              <template v-else-if="planMusee">
-                <span class="ps-price">{{ formatMontant(planMusee.prix, planMusee.devise) }} <small>{{ $t('museum.perDays', { n: planMusee.duree_jours }) }}</small></span>
-                <button class="ps-btn ps-btn--sm" @click="addPass">
-                  <i class="pi pi-shopping-bag" /> {{ added === 'pass' ? $t('common.added') : $t('museum.addToCart') }}
-                </button>
-              </template>
-            </div>
-          </div>
-
-          <div v-if="voice && !access.hasVoice(museum.id)" class="offer ps-card">
-            <span class="offer__ic"><i class="pi pi-volume-up" /></span>
-            <div class="offer__b">
-              <strong>{{ voice.titre || $t('museum.audioguideDefault') }}</strong>
-              <span class="ps-price">{{ formatMontant(voice.prix, voice.devise) }}</span>
-              <span class="offer__lock"><i class="pi pi-lock" /> {{ $t('museum.locked') }}</span>
-              <button class="ps-btn ps-btn--sm" @click="addVoice">
-                <i class="pi pi-shopping-bag" /> {{ added === 'voice' ? $t('common.added') : $t('museum.buyAudioguide') }}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Guide vocal débloqué : contenu payant chargé côté serveur (RPC gated) -->
-        <div v-if="guide && access.hasVoice(museum.id)" class="ag-wrap">
-          <VoiceGuide :guide="guide" :museum-name="museum.nom" />
-        </div>
-
+        <!-- Le parcours : après la description, on entre dans une salle.
+             Les œuvres ne sont pas listées ici — on les découvre en entrant. -->
         <h2 class="ps-title">{{ $t('museum.rooms') }}</h2>
+        <p class="m-roomlead">{{ $t('museum.roomsLead') }}</p>
         <div class="sectors">
-          <div v-for="sec in sectors" :key="sec.id" class="sector ps-card">
-            <i :class="sec.emplacement === 'Extérieur' ? 'pi pi-cloud' : 'pi pi-home'" />
-            <div>
+          <router-link
+            v-for="sec in sectors" :key="sec.id"
+            :to="to(`/secteurs/${sec.id}`)"
+            class="sector ps-card ps-card--hover"
+          >
+            <span class="sector__ic">
+              <i :class="sec.emplacement === 'Extérieur' ? 'pi pi-cloud' : 'pi pi-home'" />
+            </span>
+            <div class="sector__b">
               <strong>{{ sec.nom }}</strong>
-              <span>{{ sec.emplacement }}</span>
+              <span class="sector__meta">
+                {{ sec.emplacement }}
+                <template v-if="nbObjets[sec.id]"> · {{ $t('museum.roomWorks', { n: nbObjets[sec.id] }) }}</template>
+              </span>
+              <span v-if="sec.description" class="sector__desc">{{ sec.description }}</span>
             </div>
-          </div>
+            <i class="pi pi-arrow-right sector__go" />
+          </router-link>
           <p v-if="!sectors.length" class="ps-muted">{{ $t('museum.noRooms') }}</p>
         </div>
 
@@ -196,19 +142,6 @@ const suggestions = computed(() => [t('museum.guideSug1'), t('museum.guideSug2')
           </div>
         </template>
 
-        <h2 class="ps-title">{{ $t('museum.worksToDiscover') }}</h2>
-        <div v-if="objects.length" class="ocards">
-          <router-link v-for="o in objects" :key="o.id" :to="to(`/objets/${o.id}`)" class="ocard ps-card ps-card--hover">
-            <div class="ocard__img">
-              <img v-if="o.photo" :src="o.photo" :alt="o.nom" />
-              <div v-else class="ps-ph"><i class="pi pi-box" /></div>
-              <span v-if="o.model3d" class="ps-tag ps-tag--primary ocard__3d">3D · AR</span>
-            </div>
-            <strong>{{ o.nom }}</strong>
-            <small v-if="o.nom_commun">{{ o.nom_commun }}</small>
-          </router-link>
-        </div>
-        <p v-else class="ps-muted">{{ $t('museum.noWorks') }}</p>
       </div>
 
       <!-- Agenda et livre d'or de ce musée -->
@@ -268,11 +201,27 @@ const suggestions = computed(() => [t('museum.guideSug1'), t('museum.guideSug2')
 .gen-card__vie { font-size: 0.78rem; color: #7c817b; }
 .gen-card__cta { margin-top: auto; font-size: 0.72rem; }
 
-.sectors { display: flex; flex-wrap: wrap; gap: 0.8rem; }
-.sector { display: flex; align-items: center; gap: 0.7rem; padding: 0.75rem 1.05rem; }
-.sector i { color: var(--site-primary); font-size: 1.1rem; }
-.sector strong { display: block; font-size: 0.95rem; color: #101210; }
-.sector span { font-size: 0.76rem; color: #7c817b; }
+.m-roomlead { color: #5c615c; margin: -0.4rem 0 1.1rem; font-size: 0.94rem; }
+.sectors { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 1rem; }
+.sector {
+  display: flex; align-items: center; gap: 0.9rem; padding: 1.05rem 1.2rem;
+  text-decoration: none; transition: transform 0.15s ease;
+}
+.sector:hover { transform: translateY(-2px); }
+.sector__ic {
+  flex: 0 0 auto; width: 46px; height: 46px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--site-primary) 10%, #fff);
+  color: var(--site-primary); font-size: 1.15rem;
+}
+.sector__b { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 0.2rem; }
+.sector__b strong { font-size: 1rem; color: #101210; }
+.sector__meta { font-size: 0.78rem; color: #7c817b; font-weight: 600; }
+.sector__desc {
+  font-size: 0.82rem; color: #5c615c; line-height: 1.45;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.sector__go { color: var(--site-primary); flex: 0 0 auto; }
 
 .ocards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.2rem; }
 .ocard { overflow: hidden; text-align: center; }

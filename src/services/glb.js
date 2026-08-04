@@ -119,6 +119,102 @@ function lathe(profile, segments = 48) {
 }
 
 // ---------------------------------------------------------------------------
+// Géométrie libre — pour ce que le tour ne sait pas faire
+//
+// Un masque n'est pas une forme de révolution : il a une face, un dos, des
+// oreilles. On part donc d'un ellipsoïde que l'on DÉFORME point par point,
+// puis on recalcule les normales d'après la surface obtenue. Les déduire
+// analytiquement obligerait à dériver chaque déformation à la main ; les
+// moyenner depuis les faces donne le même résultat et accepte n'importe quel
+// relief.
+// ---------------------------------------------------------------------------
+function calculerNormales(positions, indices) {
+  const n = new Float32Array(positions.length)
+  for (let i = 0; i < indices.length; i += 3) {
+    const [a, b, c] = [indices[i] * 3, indices[i + 1] * 3, indices[i + 2] * 3]
+    const ux = positions[b] - positions[a]
+    const uy = positions[b + 1] - positions[a + 1]
+    const uz = positions[b + 2] - positions[a + 2]
+    const vx = positions[c] - positions[a]
+    const vy = positions[c + 1] - positions[a + 1]
+    const vz = positions[c + 2] - positions[a + 2]
+    // Produit vectoriel : la normale de la face, pondérée par son aire.
+    const nx = uy * vz - uz * vy
+    const ny = uz * vx - ux * vz
+    const nz = ux * vy - uy * vx
+    for (const s of [a, b, c]) { n[s] += nx; n[s + 1] += ny; n[s + 2] += nz }
+  }
+  for (let i = 0; i < n.length; i += 3) {
+    const l = Math.hypot(n[i], n[i + 1], n[i + 2]) || 1
+    n[i] /= l; n[i + 1] /= l; n[i + 2] /= l
+  }
+  return Array.from(n)
+}
+
+// Ellipsoïde paramétré, éventuellement déformé. `deform(p, u, v)` reçoit le
+// point et ses coordonnées de surface, et renvoie le point déplacé.
+function spheroid({ rx, ry, rz, segments = 48, rings = 32, deform = null }) {
+  const positions = []
+  const indices = []
+  for (let j = 0; j <= rings; j++) {
+    const v = j / rings
+    const phi = v * Math.PI
+    for (let i = 0; i <= segments; i++) {
+      const u = i / segments
+      const theta = u * Math.PI * 2
+      let p = [
+        rx * Math.sin(phi) * Math.sin(theta),
+        ry * Math.cos(phi),
+        rz * Math.sin(phi) * Math.cos(theta)
+      ]
+      if (deform) p = deform(p, u, v)
+      positions.push(p[0], p[1], p[2])
+    }
+  }
+  const parLigne = segments + 1
+  for (let j = 0; j < rings; j++) {
+    for (let i = 0; i < segments; i++) {
+      const a = j * parLigne + i
+      const b = a + parLigne
+      indices.push(a, b, a + 1, a + 1, b, b + 1)
+    }
+  }
+  return { positions, indices }
+}
+
+function transformer(mesh, { dx = 0, dy = 0, dz = 0, rotZ = 0 }) {
+  const p = [...mesh.positions]
+  for (let i = 0; i < p.length; i += 3) {
+    let [x, y] = [p[i], p[i + 1]]
+    if (rotZ) {
+      const c = Math.cos(rotZ)
+      const s = Math.sin(rotZ)
+      ;[x, y] = [x * c - y * s, x * s + y * c]
+    }
+    p[i] = x + dx
+    p[i + 1] = y + dy
+    p[i + 2] += dz
+  }
+  return { positions: p, indices: mesh.indices }
+}
+
+// Concatène des maillages en conservant des groupes : chaque groupe deviendra
+// une primitive, donc pourra porter sa propre matière.
+function fusionner(groupes) {
+  const positions = []
+  const indices = []
+  const plages = []
+  for (const g of groupes) {
+    const decalage = positions.length / 3
+    const debut = indices.length
+    positions.push(...g.mesh.positions)
+    for (const idx of g.mesh.indices) indices.push(idx + decalage)
+    plages.push({ nom: g.nom, debut, compte: indices.length - debut, couleur: g.couleur })
+  }
+  return { positions, indices, normals: calculerNormales(positions, indices), plages }
+}
+
+// ---------------------------------------------------------------------------
 // Écriture d'un maillage dans un .glb complet
 // ---------------------------------------------------------------------------
 function meshToGlb({ positions, normals, indices }, { nom, couleur, rugosite = 0.72 }) {
@@ -166,6 +262,83 @@ function meshToGlb({ positions, normals, indices }, { nom, couleur, rugosite = 0
       { bufferView: 1, componentType: 5126, count: nor.length / 3, type: 'VEC3' },
       { bufferView: 2, componentType: 5125, count: idx.length, type: 'SCALAR' }
     ]
+  }
+
+  return buildGlb(gltf, bin)
+}
+
+// Variante à PLUSIEURS MATIÈRES.
+//
+// Un même maillage, découpé en primitives : chacune porte sa propre matière.
+// C'est ce qui permet au masque d'avoir un corps en bois patiné et des yeux
+// clairs, sans texture ni fichier annexe — une matière est ici quatre nombres.
+function meshMultiToGlb({ positions, normals, indices, plages }, nom) {
+  const pos = new Float32Array(positions)
+  const nor = new Float32Array(normals)
+  const idx = new Uint32Array(indices)
+
+  const posLen = pad4(pos.byteLength)
+  const norLen = pad4(nor.byteLength)
+  const idxLen = pad4(idx.byteLength)
+  const bin = new ArrayBuffer(posLen + norLen + idxLen)
+  new Uint8Array(bin).set(new Uint8Array(pos.buffer), 0)
+  new Uint8Array(bin).set(new Uint8Array(nor.buffer), posLen)
+  new Uint8Array(bin).set(new Uint8Array(idx.buffer), posLen + norLen)
+
+  const min = [Infinity, Infinity, Infinity]
+  const max = [-Infinity, -Infinity, -Infinity]
+  for (let i = 0; i < pos.length; i += 3) {
+    for (let k = 0; k < 3; k++) {
+      if (pos[i + k] < min[k]) min[k] = pos[i + k]
+      if (pos[i + k] > max[k]) max[k] = pos[i + k]
+    }
+  }
+
+  // Un accesseur d'indices par plage : c'est la découpe en primitives.
+  const accessors = [
+    { bufferView: 0, componentType: 5126, count: pos.length / 3, type: 'VEC3', min, max },
+    { bufferView: 1, componentType: 5126, count: nor.length / 3, type: 'VEC3' }
+  ]
+  const primitives = []
+  const materials = []
+  plages.forEach((p, i) => {
+    accessors.push({
+      bufferView: 2,
+      byteOffset: p.debut * 4, // Uint32 : 4 octets par indice
+      componentType: 5125,
+      count: p.compte,
+      type: 'SCALAR'
+    })
+    materials.push({
+      name: p.nom,
+      pbrMetallicRoughness: {
+        baseColorFactor: p.couleur,
+        metallicFactor: 0.04,
+        roughnessFactor: p.rugosite ?? 0.68
+      },
+      doubleSided: false
+    })
+    primitives.push({
+      attributes: { POSITION: 0, NORMAL: 1 },
+      indices: 2 + i,
+      material: i
+    })
+  })
+
+  const gltf = {
+    asset: { version: '2.0', generator: 'MUSÉA — générateur interne' },
+    scene: 0,
+    scenes: [{ nodes: [0], name: nom }],
+    nodes: [{ mesh: 0, name: nom }],
+    meshes: [{ name: nom, primitives }],
+    materials,
+    buffers: [{ byteLength: bin.byteLength }],
+    bufferViews: [
+      { buffer: 0, byteOffset: 0, byteLength: pos.byteLength, target: 34962 },
+      { buffer: 0, byteOffset: posLen, byteLength: nor.byteLength, target: 34962 },
+      { buffer: 0, byteOffset: posLen + norLen, byteLength: idx.byteLength, target: 34963 }
+    ],
+    accessors
   }
 
   return buildGlb(gltf, bin)

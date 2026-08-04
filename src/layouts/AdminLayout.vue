@@ -52,7 +52,12 @@ async function loadPendingTenants() {
 // Navigation groupée par sections (labels gris majuscules — style Génius).
 const navGroups = computed(() => [
   { label: t('admin.nav.grpPilotage'), items: [
-    { to: '/dashboard', icon: 'pi pi-th-large', label: t('admin.nav.dashboard') }
+    { to: '/dashboard', icon: 'pi pi-th-large', label: t('admin.nav.dashboard') },
+    { to: '/assistant-installation', icon: 'pi pi-sparkles', label: t('admin.nav.setupAgent') },
+    { to: '/brouillons', icon: 'pi pi-inbox', label: t('admin.nav.drafts') },
+    { to: '/quetes', icon: 'pi pi-compass', label: t('admin.nav.quests') },
+    { to: '/questions', icon: 'pi pi-comments', label: t('admin.nav.questions') },
+    { to: '/reseau', icon: 'pi pi-share-alt', label: t('admin.nav.network') }
   ] },
   { label: t('admin.nav.grpContent'), items: [
     { to: '/musees', icon: 'pi pi-building', label: t('admin.nav.museums') },
