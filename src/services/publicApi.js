@@ -269,7 +269,10 @@ export async function pubSiblings(objectId) {
   const { data, error } = await scoped(supabase
     .from('object_siblings')
     .select('id, source, external_id, titre, culture, pays, image_url, source_url, ' +
-            'score, type_lien, justification'))
+            'score, type_lien, justification, ' +
+            // La carte de profondeur vit sur le catalogue GLOBAL, pas sur le
+            // lien : elle est calculée une fois pour toutes les organisations.
+            'objets_externes(depth_map_url, amplitude_relief)'))
     .eq('object_id', objectId)
     .order('score', { ascending: false })
   if (error) { console.error('[public] siblings', error.message); return [] }
@@ -288,7 +291,11 @@ export async function pubSiblings(objectId) {
     typeLien: r.type_lien || null,
     justification: r.justification || '',
     // Nom lisible de l'institution, à défaut la clé technique de la source.
-    musee: MUSEES[r.source] || r.source
+    musee: MUSEES[r.source] || r.source,
+    // Relief 2.5D. Absent tant que la carte n'a pas été produite : la planche
+    // reste alors une image plate, ce qui est le comportement normal.
+    profondeur: r.objets_externes?.depth_map_url || '',
+    amplitude: r.objets_externes?.amplitude_relief ?? 0.12
   }))
 }
 

@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { pubSiblings } from '@/services/publicApi'
+import { creerRelief, ANGLE_MAX_RELIEF, AMPLITUDE_DEFAUT } from '@/services/relief'
 
 // LE CABINET DE COMPARAISON — côté visiteur.
 //
@@ -114,7 +115,66 @@ function fermer() { actif.value = null }
 
 function auClavier(e) { if (e.key === 'Escape') fermer() }
 onMounted(() => window.addEventListener('keydown', auClavier))
-onBeforeUnmount(() => window.removeEventListener('keydown', auClavier))
+onBeforeUnmount(() => { window.removeEventListener('keydown', auClavier); libererRelief() })
+
+// ---------------------------------------------------------------------------
+// RELIEF 2.5D — uniquement sur la planche OUVERTE
+// ---------------------------------------------------------------------------
+// C'est la règle des deux niveaux de rendu : un maillage déplacé coûte 16 000
+// sommets et deux textures. Multiplié par les vingt planches de l'arc, il tue
+// un téléphone. On ne le paie donc que là où le visiteur regarde vraiment.
+const toile = ref(null)
+const reliefActif = ref(false)
+let moteur = null
+let boucle = 0
+let yawRelief = 0
+let pitchRelief = 0
+
+const aDuRelief = computed(() => !!actif.value?.profondeur)
+
+function libererRelief() {
+  cancelAnimationFrame(boucle)
+  boucle = 0
+  moteur?.detruire()
+  moteur = null
+  reliefActif.value = false
+}
+
+watch(actif, async (f) => {
+  libererRelief()
+  if (!f?.profondeur) return
+  await nextTick()
+  if (!toile.value) return
+
+  moteur = creerRelief(toile.value)
+  // `creerRelief` renvoie null si l'appareil ne sait pas lire une texture dans
+  // le shader de sommets. Ce n'est pas une panne : l'image plate reste affichée.
+  if (!moteur) return
+
+  const ok = await moteur.charger(f.image, f.profondeur)
+  if (!ok) { libererRelief(); return }
+
+  reliefActif.value = true
+  const amp = f.amplitude || AMPLITUDE_DEFAUT
+  const animer = () => {
+    moteur?.rendre(yawRelief, pitchRelief, amp)
+    boucle = requestAnimationFrame(animer)
+  }
+  animer()
+})
+
+// Parallaxe au survol, BORNÉE. Au-delà d'une vingtaine de degrés, les zones que
+// la photo ne contient pas apparaissent et s'étirent — la limite est celle du
+// procédé, pas un réglage de confort.
+function bougerRelief(e) {
+  if (!reliefActif.value) return
+  const r = e.currentTarget.getBoundingClientRect()
+  const dx = (e.clientX - r.left) / r.width - 0.5
+  const dy = (e.clientY - r.top) / r.height - 0.5
+  yawRelief = Math.max(-ANGLE_MAX_RELIEF, Math.min(ANGLE_MAX_RELIEF, dx * ANGLE_MAX_RELIEF * 2))
+  pitchRelief = Math.max(-ANGLE_MAX_RELIEF, Math.min(ANGLE_MAX_RELIEF, -dy * ANGLE_MAX_RELIEF * 1.4))
+}
+function quitterRelief() { yawRelief = 0; pitchRelief = 0 }
 </script>
 
 <template>
@@ -166,7 +226,20 @@ onBeforeUnmount(() => window.removeEventListener('keydown', auClavier))
       <!-- Fiche dépliée -->
       <div v-if="actif" class="cf__fiche" @click.self="fermer">
         <div class="cf__fiche-corps">
-          <img v-if="actif.image" :src="actif.image" :alt="actif.titre" />
+          <!-- Deux niveaux de rendu : maillage déplacé si une carte de
+               profondeur existe, simple image sinon. -->
+          <div
+            v-if="aDuRelief" class="cf__relief"
+            @pointermove="bougerRelief" @pointerleave="quitterRelief"
+          >
+            <canvas ref="toile" class="cf__toile" />
+            <!-- L'image reste dessous : si le moteur renonce (vieux GPU,
+                 image d'un autre domaine sans CORS), on ne montre pas un
+                 rectangle vide. -->
+            <img v-show="!reliefActif" :src="actif.image" :alt="actif.titre" class="cf__toile-repli" />
+            <span v-if="reliefActif" class="cf__relief-note">{{ $t('cabinet.public.relief') }}</span>
+          </div>
+          <img v-else-if="actif.image" :src="actif.image" :alt="actif.titre" />
           <div class="cf__fiche-txt">
             <strong>{{ actif.titre }}</strong>
             <p class="cf__fiche-meta">{{ [actif.culture, actif.pays].filter(Boolean).join(' · ') }}</p>
@@ -241,7 +314,17 @@ onBeforeUnmount(() => window.removeEventListener('keydown', auClavier))
 .cf__fiche { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
   background: rgba(8,11,10,0.82); padding: 1.2rem; }
 .cf__fiche-corps { display: flex; gap: 1.2rem; max-width: 620px; align-items: center; }
-.cf__fiche-corps img { width: 210px; height: 210px; object-fit: cover; border-radius: 10px; flex: 0 0 auto; }
+.cf__fiche-corps > img { width: 210px; height: 210px; object-fit: cover; border-radius: 10px; flex: 0 0 auto; }
+
+/* Zone de relief : le canvas et l'image de repli occupent exactement la même
+   place, l'un par-dessus l'autre. */
+.cf__relief { position: relative; width: 240px; height: 240px; flex: 0 0 auto; cursor: crosshair; }
+.cf__toile { width: 100%; height: 100%; display: block; }
+.cf__toile-repli { position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; border-radius: 10px; }
+.cf__relief-note { position: absolute; left: 50%; bottom: -4px; transform: translateX(-50%);
+  font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(255,255,255,0.45); white-space: nowrap; }
 .cf__fiche-txt { color: #fff; min-width: 0; }
 .cf__fiche-txt strong { font-size: 1.1rem; display: block; }
 .cf__fiche-meta { margin: 0.25rem 0 0.6rem; font-size: 0.82rem; color: rgba(255,255,255,0.6); }

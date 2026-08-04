@@ -650,10 +650,49 @@ par le sens**, faire **justifier** par un modèle, faire **trancher** par un hum
 - [ ] Brancher Bedrock sur `freres` : Llama rend des justifications laconiques
       (« Même culture Bamiléké ») là où Claude rédigerait la phrase de cartel
       attendue. Trois lignes, cf. le commentaire en tête de la fonction.
-- [ ] **Phase 2.5D** — volontairement remise à plus tard, comme prévu : segmentation
-      (rembg/SAM 2), carte de profondeur (Depth Anything V2), `displacementMap`.
-      Elle exigera WebGL, donc un moteur écrit à la main comme celui du panorama.
-      Rien de ce qui précède n'est à jeter : une colonne et un matériau à changer.
+### Phase 11 — Relief 2.5D 🟡 (2026-08-04, moteur prêt, aucune carte produite)
+
+Une photo plate qui révèle du volume quand la caméra bouge. **Ce n'est pas un
+scan** : un plan subdivisé dont les sommets sont poussés par une carte de
+profondeur. L'illusion tient de face et s'effondre de profil — d'où le bridage
+d'angle, qui est la condition du procédé et non un réglage de confort.
+
+- [x] `src/services/relief.js` — moteur **WebGL écrit à la main**, dans la veine
+      de `panorama.js` : grille 128×128, déplacement des sommets par
+      `texture2D` dans le shader de sommets, fond écarté par l'alpha.
+      **Contrôle indispensable au démarrage** : `MAX_VERTEX_TEXTURE_IMAGE_UNITS`
+      vaut 0 sur certains GPU mobiles anciens — le moteur renonce alors
+      proprement et l'appelant affiche l'image plate.
+- [x] **Règle des deux niveaux de rendu** respectée : maillage déplacé pour la
+      SEULE planche ouverte, image simple pour les vingt autres. 16 000 sommets
+      et deux textures par planche tueraient un téléphone.
+- [x] Parallaxe bornée à **±20°**, angle au-delà duquel les zones absentes de
+      la photo apparaissent et s'étirent.
+- [x] `amplitude_relief` **réglable par œuvre** (0,02–0,30, bornée en base) :
+      une tapisserie et un buste ne demandent pas la même valeur.
+- [x] Bucket `profondeur` (public en lecture, écriture réservée au personnel).
+      Pas de base64 en colonne texte : `image.js` documente déjà ce piège.
+- [x] `scripts/profondeur.py` — segmentation `rembg`, puis Depth Anything V2
+      Small, puis **masquage de la carte par l'alpha** (sans quoi le fond
+      ondule), envoi dans le bucket et rattachement à la notice. PNG 16 bits
+      pour éviter les marches sur les surfaces lisses.
+
+> ⚠️ **Piège d'échelle mesuré.** Le cahier des charges donne 0,08–0,15 « de la
+> largeur du plan », pour un plan de largeur 1. Notre grille va de −1 à +1 :
+> elle fait DEUX unités. Sans le facteur ×2 appliqué dans `rendre()`, le relief
+> sortait deux fois trop faible — invisible à l'œil.
+
+**RESTE**
+
+- [ ] **Aucune carte de profondeur n'existe encore.** Le moteur a été vérifié
+      sur une carte fabriquée pour l'essai (un visage : nez saillant, yeux
+      creusés) — la parallaxe est franche. Mais tant que `scripts/profondeur.py`
+      n'a pas tourné, aucune planche du cabinet n'a de relief en production.
+      Ce script ne peut PAS tourner ici : Python + PyTorch, et npm est HS.
+- [ ] Régler l'amplitude par œuvre depuis l'ERP (la colonne et la RPC
+      `externe_regler_relief` existent, l'écran n'a pas encore le curseur).
+- [ ] Passe d'inpainting sur les zones de disocclusion, si l'on veut élargir
+      l'angle au-delà de 20°. Confort, pas nécessité.
 
 ---
 

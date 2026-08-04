@@ -290,6 +290,7 @@ export default {
       tous: 'All links',
       voirAuMusee: 'View at the museum',
       fermer: 'Back to the cabinet',
+      relief: 'Move the mouse over the image',
       aucun: 'No related object has been identified for this work yet.',
     },
   },

@@ -292,6 +292,7 @@ export default {
       tous: 'Tous les liens',
       voirAuMusee: 'Voir au musée',
       fermer: 'Revenir au cabinet',
+      relief: 'Bougez la souris sur l’image',
       aucun: 'Aucun objet apparenté n’a encore été identifié pour cette œuvre.',
     },
   },
