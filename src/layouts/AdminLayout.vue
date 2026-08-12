@@ -12,6 +12,7 @@ import { useSectorStore } from '@/stores/useSectorStore'
 import { useObjectStore } from '@/stores/useObjectStore'
 import { usePricingStore } from '@/stores/usePricingStore'
 import { useGenealogyStore } from '@/stores/useGenealogyStore'
+import { useMessageStore } from '@/stores/useMessageStore'
 import { supabase } from '@/services/supabase'
 
 const route = useRoute()
@@ -19,6 +20,7 @@ const router = useRouter()
 const { t } = useI18n()
 const auth = useAuthStore()
 const objectStore = useObjectStore()
+const messageStore = useMessageStore()
 const { isDark, toggle } = useTheme()
 
 const isDesktop = ref(window.innerWidth >= 992)
@@ -76,9 +78,11 @@ const navGroups = computed(() => [
     { to: '/faq', icon: 'pi pi-question-circle', label: t('admin.nav.faq') },
     { to: '/assistant-vocal', icon: 'pi pi-volume-up', label: t('admin.nav.voice') },
     { to: '/visiteurs', icon: 'pi pi-users', label: t('admin.nav.audience') },
+    { to: '/messagerie', icon: 'pi pi-envelope', label: t('admin.nav.messages'), badge: messageStore.unreadCount || null },
     { to: '/campagnes', icon: 'pi pi-send', label: t('admin.nav.campaigns') }
   ] },
   { label: t('admin.nav.grpManagement'), items: [
+    { to: '/decisionnel', icon: 'pi pi-chart-bar', label: t('admin.nav.analytics') },
     { to: '/tarifs', icon: 'pi pi-tag', label: t('admin.nav.pricing') },
     { to: '/organisation', icon: 'pi pi-building', label: t('admin.nav.organization') },
     { to: '/parametres', icon: 'pi pi-cog', label: t('admin.nav.settings') }
@@ -145,6 +149,7 @@ onMounted(() => {
   useObjectStore().load()
   usePricingStore().load()
   useGenealogyStore().load()
+  messageStore.load()
   loadPendingTenants()
 })
 onUnmounted(() => window.removeEventListener('resize', onResize))

@@ -179,6 +179,18 @@ const routes = [
         meta: { title: 'admin.nav.drafts', icon: 'pi pi-inbox' }
       },
       {
+        path: 'decisionnel',
+        name: 'decisionnel',
+        component: () => import('@/views/AnalyticsView.vue'),
+        meta: { title: 'admin.nav.analytics', group: 'admin.groups.system', icon: 'pi pi-chart-bar' }
+      },
+      {
+        path: 'messagerie',
+        name: 'messagerie',
+        component: () => import('@/views/MessagesView.vue'),
+        meta: { title: 'admin.nav.messages', group: 'admin.groups.engagement', icon: 'pi pi-envelope' }
+      },
+      {
         path: 'campagnes',
         name: 'campagnes',
         component: () => import('@/views/CampaignsView.vue'),
