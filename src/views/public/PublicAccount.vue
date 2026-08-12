@@ -9,6 +9,7 @@ import { pubMuseums } from '@/services/publicApi'
 import { useSiteLink } from '@/composables/useSiteLink'
 import { qrSvg } from '@/services/qrcode'
 import { formatMontant } from '@/constants/options'
+import ContactForm from '@/components/public/ContactForm.vue'
 
 // Liens internes : reste sur le site consulte (/site ou /c/<slug>)
 const { to } = useSiteLink()
@@ -21,6 +22,8 @@ const access = useAccessStore()
 
 const orders = ref([])
 const museums = ref([])
+// Commande dont le formulaire de contact est déplié (une seule à la fois).
+const askOrder = ref(null)
 
 // Cette page est l'ESPACE COMPTE, pas une porte d'entrée.
 //
@@ -132,6 +135,18 @@ async function logout() {
           <ul>
             <li v-for="it in o.order_items" :key="it.id">{{ it.label }} — {{ formatMontant(it.montant, o.devise) }}</li>
           </ul>
+
+          <!-- SAV : le fil arrive dans la messagerie de l'ERP, rattaché à cette commande. -->
+          <button type="button" class="order__ask" @click="askOrder = askOrder === o.id ? null : o.id">
+            <i class="pi pi-comment" /> {{ $t('contact.orderAsk') }}
+          </button>
+          <ContactForm
+            v-if="askOrder === o.id"
+            compact
+            :order-id="o.id"
+            :sujet-impose="$t('contact.orderSubject', { n: o.id })"
+            class="order__form"
+          />
         </div>
       </div>
       <p v-else class="muted">{{ $t('account.noOrders') }}</p>
@@ -177,4 +192,11 @@ async function logout() {
 .order__date { color: #897f70; font-size: 0.82rem; }
 .order__total { margin-left: auto; }
 .order ul { margin: 0.5rem 0 0; padding-left: 1.1rem; color: #6b6052; font-size: 0.88rem; }
+.order__ask {
+  margin-top: 0.7rem; background: none; border: none; padding: 0; cursor: pointer;
+  font: inherit; font-size: 0.84rem; color: var(--site-primary, #0e6f5c);
+  display: inline-flex; align-items: center; gap: 0.35rem;
+}
+.order__ask:hover { text-decoration: underline; }
+.order__form { margin-top: 0.8rem; }
 </style>

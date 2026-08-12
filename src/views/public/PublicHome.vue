@@ -7,6 +7,7 @@ import ProductCard from '@/components/public/ProductCard.vue'
 import InstallPwa from '@/components/public/InstallPwa.vue'
 import EventsSection from '@/components/public/EventsSection.vue'
 import GuestBook from '@/components/public/GuestBook.vue'
+import ContactForm from '@/components/public/ContactForm.vue'
 import { useSiteLink } from '@/composables/useSiteLink'
 
 // Liens internes : reste sur le site consulte (/site ou /c/<slug>)
@@ -210,6 +211,16 @@ function toggleFav(id) {
     <!-- Livre d'or -->
     <GuestBook />
 
+    <!-- Nous écrire : le message arrive dans la messagerie de l'ERP -->
+    <section class="ps-wrap contact-sec">
+      <div class="contact-sec__head">
+        <span class="ps-over">{{ $t('contact.eyebrow') }}</span>
+        <h2 class="contact-sec__title">{{ $t('contact.title') }}</h2>
+        <p class="contact-sec__lead">{{ $t('contact.lead') }}</p>
+      </div>
+      <ContactForm compact class="contact-sec__form" />
+    </section>
+
     <!-- Bande généalogie -->
     <section class="band">
       <div class="band__in">
@@ -328,6 +339,14 @@ function toggleFav(id) {
 .ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #b9beb8; font-size: 2rem; }
 
 /* Bande généalogie */
+/* Nous écrire — même gabarit centré que le livre d'or, formulaire en colonne étroite. */
+.contact-sec { margin-top: 3.2rem; }
+.contact-sec__head { text-align: center; margin-bottom: 1.6rem; }
+.contact-sec__head .ps-over { margin-bottom: 0.4rem; }
+.contact-sec__title { font-family: 'Anton', 'Inter', sans-serif; font-weight: 400; text-transform: uppercase; font-size: clamp(1.5rem, 3vw, 2.1rem); margin: 0 0 0.5rem; color: #101210; }
+.contact-sec__lead { color: #5c615c; max-width: 560px; margin: 0 auto; }
+.contact-sec__form { max-width: 560px; margin: 0 auto; }
+
 .band { margin-top: 3.6rem; background: #0d0f0d; color: #fff; }
 .band__in { max-width: 1240px; margin: 0 auto; padding: 3.2rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 2rem; flex-wrap: wrap; }
 .band__over { display: block; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: color-mix(in srgb, var(--site-primary) 65%, #fff); margin-bottom: 0.4rem; }

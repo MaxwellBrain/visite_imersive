@@ -200,6 +200,54 @@ export async function pubAddReview({ nom, message, note, museumId = null }) {
   return true
 }
 
+// ---------- Messagerie ----------
+// L'écriture passe par une fonction SECURITY DEFINER : le visiteur n'a aucun droit
+// d'insertion sur les tables. C'est la base qui valide l'organisation, exige une
+// adresse joignable et plafonne le débit — un contrôle côté navigateur ne
+// protégerait de rien.
+//
+// Les erreurs sont renvoyées telles quelles (codes courts, ex. « trop_de_messages ») :
+// l'appelant les traduit pour le visiteur.
+export async function pubSendMessage({ sujet, corps, nom = null, email = null, orderId = null }) {
+  if (publicTenantId == null) throw new Error('organisation_indisponible')
+  const { data, error } = await supabase.rpc('envoyer_message_public', {
+    p_tenant_id: publicTenantId,
+    p_sujet: sujet,
+    p_corps: corps,
+    p_nom: nom,
+    p_email: email,
+    p_order_id: orderId
+  })
+  if (error) throw new Error(extraitCode(error.message))
+  return data
+}
+
+// Réponse d'un visiteur connecté dans un fil qui lui appartient.
+export async function pubReplyMessage(messageId, corps) {
+  const { data, error } = await supabase.rpc('repondre_message_public', {
+    p_message_id: messageId,
+    p_corps: corps
+  })
+  if (error) throw new Error(extraitCode(error.message))
+  return data
+}
+
+// Fils du visiteur connecté, avec leurs échanges (espace client).
+export async function pubMyMessages() {
+  const { data, error } = await supabase
+    .from('messages')
+    .select('*, message_replies(*)')
+    .order('dernier_message_at', { ascending: false })
+  if (error) { console.error('[public] messages', error.message); return [] }
+  return data || []
+}
+
+// Postgres enrobe nos RAISE EXCEPTION ; on ne garde que le code court.
+function extraitCode(msg) {
+  const m = String(msg || '').match(/(champs_obligatoires|organisation_indisponible|email_requis|email_invalide|commande_introuvable|trop_de_messages|fil_introuvable)/)
+  return m ? m[1] : 'erreur'
+}
+
 // ---------- Généalogie ----------
 export async function pubPersonnage(id) {
   const { data } = await scoped(supabase.from('personnages').select('*')).eq('id', id).eq('published', true).maybeSingle()
