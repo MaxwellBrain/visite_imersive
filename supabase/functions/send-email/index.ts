@@ -1,14 +1,26 @@
-// Edge Function : e-mails transactionnels via Resend.
-// La clé API reste 100 % côté serveur (secret RESEND_API_KEY) — jamais dans le frontend.
+// Edge Function : e-mails transactionnels, via Twilio SendGrid ou Resend.
+// La clé API reste 100 % côté serveur — jamais dans le frontend.
+//
+// Secrets (poser CELUI du service retenu) :
+//   SENDGRID_API_KEY  — Twilio SendGrid, clé de la forme « SG.… »
+//                       (alias acceptés : SEND_GRID_API_KEY, TWILIO_SENDGRID_API_KEY)
+//   RESEND_API_KEY    — Resend
+//   EMAIL_PROVIDER    — facultatif : « sendgrid » ou « resend » pour forcer le choix
+//   EMAIL_FROM        — expéditrice, ex. « MUSÉA <contact@votredomaine.cm> »
+//
+// Sans EMAIL_PROVIDER, la première clé trouvée l'emporte, SendGrid en tête.
 //
 // Types gérés : recu_commande | acces_debloque | organisation_approuvee | bienvenue
+//               | campagne | reponse_message
 //
 // Sans clé configurée, la fonction répond 200 { skipped: true } : l'application
 // continue de fonctionner normalement, seul l'e-mail n'est pas envoyé.
 //
-// IMPORTANT (offre gratuite Resend) : tant qu'aucun domaine n'est vérifié, on ne peut
-// écrire QU'À l'adresse du titulaire du compte, depuis onboarding@resend.dev.
-// Une fois le domaine vérifié, poser RESEND_FROM="MUSÉA <contact@votredomaine.cm>".
+// IMPORTANT — l'expéditrice doit être VÉRIFIÉE chez le fournisseur, sinon tout envoi
+// est refusé (respectivement 403 et 401/422) :
+//   SendGrid : vérifier l'expéditrice unique, ou authentifier le domaine (SPF/DKIM).
+//   Resend   : sans domaine vérifié, on ne peut écrire QU'À l'adresse du titulaire
+//              du compte, depuis onboarding@resend.dev.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -27,6 +39,12 @@ const esc = (s: unknown) =>
 
 const money = (v: unknown, d = '€') =>
   `${Number(v || 0).toLocaleString('fr-FR')} ${esc(d)}`
+
+// Une ligne d'objet n'est PAS du HTML : l'échapper y fait apparaître des entités
+// bien visibles pour le destinataire (« l&#39;exposition » au lieu de « l'exposition »).
+// On n'ôte donc que les retours à la ligne, qui permettraient d'injecter des en-têtes.
+const sujetLigne = (s: unknown) =>
+  String(s ?? '').replace(/[\r\n]+/g, ' ').trim()
 
 // ---------- Gabarit commun (sobre, lisible sur tous les clients mail) ----------
 function layout(opts: { titre: string; corps: string; marque: string; couleur: string; lien?: string; lienTexte?: string; desinscription?: string }) {
@@ -119,12 +137,41 @@ function build(type: string, d: Record<string, any>) {
       ${paragraphes}
       ${d.image ? `<img src="${esc(d.image)}" alt="" style="width:100%;border-radius:8px;margin:8px 0 4px">` : ''}`
     return {
-      sujet: `${esc(d.sujet || marque)}`,
+      sujet: sujetLigne(d.sujet || marque),
       html: layout({
         titre: d.titre || d.sujet || marque,
         corps, marque, couleur,
         lien: d.lien, lienTexte: d.lienTexte || 'En savoir plus',
         desinscription: d.desinscription
+      })
+    }
+  }
+
+  // Réponse du personnel à un message reçu dans la boîte de l'organisation.
+  // Le corps est saisi par un humain dans l'ERP : on le reçoit en TEXTE BRUT et on
+  // l'échappe intégralement, comme pour les campagnes. On rappelle la question du
+  // visiteur en citation, pour qu'il retrouve le contexte sans ouvrir le site.
+  if (type === 'reponse_message') {
+    const paragraphes = String(d.contenu || '')
+      .split(/\n\s*\n/)
+      .map((p: string) => p.trim())
+      .filter(Boolean)
+      .map((p: string) => `<p style="margin:0 0 16px;line-height:1.65;font-size:15px">${esc(p).replace(/\n/g, '<br>')}</p>`)
+      .join('')
+    const corps = `
+      ${d.prenom ? `<p style="margin:0 0 16px;line-height:1.6;font-size:15px">Bonjour ${esc(d.prenom)},</p>` : ''}
+      ${paragraphes}
+      ${d.question ? `
+        <div style="margin:22px 0 0;padding:12px 16px;background:#f7f8f6;border-left:3px solid ${couleur};border-radius:0 6px 6px 0">
+          <div style="color:#7c817b;font-size:12px;margin-bottom:6px">Votre message</div>
+          <div style="color:#5c615c;font-size:14px;line-height:1.55">${esc(d.question).replace(/\n/g, '<br>')}</div>
+        </div>` : ''}`
+    return {
+      sujet: `Re : ${sujetLigne(d.sujet || 'votre message')} — ${marque}`,
+      html: layout({
+        titre: d.sujet || 'Réponse à votre message',
+        corps, marque, couleur,
+        lien: d.lien, lienTexte: d.lienTexte || 'Poursuivre la conversation'
       })
     }
   }
@@ -143,6 +190,83 @@ function build(type: string, d: Record<string, any>) {
   return null
 }
 
+// ============================================================================
+// Acheminement — deux fournisseurs possibles, même contrat en sortie.
+//
+// ATTENTION à un contresens courant : les identifiants Twilio habituels
+// (Account SID + Auth Token) n'envoient PAS d'e-mail — ils servent au SMS et à
+// la voix. L'e-mail chez Twilio, c'est SendGrid, avec sa propre clé « SG.… ».
+// C'est donc l'API SendGrid qui est appelée ici.
+//
+// Choix du fournisseur : EMAIL_PROVIDER (sendgrid | resend) s'il est posé,
+// sinon la première clé trouvée, SendGrid en tête.
+// ============================================================================
+type Envoi = { ok: boolean; id?: string; status: number; detail: string }
+
+function resolveProvider(): { provider: string; key: string | null; from: string } {
+  // On accepte les trois graphies rencontrées : la variante avec tiret bas est
+  // celle réellement posée sur ce projet. Même précaution que GROK_API_KEY côté
+  // guide-agent — un secret mal nommé échoue en silence, ce qui coûte cher à trouver.
+  const sendgridKey = Deno.env.get('SENDGRID_API_KEY')
+    || Deno.env.get('SEND_GRID_API_KEY')
+    || Deno.env.get('TWILIO_SENDGRID_API_KEY')
+  const resendKey = Deno.env.get('RESEND_API_KEY')
+  const choix = (Deno.env.get('EMAIL_PROVIDER') || '').toLowerCase()
+
+  // Une expéditrice commune évite d'avoir à reconfigurer en changeant de service.
+  const from = Deno.env.get('EMAIL_FROM')
+    || Deno.env.get('SENDGRID_FROM')
+    || Deno.env.get('RESEND_FROM')
+    || 'MUSÉA <onboarding@resend.dev>'
+
+  if (choix === 'sendgrid') return { provider: 'sendgrid', key: sendgridKey ?? null, from }
+  if (choix === 'resend') return { provider: 'resend', key: resendKey ?? null, from }
+  if (sendgridKey) return { provider: 'sendgrid', key: sendgridKey, from }
+  return { provider: 'resend', key: resendKey ?? null, from }
+}
+
+// « MUSÉA <contact@domaine.cm> » → { nom, email }. SendGrid exige les deux séparés,
+// là où Resend accepte la forme combinée.
+function parseFrom(from: string): { email: string; name?: string } {
+  // `[^>]+` étant gourmand, il avale les espaces situés avant le chevron fermant :
+  // on retaille l'adresse, sans quoi SendGrid refuse un destinataire mal formé.
+  const m = from.match(/^\s*(.*?)\s*<\s*([^>]+?)\s*>\s*$/)
+  if (m) return { email: m[2].trim(), name: m[1] || undefined }
+  return { email: from.trim() }
+}
+
+async function viaSendGrid(key: string, from: string, to: string, message: { sujet: string; html: string }): Promise<Envoi> {
+  const expediteur = parseFrom(from)
+  const r = await fetch('https://api.sendgrid.com/v3/mail/send', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      personalizations: [{ to: [{ email: to }] }],
+      from: expediteur,
+      subject: message.sujet,
+      content: [{ type: 'text/html', value: message.html }]
+    })
+  })
+
+  // Succès SendGrid = 202 avec un corps VIDE : appeler .json() ici lèverait.
+  // L'identifiant du message n'est disponible que dans l'en-tête X-Message-Id.
+  if (r.ok) {
+    return { ok: true, id: r.headers.get('x-message-id') ?? undefined, status: r.status, detail: '' }
+  }
+  return { ok: false, status: r.status, detail: (await r.text().catch(() => '')) || '(corps vide)' }
+}
+
+async function viaResend(key: string, from: string, to: string, message: { sujet: string; html: string }): Promise<Envoi> {
+  const r = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from, to: [to], subject: message.sujet, html: message.html })
+  })
+  const payload = await r.json().catch(() => ({}))
+  if (r.ok) return { ok: true, id: payload?.id, status: r.status, detail: '' }
+  return { ok: false, status: r.status, detail: JSON.stringify(payload) }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
   if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405)
@@ -153,11 +277,13 @@ Deno.serve(async (req) => {
   const { type, to, tenantId, orderId, ...data } = body || {}
   if (!type || !to) return json({ error: 'missing_fields' }, 400)
 
-  const message = build(String(type), data)
+  // `orderId` est extrait ci-dessus pour la journalisation, mais le gabarit du reçu
+  // l'affiche aussi (« Commande n°… ») : sans ce réajout il valait `undefined` dans
+  // l'e-mail reçu par le client.
+  const message = build(String(type), { ...data, orderId })
   if (!message) return json({ error: 'unknown_type' }, 400)
 
-  const key = Deno.env.get('RESEND_API_KEY')
-  const from = Deno.env.get('RESEND_FROM') || 'MUSÉA <onboarding@resend.dev>'
+  const { provider, key, from } = resolveProvider()
 
   // Journalisation (service role : contourne la RLS en écriture).
   const admin = createClient(
@@ -168,35 +294,34 @@ Deno.serve(async (req) => {
     try {
       await admin.from('email_log').insert({
         tenant_id: tenantId ?? null, type, destinataire: to, sujet: message.sujet,
-        statut, erreur: erreur ?? null, order_id: orderId ?? null, provider_id: providerId ?? null
+        statut, erreur: erreur ?? null, order_id: orderId ?? null,
+        provider_id: providerId ?? null,
+        // Sans clé, aucun service n'a été sollicité : inscrire « resend » (la branche
+        // par défaut) laisserait croire à une panne Resend. On laisse donc le champ nul.
+        provider: key ? provider : null
       })
     } catch { /* le journal ne doit jamais bloquer l'envoi */ }
   }
 
-  // Pas de clé configurée : on ne bloque pas l'application.
+  // Aucune clé configurée : on ne bloque pas l'application.
   if (!key) {
-    await log('desactive', 'RESEND_API_KEY absente')
+    await log('desactive', 'aucune cle API e-mail (SENDGRID_API_KEY ou RESEND_API_KEY)')
     return json({ skipped: true, reason: 'no_api_key' })
   }
 
-  let r: Response
   try {
-    r = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from, to: [to], subject: message.sujet, html: message.html })
-    })
+    const envoi = provider === 'sendgrid'
+      ? await viaSendGrid(key, from, String(to), message)
+      : await viaResend(key, from, String(to), message)
+
+    if (!envoi.ok) {
+      await log('echec', `${envoi.status}: ${envoi.detail.slice(0, 300)}`)
+      return json({ error: `${provider}_error`, status: envoi.status, detail: envoi.detail }, 502)
+    }
+    await log('envoye', undefined, envoi.id)
+    return json({ ok: true, id: envoi.id, provider })
   } catch (e) {
     await log('echec', `reseau: ${String(e).slice(0, 200)}`)
     return json({ error: 'network' }, 502)
   }
-
-  const payload = await r.json().catch(() => ({}))
-  if (!r.ok) {
-    await log('echec', `${r.status}: ${JSON.stringify(payload).slice(0, 300)}`)
-    return json({ error: 'resend_error', status: r.status, detail: payload }, 502)
-  }
-
-  await log('envoye', undefined, payload?.id)
-  return json({ ok: true, id: payload?.id })
 })

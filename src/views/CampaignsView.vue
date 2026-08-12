@@ -120,7 +120,7 @@ async function sendCampaign(c) {
       if (envoyes) {
         toast.add({ severity: 'success', summary: t('admin.campaigns.sendDone', { n: envoyes }), life: 3500 })
       } else {
-        // Cas courant : aucune clé Resend posée → la fonction répond { skipped: true }.
+        // Cas courant : aucune clé d'envoi posée → la fonction répond { skipped: true }.
         toast.add({ severity: 'warn', summary: t('admin.campaigns.sendNone'), detail: t('admin.campaigns.sendNoneHint'), life: 6000 })
       }
     }

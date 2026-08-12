@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 
 // E-mails transactionnels — l'envoi réel se fait dans l'Edge Function `send-email`
-// (la clé Resend reste côté serveur). Un envoi ne doit JAMAIS bloquer le parcours
+// (la clé du fournisseur reste côté serveur). Un envoi ne doit JAMAIS bloquer le parcours
 // du visiteur : toute erreur est avalée et seulement tracée en console.
 //
 // Sans clé configurée, la fonction répond { skipped: true } et l'application continue.
@@ -10,7 +10,7 @@ async function send(payload) {
   try {
     const { data, error } = await supabase.functions.invoke('send-email', { body: payload })
     if (error) { console.warn('[email] envoi impossible :', error.message); return false }
-    if (data?.skipped) return false          // pas de clé Resend : silencieux, c'est normal
+    if (data?.skipped) return false          // aucune clé d'envoi posée : silencieux, c'est normal
     return !!data?.ok
   } catch (e) {
     console.warn('[email] envoi impossible :', e.message)
@@ -68,6 +68,20 @@ export function sendTenantApproved({ to, nomOrganisation, tenantId, lien }) {
     type: 'organisation_approuvee',
     to, tenantId: tenantId ?? null, nomOrganisation, lien,
     marque: 'MUSÉA', couleur: '#0e6f5c'
+  })
+}
+
+// Réponse du personnel à un message reçu dans la boîte de l'organisation.
+// Comme pour les campagnes, on renvoie le booléen tel quel : la vue doit savoir
+// si le visiteur a réellement été prévenu, pour l'afficher dans le fil.
+export function sendMessageReply({ to, prenom, sujet, contenu, question, lien, tenantId, settings, tenant }) {
+  if (!to) return Promise.resolve(false)
+  return send({
+    type: 'reponse_message',
+    to, tenantId: tenantId ?? null,
+    prenom: prenom || '', sujet, contenu,
+    question: question || '', lien: lien || '',
+    ...branding(settings, tenant)
   })
 }
 
