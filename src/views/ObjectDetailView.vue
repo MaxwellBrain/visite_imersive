@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Button from 'primevue/button'
@@ -12,6 +12,9 @@ import { normalise } from '@/services/genealogy'
 import GenealogyTree from '@/components/genealogy/GenealogyTree.vue'
 import Object3DViewer from '@/components/objects/Object3DViewer.vue'
 import SiblingsFinder from '@/components/objects/SiblingsFinder.vue'
+import PhotogrammetryCapture from '@/components/objects/PhotogrammetryCapture.vue'
+import PhotogrammetryJobs from '@/components/objects/PhotogrammetryJobs.vue'
+import PhotogrammetryImport from '@/components/objects/PhotogrammetryImport.vue'
 import FreresCabinet from '@/components/objects/FreresCabinet.vue'
 import ShareCardDialog from '@/components/objects/ShareCardDialog.vue'
 
@@ -32,6 +35,11 @@ const personnes = computed(() => normalise(genealogy.individus))
 
 const viewer = reactive({ visible: false })
 const partage = reactive({ visible: false })
+const scan = reactive({ visible: false })
+const importScan = reactive({ visible: false })
+// Permet de rafraîchir la liste des campagnes dès qu'une prise de vue s'achève,
+// sans recharger toute la fiche.
+const jobsRef = ref(null)
 const lieu = computed(() => `${museum.value?.nom ?? '—'} › ${sector.value?.nom ?? '—'}`)
 
 // La liste ne transporte plus les médias lourds : cette fiche les demande pour
@@ -78,6 +86,20 @@ watch(
             icon="pi pi-box"
             @click="viewer.visible = true"
           />
+          <!-- Numériser : produit le modèle qui alimentera justement le bouton 3D ci-dessus. -->
+          <Button
+            :label="object.model3d ? $t('admin.objectDetail.rescan') : $t('admin.objectDetail.scan3d')"
+            icon="pi pi-camera"
+            :outlined="!!object.model3d"
+            @click="scan.visible = true"
+          />
+          <!-- Second chemin : les photos ont déjà été prises avec l'appareil du musée. -->
+          <Button
+            :label="$t('admin.objectDetail.importPhotos')"
+            icon="pi pi-images"
+            outlined
+            @click="importScan.visible = true"
+          />
           <Button :label="$t('admin.objectDetail.editObject')" icon="pi pi-pencil" outlined @click="router.push('/objets')" />
           <!-- Annoncer la pièce là où le public est vraiment : WhatsApp. -->
           <Button :label="$t('share.action')" icon="pi pi-whatsapp" outlined @click="partage.visible = true" />
@@ -120,6 +142,8 @@ watch(
     <!-- Mémoire réunifiée : exploration à la volée, rien n'est enregistré.
          Reste utile pour dégrossir un objet dont on ignore encore la culture,
          avant de lancer le cabinet. -->
+    <PhotogrammetryJobs v-if="object" ref="jobsRef" :object-id="object.id" />
+
     <SiblingsFinder v-if="object" :objet="object" class="siblings" />
 
     <div v-else class="vi-empty">
@@ -129,6 +153,22 @@ watch(
     </div>
 
     <Object3DViewer v-model:visible="viewer.visible" :src="object?.model3d || ''" :title="object?.nom || $t('viewer3d.defaultTitle')" />
+
+    <PhotogrammetryCapture
+      v-if="object"
+      v-model:visible="scan.visible"
+      :object-id="object.id"
+      :object-nom="object.nom"
+      @termine="jobsRef?.charger()"
+    />
+
+    <PhotogrammetryImport
+      v-if="object"
+      v-model:visible="importScan.visible"
+      :object-id="object.id"
+      :object-nom="object.nom"
+      @termine="jobsRef?.charger()"
+    />
     <ShareCardDialog v-model:visible="partage.visible" :object="object" :lieu="lieu" />
   </div>
 </template>
