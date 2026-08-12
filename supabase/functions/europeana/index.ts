@@ -68,7 +68,11 @@ Deno.serve(async (req) => {
     `${API}?wskey=${encodeURIComponent(cle)}` +
     `&query=${encodeURIComponent(requete)}` +
     `&rows=${LIGNES}` +
-    `&profile=facets` +
+    // Deux profils CUMULÉS, et c'est nécessaire : `facets` seul rend bien la
+    // facette DATA_PROVIDER mais laisse les objets au profil par défaut, où
+    // `dcDescription` est absent — les descriptions seraient toutes vides.
+    // `rich` ramène les champs descriptifs, la virgule les combine.
+    `&profile=rich,facets` +
     `&facet=DATA_PROVIDER` +
     `&f.DATA_PROVIDER.facet.limit=${FACETTE_MAX}`
 
