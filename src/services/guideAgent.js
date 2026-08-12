@@ -9,15 +9,26 @@ import { supabase } from './supabase'
 // deux côtés : le contenu publié reste la seule source de vérité.
 
 // Appel de l'Edge Function (reformulation LLM ancrée, clé serveur). Renvoie { text, links }.
-async function askRemote(question, scope = {}) {
+async function askRemote(question, scope = {}, cards = []) {
   const body = { question }
   if (scope.museumId) body.museumId = scope.museumId
   if (scope.sectorId) body.sectorId = scope.sectorId
+  // Œuvres du monde : c'est le NAVIGATEUR qui interroge les collections ouvertes
+  // (The Met). Pattern déjà retenu ici — `freres` le fait « côté client, qui sait
+  // déjà le faire », et le runtime Deno, lui, ne joint pas l'API du Met (mesuré).
+  // On les transmet à l'IA pour qu'elle les présente et explique le lien.
+  if (cards.length) body.cards = cards
   const { data, error } = await supabase.functions.invoke('guide-agent', { body })
   if (error) throw error
   if (!data || typeof data.text !== 'string') throw new Error('réponse invalide du guide')
   // `source` est conservé : c'est lui qui dit si le guide a VRAIMENT su répondre.
-  return { text: data.text, links: Array.isArray(data.links) ? data.links : [], source: data.source }
+  // `cards` : œuvres apparentées trouvées dans les musées du monde (image + description).
+  return {
+    text: data.text,
+    links: Array.isArray(data.links) ? data.links : [],
+    cards: Array.isArray(data.cards) ? data.cards : [],
+    source: data.source,
+  }
 }
 
 // Journal des questions — anonyme, et surtout jamais bloquant.
@@ -41,16 +52,95 @@ function journaliser(question, scope, source) {
 export async function ask(question, scope = {}) {
   const q = (question || '').trim()
   if (!q) return { text: 'Posez-moi une question sur nos musées, nos objets ou la généalogie des chefs.', links: [] }
+
+  // Étape 1 — les collections du monde, depuis le navigateur (voir askRemote).
+  // On la lance quand le visiteur le demande explicitement (« ailleurs », « dans le
+  // monde », « similaire »…) ; jamais sur une salutation ni hors périmètre.
+  let cards = []
+  if (!GREET.test(q) && !OUT.test(q) && WORLD.test(q)) {
+    try { cards = await searchMondeMet(q) } catch { /* jamais bloquant */ }
+  }
+
   try {
-    const r = await askRemote(q, scope)
+    const r = await askRemote(q, scope, cards)
+    // L'IA a rédigé le texte ; on garantit que les vignettes suivent.
+    if (cards.length && !(r.cards || []).length) r.cards = cards
     journaliser(q, scope, r.source)
     return r
   } catch (e) {
     console.warn('[guide] Edge Function indisponible, repli local :', e?.message || e)
     const r = await askLocal(q, scope)
+    // Recherche mondiale même en repli : à la demande, ou quand le local ne trouve
+    // rien de précis. Les collections ouvertes (The Met) sont interrogeables depuis
+    // le navigateur (CORS autorisé) — le visiteur reçoit une œuvre « cousine ».
+    if (!GREET.test(q) && !OUT.test(q) && (WORLD.test(q) || !(r.links || []).length)) {
+      try {
+        const cards = await searchMondeMet(q)
+        if (cards.length) {
+          r.cards = cards
+          const c = cards[0]
+          r.text = `${r.text} Pour aller plus loin : au ${c.source}, on conserve « ${c.title} »${c.subtitle ? ` (${c.subtitle})` : ''} — une pièce de la même famille, à voir ci-dessous.`
+        }
+      } catch { /* la recherche mondiale ne doit jamais bloquer la réponse locale */ }
+    }
     journaliser(q, scope, 'grounded')   // repli local : on n'a pas su répondre par l'IA
     return r
   }
+}
+
+const WORLD = /(monde|ailleurs|[eé]tranger|autres?\s+mus[eé]es?|international|diaspora|similaire|apparent|fr[eè]re|comparer|comparaison|met(ropolitan)?|louvre|exemple|dispers|semblable|proche|[eé]quivalent|m[eê]me\s+type)/i
+
+// Recherche mondiale compacte (The Met, sans clé, dép. Afrique/Océanie/Amériques).
+const MET = 'https://collectionapi.metmuseum.org/public/collection/v1'
+// Recherche fiable : filtrer par géolocalisation (geoLocation=Cameroon) — mesuré
+// bien plus propre que q=Bamileke (bruité) ou departmentId=5 (renvoie 0).
+function typeMonde(q) {
+  const src = (q || '').toLowerCase()
+  const map = {
+    masque: 'mask', trône: 'throne', trone: 'throne', tabouret: 'stool', siège: 'stool',
+    statue: 'figure', statuette: 'figure', sculpture: 'figure', textile: 'textile', tissu: 'textile',
+    perle: 'beadwork', perlage: 'beadwork', pipe: 'pipe', tambour: 'drum', coiffe: 'headdress',
+    bracelet: 'bracelet', collier: 'necklace', calebasse: 'vessel', poterie: 'ceramic',
+    elephant: 'elephant', éléphant: 'elephant', leopard: 'leopard', léopard: 'leopard', buffle: 'buffalo',
+  }
+  for (const [fr, en] of Object.entries(map)) if (src.includes(fr)) return en
+  return '*'
+}
+async function metJson(url) {
+  const ctrl = new AbortController()
+  const t = setTimeout(() => ctrl.abort(), 6000)
+  try {
+    const r = await fetch(url, { signal: ctrl.signal })
+    return r.ok ? await r.json() : null
+  } catch { return null } finally { clearTimeout(t) }
+}
+export async function searchMondeMet(q) {
+  const type = typeMonde(q)
+  let s = await metJson(`${MET}/search?hasImages=true&geoLocation=Cameroon&q=${encodeURIComponent(type)}`)
+  let ids = (s?.objectIDs || [])
+  if (!ids.length) {
+    s = await metJson(`${MET}/search?hasImages=true&geoLocation=Cameroon&q=*`)
+    ids = (s?.objectIDs || [])
+  }
+  // Beaucoup d'œuvres n'ont pas de visuel : on pioche au hasard (au lieu de suivre
+  // l'ordre du catalogue) pour tomber vite sur des pièces illustrées, et on borne
+  // le nombre d'essais pour que le visiteur ne patiente jamais.
+  ids = ids.sort(() => Math.random() - 0.5).slice(0, 8)
+  const cards = []
+  for (const id of ids) {
+    if (cards.length >= 2) break
+    const o = await metJson(`${MET}/objects/${id}`)
+    if (!o || !o.primaryImageSmall) continue
+    cards.push({
+      title: o.title || 'Œuvre',
+      subtitle: [o.culture, o.objectDate].filter(Boolean).join(', ') || o.country || '',
+      description: [o.culture, o.period, o.objectDate, o.medium].filter(Boolean).join(' · '),
+      image: o.primaryImageSmall,
+      url: o.objectURL,
+      source: 'The Metropolitan Museum of Art (New York)',
+    })
+  }
+  return cards
 }
 
 const STOP = new Set([
@@ -60,6 +150,7 @@ const STOP = new Set([
   'the', 'and', 'ici', 'bonjour', 'salut', 'aussi', 'plus', 'tout', 'cela', 'votre'
 ])
 const OUT = /(m[eé]t[eé]o|actualit|politiqu|football|foot |recette|cuisine|bitcoin|crypto|blague|programm|javascript|python|\bcode\b|viagra|bourse)/i
+const GREET = /^\s*(bonjour|bonsoir|salut|coucou|hello|hi|hey|yo|bonne\s+(journ[eé]e|soir[eé]e)|[çc]a\s+va|merci|au\s*revoir|ok|okay|d'accord)\b/i
 
 function keywords(q) {
   return q
@@ -79,6 +170,14 @@ async function askLocal(question, scope = {}) {
     return {
       text: "Je suis le guide de la Fondation Jean Félicien Gacha : je réponds uniquement aux questions sur nos musées, nos objets et la généalogie des chefferies. En quoi puis-je vous aider sur le patrimoine ?",
       links: []
+    }
+  }
+
+  // Salutation → accueil chaleureux (jamais « précisez »).
+  if (GREET.test(q)) {
+    return {
+      text: "Bonjour et bienvenue ! Je suis le guide de la Fondation Jean Félicien Gacha. Je peux localiser une œuvre, raconter l'histoire d'un royaume Grassfields, ou retrouver des pièces apparentées dans les grands musées du monde. Que souhaitez-vous découvrir ?",
+      links: [], cards: [],
     }
   }
 
