@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
@@ -8,6 +8,7 @@ import ProgressBar from 'primevue/progressbar'
 import Message from 'primevue/message'
 import { chercherFreres, chercherReferences, repartitionParPays, pointsGlobe, SOURCES_INFO } from '@/services/collectionsApi'
 import { enrichirRequete, synthetiser, termesDeRecherche, memoryAiDisponible } from '@/services/memorySearch'
+import { couverture } from '@/services/freres'
 import DispersionGlobe from './DispersionGlobe.vue'
 
 // « Mémoire réunifiée » — retrouve les objets apparentés dispersés dans les
@@ -101,6 +102,30 @@ const dispersion = computed(() => repartitionParPays(candidats.value))
 const globe = computed(() => pointsGlobe(candidats.value, critere.pays))
 const nbSources = computed(() => new Set(candidats.value.map((c) => c.source)).size)
 const nbMusees = computed(() => new Set(candidats.value.map((c) => c.musee).filter(Boolean)).size)
+
+// ---------------------------------------------------------------------------
+// Couverture CUMULÉE de l'enquête (toutes recherches, toutes organisations).
+//
+// Les compteurs ci-dessus ne parlent que de la requête en cours. Celui-ci dit
+// sur combien d'institutions porte la Mémoire Réunifiée dans son ensemble —
+// c'est l'indicateur qui justifie l'ampleur du travail. Objectif fixé : 40.
+const OBJECTIF_INSTITUTIONS = 40
+const couvertureGlobale = ref(null)
+
+async function rafraichirCouverture() {
+  couvertureGlobale.value = await couverture()
+}
+onMounted(rafraichirCouverture)
+
+const institutionsCouvertes = computed(
+  () => Number(couvertureGlobale.value?.institutions_explorees || 0)
+)
+const partObjectif = computed(() =>
+  Math.min(100, Math.round((institutionsCouvertes.value / OBJECTIF_INSTITUTIONS) * 100))
+)
+const topInstitutions = computed(() =>
+  (couvertureGlobale.value?.par_institution || []).slice(0, 12)
+)
 
 const affiches = computed(() =>
   filtreSource.value ? candidats.value.filter((c) => c.source === filtreSource.value) : candidats.value
@@ -270,6 +295,34 @@ function severite(score) {
       <div class="sf__stat">
         <strong>{{ nbSources }}</strong>
         <span>{{ $t('siblings.statSources') }}</span>
+      </div>
+    </div>
+
+    <!-- Ampleur cumulée : ce que la Mémoire Réunifiée a balayé en tout.
+         Distinct des compteurs ci-dessus, qui ne parlent que de cette recherche. -->
+    <div v-if="institutionsCouvertes" class="sf__couverture">
+      <div class="sf__couverture-tete">
+        <span class="sf__couverture-titre">{{ $t('siblings.coverageTitle') }}</span>
+        <strong class="sf__couverture-chiffre">
+          {{ institutionsCouvertes }}<span> / {{ OBJECTIF_INSTITUTIONS }}</span>
+        </strong>
+      </div>
+      <div class="sf__jauge" role="progressbar"
+           :aria-valuenow="institutionsCouvertes" aria-valuemin="0" :aria-valuemax="OBJECTIF_INSTITUTIONS">
+        <div class="sf__jauge-remplie" :style="{ width: partObjectif + '%' }" />
+      </div>
+      <p class="sf__couverture-detail">
+        {{ $t('siblings.coverageDetail', {
+          objets: couvertureGlobale?.objets_explores || 0,
+          pays: couvertureGlobale?.pays_detenteurs || 0,
+          sources: couvertureGlobale?.sources_actives || 0
+        }) }}
+      </p>
+      <div v-if="topInstitutions.length" class="sf__institutions">
+        <span v-for="i in topInstitutions" :key="i.institution" class="sf__institution"
+              :title="`${i.institution} — ${i.n}`">
+          {{ i.institution }}<em>{{ i.n }}</em>
+        </span>
       </div>
     </div>
 
@@ -526,6 +579,29 @@ function severite(score) {
 .sf__stat { background: var(--vi-bg); border-radius: 12px; padding: 0.7rem 1.1rem; min-width: 110px; }
 .sf__stat strong { display: block; font-size: 1.5rem; line-height: 1.1; }
 .sf__stat span { font-size: 0.76rem; color: var(--vi-muted); }
+
+/* Couverture cumulée — volontairement distincte des compteurs de recherche :
+   un encadré, pas une tuile, pour qu'on ne confonde pas les deux échelles. */
+.sf__couverture {
+  margin: 0.9rem 0 0.4rem; padding: 0.9rem 1.1rem;
+  border: 1px solid var(--p-content-border-color, #e5e7eb); border-radius: 12px;
+}
+.sf__couverture-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.sf__couverture-titre { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--vi-muted); }
+.sf__couverture-chiffre { font-size: 1.35rem; line-height: 1; }
+.sf__couverture-chiffre span { font-size: 0.9rem; font-weight: 400; color: var(--vi-muted); }
+
+.sf__jauge { height: 6px; border-radius: 999px; background: var(--vi-bg, #f1f2f0); margin: 0.55rem 0 0.5rem; overflow: hidden; }
+.sf__jauge-remplie { height: 100%; background: var(--p-primary-color, #0e6f5c); border-radius: 999px; transition: width 0.4s ease; }
+
+.sf__couverture-detail { margin: 0; font-size: 0.8rem; color: var(--vi-muted); }
+.sf__institutions { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.7rem; }
+.sf__institution {
+  font-size: 0.74rem; padding: 0.2rem 0.5rem; border-radius: 999px;
+  background: var(--vi-bg, #f1f2f0); color: inherit;
+  max-width: 15rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sf__institution em { font-style: normal; color: var(--vi-muted); margin-left: 0.35rem; }
 
 .sf__list { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: 0.85rem; }
 .sfc { display: flex; gap: 0.95rem; background: var(--vi-bg); border: 1px solid var(--vi-border); border-radius: 12px; padding: 0.85rem; }

@@ -80,6 +80,10 @@ export async function mettreEnCache(candidats) {
       materiau: c.medium || null,
       image_url: c.image || null,
       source_url: c.url || null,
+      // Sans ces deux champs, impossible de dire sur combien d'institutions
+      // porte la recherche : c'est l'unité de compte de la couverture.
+      institution: c.musee || null,
+      pays_musee: c.paysMusee || null,
       texte_indexe: texteIndexe(c) || null
     }))
   if (!lignes.length) return { ok: true, ids: [], aPlonger: 0 }
@@ -282,6 +286,20 @@ export async function listerFreres(objectId) {
     .order('score', { ascending: false })
   if (error) { console.error('[freres] liste', error.message); return [] }
   return data || []
+}
+
+// Ampleur CUMULÉE de l'enquête, toutes recherches confondues.
+//
+// À ne pas confondre avec le compteur affiché sous une recherche, qui ne parle
+// que de la requête en cours. Le cache `objets_externes` étant global, la
+// couverture s'enrichit à chaque objet exploré, par toutes les organisations :
+// c'est ce chiffre-là qui dit sur combien d'institutions porte la Mémoire
+// Réunifiée. Jamais bloquant — l'absence de couverture n'empêche aucune
+// recherche, elle ne fait que masquer l'indicateur.
+export async function couverture(objectId = null) {
+  const { data, error } = await supabase.rpc('freres_couverture', { p_object_id: objectId })
+  if (error) { console.warn('[freres] couverture', error.message); return null }
+  return data || null
 }
 
 export async function decider(id, statut, justification = null, note = null) {

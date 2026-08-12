@@ -10,18 +10,37 @@
 //   • Cleveland Museum of Art         openaccess-api.clevelandart.org
 //   • Victoria & Albert (Londres)     api.vam.ac.uk
 //   • Wikidata (SPARQL)               query.wikidata.org
-//        ↳ décisif : c'est la seule voie d'accès aux musées européens qui
-//          n'exposent aucune API — Berlin, Stuttgart, Brême, Tervuren…
-//          C'est là que se trouve l'essentiel du patrimoine camerounais.
+//        ↳ voie d'accès aux musées européens sans API. ATTENTION à ne pas
+//          surestimer sa portée : mesuré le 2026-08-06, Wikidata référence
+//          1414 objets d'origine camerounaise mais ne nomme le musée détenteur
+//          (P195) que pour SIX institutions. Utile, pas suffisant.
+//   • museum-digital                  nat.museum-digital.de
+//        ↳ C'EST LA SOURCE QUI DONNE L'AMPLEUR : 22 institutions distinctes
+//          relevées sur seulement 672 objets « Kamerun » parcourus (corpus
+//          annoncé : 2311). Le Cameroun ayant été colonie allemande de 1884 à
+//          1916, c'est en Allemagne que dort l'essentiel du patrimoine sorti
+//          des chefferies.
+//
+//   • Europeana                       via l'Edge Function `europeana`
+//        ↳ LA PLUS LARGE : plusieurs milliers d'institutions européennes.
+//          Seule source passant par le serveur, car elle exige une clé — qui
+//          n'a rien à faire dans un bundle public. Sa facette DATA_PROVIDER
+//          énumère les institutions détentrices en UNE requête : c'est la
+//          mesure de couverture la plus directe du dispositif.
+//          Sans le secret EUROPEANA_API_KEY, l'adaptateur se retire en silence.
 //
 // Sources écartées pour l'instant (clé gratuite requise) :
-//   Smithsonian (API_KEY_MISSING), Harvard (Unauthorized), Europeana, Rijksmuseum.
+//   Smithsonian (API_KEY_MISSING), Harvard (Unauthorized), Rijksmuseum.
 //
 // NOTATION — étape 1 : appariement lexical et structuré (référence de base).
 // Chaque critère est explicite et justifié auprès du conservateur : c'est la
 // « baseline » indispensable avant d'évaluer une approche par plongements
 // sémantiques (voir scoreSemantic, point d'extension prévu plus bas).
 // ============================================================================
+
+// Seule dépendance du module : Europeana exige une clé, donc un relais serveur.
+// Toutes les autres sources sont interrogées directement par le navigateur.
+import { supabase } from './supabase'
 
 const MET = 'https://collectionapi.metmuseum.org/public/collection/v1'
 const ARTIC = 'https://api.artic.edu/api/v1'
@@ -331,6 +350,193 @@ const vamAdapter = {
   }
 }
 
+// ---- Europeana : l'agrégateur le plus large -------------------------------
+//
+// Seule source à passer par le SERVEUR : Europeana exige une clé, et une clé
+// n'a rien à faire dans un bundle lisible par tous. L'Edge Function `europeana`
+// la détient et ne renvoie que des résultats normalisés.
+//
+// Sa facette DATA_PROVIDER énumère les institutions détentrices AVEC leur
+// nombre d'objets, en une requête et sans parcourir le corpus : c'est la
+// mesure de couverture la plus directe dont on dispose.
+//
+// Sans clé posée, la fonction répond { skipped: true } et l'adaptateur rend un
+// tableau vide : les autres sources continuent, la recherche n'échoue pas.
+let europeanaIndisponible = false   // évite de rappeler le serveur pour rien
+
+const europeanaAdapter = {
+  cle: 'europeana',
+  label: 'Europeana — collections européennes',
+  paysMusee: '',
+  // Renseigné par le dernier appel : c'est la facette, pas un décompte des
+  // objets ramenés. Sert à afficher l'ampleur réelle de la source.
+  derniereCouverture: { institutions: [], total: 0 },
+  async chercher(termes, limite, ctx = {}) {
+    if (europeanaIndisponible) return []
+    let data
+    try {
+      const r = await supabase.functions.invoke('europeana', {
+        body: { termes, pays: ctx.pays || '', limite }
+      })
+      if (r.error) throw new Error(r.error.message)
+      data = r.data
+    } catch (e) {
+      console.warn('[europeana] indisponible :', e.message)
+      return []
+    }
+    if (data?.skipped) {
+      // Pas de clé : inutile d'insister à chaque recherche de la session.
+      europeanaIndisponible = true
+      return []
+    }
+    if (!data?.ok) return []
+
+    this.derniereCouverture = {
+      institutions: data.institutions || [],
+      total: data.total || 0
+    }
+
+    return (data.objets || []).map((o) => ({
+      source: 'europeana',
+      sourceLabel: o.musee || this.label,
+      paysMusee: o.paysMusee || '',
+      musee: o.musee || '',
+      externalId: String(o.externalId || ''),
+      title: o.title || '',
+      culture: '',
+      region: '',
+      origine: ctx.pays || '',
+      inventaire: o.inventaire || '',
+      date: o.date || '',
+      medium: o.medium || '',
+      image: o.image || '',
+      url: o.url || ''
+    })).filter((o) => o.externalId)
+  }
+}
+
+// ---- museum-digital : l'agrégateur qui apporte la DIVERSITÉ ---------------
+//
+// POURQUOI CETTE SOURCE EST DÉCISIVE (mesuré le 2026-08-06, pas supposé)
+//
+// L'objectif « couvrir au moins 40 institutions » est hors d'atteinte avec les
+// sources précédentes : Wikidata ne connaît le musée détenteur (P195) que pour
+// SIX institutions sur les 1414 objets camerounais qu'il référence, et le Met,
+// l'Art Institute, Cleveland et le V&A ne sont qu'un musée chacun. Soit dix.
+//
+// museum-digital fédère des centaines de musées allemands : sur 672 objets
+// « Kamerun » parcourus (le corpus en annonce 2311), on relève DÉJÀ 22
+// institutions distinctes. Ce n'est pas un hasard historique : le Cameroun fut
+// colonie allemande de 1884 à 1916, et c'est en Allemagne que se trouve
+// l'essentiel du patrimoine des chefferies sorti du pays.
+//
+// DEUX CONTRAINTES MESURÉES, qui expliquent le code ci-dessous :
+//  1. Le point d'accès ignore `limit` et rend 24 objets par page ; la
+//     pagination se fait par `startwert`.
+//  2. Il coupe (HTTP 503) dès qu'on l'interroge à 6 requêtes en parallèle.
+//     On enchaîne donc les pages EN SÉRIE, avec une pause. C'est plus lent,
+//     mais c'est le prix d'une source publique gratuite qu'on ne veut pas
+//     maltraiter.
+const MD = 'https://nat.museum-digital.de'
+const MD_PAR_PAGE = 24
+// La diversité vit dans la LONGUE TRAÎNE : les premières pages sont saturées par
+// Berlin, les institutions rares n'apparaissent qu'en profondeur. 20 pages ≈ 480
+// objets par terme, ce qui suffit à décrocher l'essentiel des petits musées.
+const MD_PAGES_MAX = 20
+const MD_PAUSE_MS = 160
+// Le 503 se déclenche à 6 requêtes simultanées (mesuré) : on reste très en deçà.
+const MD_PARALLELE = 2
+// Un seul musée détient l'essentiel du corpus (Berlin : 572 objets sur 672).
+// Sans plafond, il occuperait toute la place et la couverture resterait à 1.
+const MD_MAX_PAR_INSTITUTION = 4
+
+// Les catalogues allemands indexent en allemand : « Cameroon » n'y rend presque
+// rien, « Kamerun » beaucoup. On ajoute donc l'exonyme quand on le connaît.
+const EXONYMES_DE = {
+  cameroon: 'Kamerun', cameroun: 'Kamerun', nigeria: 'Nigeria', congo: 'Kongo',
+  'democratic republic of the congo': 'Kongo', ghana: 'Ghana', togo: 'Togo',
+  benin: 'Benin', gabon: 'Gabun', chad: 'Tschad', tanzania: 'Tansania',
+  namibia: 'Namibia', mali: 'Mali', senegal: 'Senegal'
+}
+
+const pause = (ms) => new Promise((r) => setTimeout(r, ms))
+
+const museumDigitalAdapter = {
+  cle: 'museumdigital',
+  label: 'museum-digital — musées allemands',
+  paysMusee: 'Allemagne',
+  async chercher(termes, limite, ctx = {}) {
+    const allemand = EXONYMES_DE[norm(ctx.pays || '')]
+    // L'exonyme d'abord : c'est lui qui ramène le corpus colonial.
+    const requetes = [...new Set([allemand, ...termes].filter(Boolean))].slice(0, 3)
+
+    const unePage = async (terme, p) => {
+      try {
+        const lot = await jget(
+          `${MD}/objects?s=${encodeURIComponent(terme)}&output=json&startwert=${p * MD_PAR_PAGE}`
+        )
+        return Array.isArray(lot) ? lot : []
+      } catch {
+        return [] // 503 ou coupure : on garde ce qu'on a plutôt que tout perdre
+      }
+    }
+
+    const brut = []
+    for (const terme of requetes) {
+      let epuise = false
+      for (let p = 0; p < MD_PAGES_MAX && !epuise; p += MD_PARALLELE) {
+        const lots = await Promise.all(
+          Array.from({ length: MD_PARALLELE }, (_, k) => p + k)
+            .filter((n) => n < MD_PAGES_MAX)
+            .map((n) => unePage(terme, n))
+        )
+        for (const lot of lots) {
+          brut.push(...lot)
+          // Page incomplète = fin du corpus pour ce terme, inutile d'insister.
+          if (lot.length < MD_PAR_PAGE) epuise = true
+        }
+        if (!epuise) await pause(MD_PAUSE_MS)
+      }
+    }
+
+    // Répartition : on prend au plus N objets par musée, en faisant plusieurs
+    // tours. Un musée qui n'a qu'une pièce est ainsi représenté au même titre
+    // qu'un musée qui en a 500 — c'est exactement ce qu'on cherche à montrer.
+    const parInstitution = new Map()
+    for (const o of brut) {
+      if (!o?.objekt_id) continue
+      const nom = o.institution_name || 'Institution inconnue'
+      if (!parInstitution.has(nom)) parInstitution.set(nom, [])
+      parInstitution.get(nom).push(o)
+    }
+
+    const retenus = []
+    for (let tour = 0; tour < MD_MAX_PAR_INSTITUTION && retenus.length < limite; tour++) {
+      for (const [, objets] of parInstitution) {
+        if (retenus.length >= limite) break
+        if (objets[tour]) retenus.push(objets[tour])
+      }
+    }
+
+    return retenus.map((o) => ({
+      source: 'museumdigital',
+      sourceLabel: o.institution_name || this.label,
+      paysMusee: this.paysMusee,
+      musee: o.institution_name || '',
+      externalId: String(o.objekt_id),
+      title: o.objekt_name || '',
+      culture: '',
+      region: '',
+      origine: ctx.pays || '',
+      inventaire: o.objekt_inventarnr || '',
+      date: '',
+      medium: '',
+      image: o.image ? `${MD}/${String(o.image).replace(/^\/+/, '')}` : '',
+      url: `${MD}/object/${o.objekt_id}`
+    }))
+  }
+}
+
 // ---- Wikidata : les musées européens sans API ----------------------------
 // Deux temps : on résout le pays d'origine en identifiant Wikidata (rapide),
 // puis on liste les objets de ce pays conservés dans une collection.
@@ -352,15 +558,21 @@ const wikidataAdapter = {
     const qid = await wikidataPaysId(pays)
     if (!qid) return []
 
-    const sparql = `SELECT ?item ?itemLabel ?collLabel ?paysLabel ?coord ?inv ?img ?date WHERE {
-      ?item wdt:P495 wd:${qid} ; wdt:P195 ?coll .
+    // P195 (« collection ») OU P276 (« lieu de conservation ») : beaucoup de
+    // fiches n'emploient que la seconde. Mesuré sur le Cameroun (Q1009) le
+    // 2026-08-06 : P195 seul → 6 institutions ; P195 ∪ P276 → 13. On double la
+    // couverture pour le coût d'une UNION, sans rien relâcher sur la rigueur —
+    // les deux propriétés désignent bien un détenteur.
+    const sparql = `SELECT DISTINCT ?item ?itemLabel ?collLabel ?paysLabel ?coord ?inv ?img ?date WHERE {
+      ?item wdt:P495 wd:${qid} .
+      { ?item wdt:P195 ?coll } UNION { ?item wdt:P276 ?coll }
       OPTIONAL { ?item wdt:P217 ?inv }
       OPTIONAL { ?item wdt:P18 ?img }
       OPTIONAL { ?item wdt:P571 ?date }
       OPTIONAL { ?coll wdt:P17 ?pays }
       OPTIONAL { ?coll wdt:P625 ?coord }
       SERVICE wikibase:label { bd:serviceParam wikibase:language "fr,en". }
-    } LIMIT ${Math.min(limite, 40)}`
+    } LIMIT ${Math.max(60, Math.min(limite * 3, 200))}`
 
     const d = await jget(
       `${WD_SPARQL}?query=${encodeURIComponent(sparql)}&format=json`,
@@ -392,7 +604,17 @@ const wikidataAdapter = {
   }
 }
 
-export const SOURCES = [metAdapter, articAdapter, clevelandAdapter, vamAdapter, wikidataAdapter]
+export const SOURCES = [
+  metAdapter, articAdapter, clevelandAdapter, vamAdapter,
+  wikidataAdapter, museumDigitalAdapter, europeanaAdapter
+]
+
+// Couverture rapportée par Europeana lors de la dernière recherche : nombre
+// d'institutions détentrices connues de l'agrégateur, lu sur sa facette.
+// À distinguer des musées effectivement rapatriés dans les candidats.
+export function couvertureEuropeana() {
+  return europeanaAdapter.derniereCouverture
+}
 export const SOURCES_INFO = SOURCES.map((s) => ({ cle: s.cle, label: s.label }))
 
 // --------------------------------------------------------------------------
