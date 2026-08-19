@@ -126,16 +126,25 @@ echo
 echo "── Vérification du site en ligne ──"
 BASE="https://$DOMAINE"
 
-# `-o /dev/null` echoue sous Git Bash (curl 23, « error on write ») : le repli
-# s'ajoutait alors au vrai code et affichait « 200000 » a chaque deploiement.
-# On ecrit dans un fichier temporaire, qui marche sur les deux systemes.
-JETABLE=$(mktemp)
-CODE=$(curl -fsS -o "$JETABLE" -w "%{http_code}" "$BASE/" || echo 000)
+# On n'ecrit le corps dans AUCUN fichier : il est capture dans la variable et
+# le code HTTP ajoute en derniere ligne par `-w`.
+# Pourquoi pas `-o /dev/null` : ce script s'execute avec MSYS_NO_PATHCONV=1
+# (necessaire plus haut pour CloudFront), donc curl — binaire Windows — recoit
+# « /dev/null » tel quel et echoue en erreur 23. Le repli s'ajoutait alors au
+# vrai code et affichait « 200000 » a chaque deploiement pourtant reussi.
+code_http() {
+  local rep
+  rep=$(curl -fsS -w $'
+%{http_code}' "$1" 2>/dev/null) || { echo 000; return; }
+  printf '%s' "$rep" | tail -n1
+}
+
+CODE=$(code_http "$BASE/")
 echo "  accueil                 : $CODE"
 
 # LE contrôle qui compte : les QR codes de réalité augmentée pointent vers
 # /site/ar/<id>. Sans repli SPA, ils mènent à une page blanche.
-CODE=$(curl -fsS -o "$JETABLE" -w "%{http_code}" "$BASE/site/ar/demo" || echo 000)
+CODE=$(code_http "$BASE/site/ar/demo")
 echo "  lien profond (repli SPA): $CODE"
 [ "$CODE" = "200" ] || echo "     ⚠ le repli SPA ne fonctionne pas — les QR de RA seront cassés"
 
@@ -145,5 +154,4 @@ echo "  type du modèle 3D       : ${TYPE:-inconnu}"
 [ "$TYPE" = "model/gltf-binary" ] || echo "     ⚠ type MIME incorrect — la RA échouera sur Android et iOS"
 
 echo
-rm -f "$JETABLE"
 echo "Déployé sur $BASE"
