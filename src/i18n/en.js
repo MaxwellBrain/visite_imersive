@@ -778,6 +778,10 @@ export default {
     hint: 'Rotate the object with the mouse or your finger. On a compatible phone, tap “Augmented reality” to place it in your real space.',
     empty: 'No 3D model has been loaded for this object.',
     emptyHint: 'Scan the object (LiDAR smartphone / photogrammetry) and import a .glb or .gltf file.',
+    usdzOnly: 'Model available in augmented reality only',
+    usdzOnlyHint: 'This object only has a .usdz file, Apple’s format. It opens on iPhone and iPad through Quick Look, but no browser can display it on screen on desktop or Android.',
+    openQuickLook: 'Open in augmented reality',
+    needGlb: 'For the object to rotate on screen on every device, also add a .glb version. Many scanning apps (Polycam, Scaniverse, Kiri Engine) export it directly.',
   },
   tour: {
     // 360 viewer
@@ -1539,6 +1543,9 @@ export default {
       view3d: 'View in 3D',
       model3dLoaded: '3D model loaded',
       model3dFailed: 'The file could not be read',
+      model3dWrongSlot: 'File dropped in the wrong field',
+      model3dIsUsdz: 'This file is a .usdz (Apple format). It belongs in the “iPhone model” field, not the .glb one: no browser can display a .usdz on screen.',
+      model3dIsGlb: 'This file is a .glb. It belongs in the “3D model” field, not the iPhone one: Quick Look only reads .usdz.',
       model3dTooBig: 'File too heavy (limit {n} MB)',
       model3dUseUrl: 'This model weighs {n} MB. Host it and paste its web address in the field provided.',
       model3dUrl: 'or web address of the model',

@@ -80,8 +80,11 @@ watch(
         <p v-if="object.nomCommun" class="fiche__common">{{ object.nomCommun }}</p>
         <p class="fiche__desc">{{ object.description || $t('admin.objectDetail.noDescription') }}</p>
         <div class="fiche__actions">
+          <!-- Un USDZ seul mérite aussi le bouton : il ouvre Quick Look sur iPhone.
+               Le gater sur model3d seul rendait la RA inaccessible aux objets
+               numérisés à l'iPhone, dont c'est pourtant le format natif. -->
           <Button
-            v-if="object.model3d"
+            v-if="object.model3d || object.model3dIos"
             :label="$t('admin.objectDetail.view3d')"
             icon="pi pi-box"
             @click="viewer.visible = true"
@@ -152,7 +155,12 @@ watch(
       <Button :label="$t('admin.objectDetail.backToObjects')" icon="pi pi-arrow-left" @click="router.push('/objets')" />
     </div>
 
-    <Object3DViewer v-model:visible="viewer.visible" :src="object?.model3d || ''" :title="object?.nom || $t('viewer3d.defaultTitle')" />
+    <Object3DViewer
+      v-model:visible="viewer.visible"
+      :src="object?.model3d || ''"
+      :ios-src="object?.model3dIos || ''"
+      :title="object?.nom || $t('viewer3d.defaultTitle')"
+    />
 
     <PhotogrammetryCapture
       v-if="object"

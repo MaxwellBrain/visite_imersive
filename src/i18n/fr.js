@@ -781,6 +781,10 @@ export default {
     hint: 'Faites tourner l\'objet à la souris ou au doigt. Sur mobile compatible, touchez « Réalité augmentée » pour le poser dans votre espace réel.',
     empty: 'Aucun modèle 3D n\'a été chargé pour cet objet.',
     emptyHint: 'Scannez l\'objet (smartphone LiDAR / photogrammétrie) et importez un fichier .glb ou .gltf.',
+    usdzOnly: 'Modèle disponible en réalité augmentée uniquement',
+    usdzOnlyHint: 'Cet objet n’a qu’un fichier .usdz, le format d’Apple. Il s’ouvre sur iPhone et iPad via Quick Look, mais aucun navigateur ne sait l’afficher à l’écran sur ordinateur ou Android.',
+    openQuickLook: 'Ouvrir en réalité augmentée',
+    needGlb: 'Pour que l’objet tourne à l’écran sur tous les appareils, ajoutez aussi une version .glb. Beaucoup d’applications de scan (Polycam, Scaniverse, Kiri Engine) l’exportent directement.',
   },
   tour: {
     // Visionneuse 360
@@ -1542,6 +1546,9 @@ export default {
       view3d: 'Voir en 3D',
       model3dLoaded: 'Modèle 3D chargé',
       model3dFailed: 'Lecture du fichier impossible',
+      model3dWrongSlot: 'Fichier déposé dans le mauvais champ',
+      model3dIsUsdz: 'Ce fichier est un .usdz (format Apple). Il va dans le champ « Modèle iPhone », pas dans le champ .glb : aucun navigateur ne sait afficher un .usdz à l’écran.',
+      model3dIsGlb: 'Ce fichier est un .glb. Il va dans le champ « Modèle 3D », pas dans le champ iPhone : Quick Look ne lit que le .usdz.',
       model3dTooBig: 'Fichier trop lourd (limite {n} Mo)',
       model3dUseUrl: 'Ce modèle pèse {n} Mo. Hébergez-le et collez son adresse web dans le champ prévu.',
       model3dUrl: 'ou adresse web du modèle',

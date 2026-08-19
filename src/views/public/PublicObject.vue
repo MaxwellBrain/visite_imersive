@@ -88,7 +88,7 @@ const suggestions = computed(() =>
         <div class="obj__media ps-card">
           <img v-if="object.photo" :src="object.photo" :alt="object.nom" />
           <div v-else class="ps-ph"><i class="pi pi-box" /></div>
-          <span v-if="object.model3d" class="ps-tag ps-tag--primary badge3d"><i class="pi pi-box" /> 3D · AR</span>
+          <span v-if="object.model3d || object.model3dIos" class="ps-tag ps-tag--primary badge3d"><i class="pi pi-box" /> 3D · AR</span>
         </div>
 
         <div class="obj__info">
@@ -109,7 +109,7 @@ const suggestions = computed(() =>
               <router-link :to="to(`/ar/${object.id}`)" class="ps-btn">
                 <i class="pi pi-mobile" /> {{ $t('ar.cta') }}
               </router-link>
-              <button v-if="object.model3d" class="ps-btn ps-btn--line" @click="viewer.visible = true">
+              <button v-if="object.model3d || object.model3dIos" class="ps-btn ps-btn--line" @click="viewer.visible = true">
                 <i class="pi pi-box" /> {{ $t('object.view3d') }}
               </button>
             </template>
@@ -187,7 +187,12 @@ const suggestions = computed(() =>
         </div>
       </div>
 
-      <Object3DViewer v-model:visible="viewer.visible" :src="object.model3d || ''" :title="object.nom" />
+      <Object3DViewer
+        v-model:visible="viewer.visible"
+        :src="object.model3d || ''"
+        :ios-src="object.model3dIos || ''"
+        :title="object.nom"
+      />
     </template>
     <div v-else class="ps-muted">{{ $t('object.notFound') }}</div>
   </div>

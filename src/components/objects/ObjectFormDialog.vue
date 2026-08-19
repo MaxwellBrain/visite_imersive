@@ -178,9 +178,44 @@ const MODEL_MAX_MO = 12
 // `champ` vaut 'model3d' (.glb, Android et navigateurs) ou 'model3dIos' (.usdz,
 // Quick Look sur iPhone/iPad). Les deux sont nécessaires pour couvrir tout le parc :
 // iOS ne lira jamais un .glb, Android ne lira jamais un .usdz.
-function lireModele(event, champ) {
+// Reconnaît le format RÉEL d'un fichier 3D par sa signature, pas par son nom.
+// Un .usdz est une archive ZIP (« PK.. »), un .glb commence par « glTF ».
+// L'extension ment : elle est modifiable d'un clic, et un fichier renommé
+// passerait un contrôle qui s'y fierait.
+async function formatReel(file) {
+  const tete = new Uint8Array(await file.slice(0, 4).arrayBuffer())
+  const txt = String.fromCharCode(...tete)
+  if (txt === 'glTF') return 'glb'
+  if (txt.startsWith('PK')) return 'usdz'
+  if (txt.trimStart().startsWith('{')) return 'gltf-json'
+  return 'inconnu'
+}
+
+async function lireModele(event, champ) {
   const file = event.target.files?.[0]
   if (!file) return
+
+  // LE contrôle qui manquait. Un USDZ déposé dans le champ GLB ne produit pas un
+  // rendu dégradé : model-viewer affiche « le modèle n'a pas pu être chargé »,
+  // sans indiquer pourquoi. C'est arrivé le 19 août 2026 et a coûté une enquête
+  // complète — le fichier était valide, seule sa destination était fausse.
+  const format = await formatReel(file)
+  const attendu = champ === 'model3d' ? 'glb' : 'usdz'
+  const compatible = attendu === 'glb'
+    ? (format === 'glb' || format === 'gltf-json')
+    : format === 'usdz'
+
+  if (!compatible) {
+    toast.add({
+      severity: 'error',
+      summary: t('admin.objects.model3dWrongSlot'),
+      detail: t(format === 'usdz' ? 'admin.objects.model3dIsUsdz' : 'admin.objects.model3dIsGlb'),
+      life: 9000
+    })
+    event.target.value = ''
+    return
+  }
+
   const mo = file.size / (1024 * 1024)
   if (mo > MODEL_MAX_MO) {
     toast.add({
