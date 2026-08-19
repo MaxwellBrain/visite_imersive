@@ -74,7 +74,7 @@ watch(() => route.params.id, load)
             <div class="ocard__img">
               <img v-if="o.photo" :src="o.photo" :alt="o.nom" loading="lazy" decoding="async" />
               <div v-else class="ps-ph"><i class="pi pi-box" /></div>
-              <span v-if="o.model3d" class="ps-tag ps-tag--primary ocard__3d">3D · AR</span>
+              <span v-if="o.a_3d" class="ps-tag ps-tag--primary ocard__3d">3D · AR</span>
             </div>
             <div class="ocard__b">
               <strong>{{ o.nom }}</strong>

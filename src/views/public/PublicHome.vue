@@ -132,7 +132,7 @@ function toggleFav(id) {
         <div class="spot__img">
           <img v-if="objects[0].photo" :src="objects[0].photo" :alt="objects[0].nom" />
           <div v-else class="ph"><i class="pi pi-box" /></div>
-          <span v-if="objects[0].model3d" class="work__3d">3D · AR</span>
+          <span v-if="objects[0].a_3d" class="work__3d">3D · AR</span>
         </div>
         <div class="spot__b">
           <span class="spot__over">{{ $t('home.edition', { year: new Date().getFullYear() }) }}</span>
@@ -151,7 +151,7 @@ function toggleFav(id) {
             <button class="work__fav" :class="{ on: favorites.has(o.id) }" @click.stop.prevent="toggleFav(o.id)" :aria-label="$t('common.favorite')">
               <i :class="favorites.has(o.id) ? 'pi pi-heart-fill' : 'pi pi-heart'" />
             </button>
-            <span v-if="o.model3d" class="work__3d">3D · AR</span>
+            <span v-if="o.a_3d" class="work__3d">3D · AR</span>
             <!-- Mise en avant automatique : l'œuvre est là parce que le public la regarde. -->
             <span v-if="estPopulaire(o.id)" class="work__hot"><i class="pi pi-chart-line" /> {{ $t('home.popular') }}</span>
           </div>

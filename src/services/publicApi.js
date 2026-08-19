@@ -16,6 +16,24 @@ function scoped(q) {
   return publicTenantId == null ? q : q.eq('tenant_id', publicTenantId)
 }
 
+// Colonnes des LISTES d'objets.
+//
+// `model3d`, `model3d_ios`, `model_usdz`, `embedding` et `texte_indexe` en sont
+// volontairement ABSENTS. Mesuré le 2026-08-19 sur 13 objets publiés :
+// `select('*')` transportait 3 159 Ko quand 19 Ko suffisent — 99,3 % de charge
+// inutile, un seul objet pesant 3,1 Mo à lui seul (son modèle en base64).
+// Ces écrans n'affichent qu'une vignette et un titre : ils n'ont aucun usage du
+// maillage. La colonne calculée `a_3d` porte l'information « ce objet a un
+// modèle », qui suffit à la pastille « 3D · AR ».
+//
+// La fiche détaillée, elle, garde `select('*')` : elle a réellement besoin du
+// modèle, et ne charge qu'UNE ligne.
+const COLONNES_LISTE =
+  'id, sector_id, nom, nom_commun, description, photo, photo_thumb,' +
+  ' published, published_at, seo, created_at, a_3d,' +
+  ' model3d_name, model3d_ios_name, ar_placement, ar_echelle,' +
+  ' depth_map_url, amplitude_relief'
+
 export async function pubMuseums() {
   const { data, error } = await scoped(supabase.from('museums').select('*')).eq('published', true).order('id')
   if (error) console.error('[public] museums', error.message)
@@ -37,7 +55,7 @@ export async function pubObjectsForMuseum(museumId) {
   const sectors = await pubSectors(museumId)
   const ids = sectors.map((s) => s.id)
   if (!ids.length) return { sectors, objects: [] }
-  const { data } = await scoped(supabase.from('objects').select('*')).in('sector_id', ids).eq('published', true).order('id')
+  const { data } = await scoped(supabase.from('objects').select(COLONNES_LISTE)).in('sector_id', ids).eq('published', true).order('id')
   return { sectors, objects: data || [] }
 }
 
@@ -113,7 +131,7 @@ export async function pubObjectChefs(objectId) {
 }
 
 export async function pubFeaturedObjects(limit = 6) {
-  const { data } = await scoped(supabase.from('objects').select('*')).eq('published', true)
+  const { data } = await scoped(supabase.from('objects').select(COLONNES_LISTE)).eq('published', true)
     .order('published_at', { ascending: false, nullsFirst: false }).limit(limit)
   return data || []
 }
@@ -497,7 +515,7 @@ export async function pubSector(id) {
 }
 
 export async function pubObjectsForSector(sectorId) {
-  const { data, error } = await scoped(supabase.from('objects').select('*'))
+  const { data, error } = await scoped(supabase.from('objects').select(COLONNES_LISTE))
     .eq('sector_id', sectorId).eq('published', true).order('id')
   if (error) { console.error('[public] objets du secteur', error.message); return [] }
   return data || []
