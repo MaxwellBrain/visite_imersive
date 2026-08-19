@@ -59,10 +59,31 @@ export async function pubObjectsForMuseum(museumId) {
   return { sectors, objects: data || [] }
 }
 
+// Fiche d'un objet, SANS son modele 3D.
+//
+// MESURE (2026-08-19) : avec `select('*')`, cette page mettait ~12 s a s'afficher.
+// La cause n'etait pas la requete mais son POIDS — un objet portait 2,72 Mo de
+// modele en base64, transportes avant le moindre pixel. Or la page affiche
+// d'abord un titre, une photo et une notice : le maillage n'est utile qu'au
+// moment ou le visiteur ouvre la visionneuse, et beaucoup ne l'ouvrent jamais.
+//
+// Meme parti pris que l'ERP (useObjectStore.chargerMedias) : le lourd se
+// demande separement, quand il sert.
 export async function pubObject(id) {
-  const { data } = await scoped(supabase.from('objects').select('*, sectors(museum_id)'))
-    .eq('id', id).eq('published', true).maybeSingle()
+  const { data } = await scoped(supabase.from('objects').select(
+    COLONNES_LISTE + ', sectors(museum_id)'
+  )).eq('id', id).eq('published', true).maybeSingle()
   return data
+}
+
+// Modeles 3D d'un objet, charges A L'OUVERTURE de la visionneuse seulement.
+// Renvoie un objet vide en cas d'echec : la fiche reste consultable, seule la
+// 3D manque — jamais l'inverse.
+export async function pubObjectModels(id) {
+  const { data, error } = await scoped(supabase.from('objects')
+    .select('model3d, model3d_ios')).eq('id', id).eq('published', true).maybeSingle()
+  if (error) { console.warn('[public] modeles', error.message); return {} }
+  return data || {}
 }
 
 // Offre du guide vocal (règle §2.5 : uniquement si publié, actif ET prix défini).

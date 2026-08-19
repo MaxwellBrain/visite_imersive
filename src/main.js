@@ -8,9 +8,10 @@ import ToastService from 'primevue/toastservice'
 import ConfirmationService from 'primevue/confirmationservice'
 import Tooltip from 'primevue/tooltip'
 
-// Web component pour l'affichage 3D des objets (.glb / .gltf).
-// Chargé en différé (fire-and-forget) pour ne pas alourdir le démarrage.
-import('@google/model-viewer')
+// <model-viewer> N'EST PLUS CHARGÉ ICI. Il l'était au démarrage, donc sur CHAQUE
+// page — 1 Mo, près d'un tiers du JavaScript du site, pour un composant que la
+// plupart des visiteurs n'ouvrent jamais. Il est désormais demandé au moment où
+// une visionneuse s'ouvre : voir src/services/modelViewer.js.
 
 import 'primeicons/primeicons.css'
 import './style.css'

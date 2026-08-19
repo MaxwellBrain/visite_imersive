@@ -126,12 +126,16 @@ echo
 echo "── Vérification du site en ligne ──"
 BASE="https://$DOMAINE"
 
-CODE=$(curl -fsS -o /dev/null -w "%{http_code}" "$BASE/" || echo 000)
+# `-o /dev/null` echoue sous Git Bash (curl 23, « error on write ») : le repli
+# s'ajoutait alors au vrai code et affichait « 200000 » a chaque deploiement.
+# On ecrit dans un fichier temporaire, qui marche sur les deux systemes.
+JETABLE=$(mktemp)
+CODE=$(curl -fsS -o "$JETABLE" -w "%{http_code}" "$BASE/" || echo 000)
 echo "  accueil                 : $CODE"
 
 # LE contrôle qui compte : les QR codes de réalité augmentée pointent vers
 # /site/ar/<id>. Sans repli SPA, ils mènent à une page blanche.
-CODE=$(curl -fsS -o /dev/null -w "%{http_code}" "$BASE/site/ar/demo" || echo 000)
+CODE=$(curl -fsS -o "$JETABLE" -w "%{http_code}" "$BASE/site/ar/demo" || echo 000)
 echo "  lien profond (repli SPA): $CODE"
 [ "$CODE" = "200" ] || echo "     ⚠ le repli SPA ne fonctionne pas — les QR de RA seront cassés"
 
@@ -141,4 +145,5 @@ echo "  type du modèle 3D       : ${TYPE:-inconnu}"
 [ "$TYPE" = "model/gltf-binary" ] || echo "     ⚠ type MIME incorrect — la RA échouera sur Android et iOS"
 
 echo
+rm -f "$JETABLE"
 echo "Déployé sur $BASE"

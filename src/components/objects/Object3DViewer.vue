@@ -1,7 +1,8 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import Dialog from 'primevue/dialog'
 import Message from 'primevue/message'
+import { chargerModelViewer } from '@/services/modelViewer'
 
 // VISUALISEUR 3D — et la distinction que tout le monde rate ici.
 //
@@ -39,6 +40,13 @@ const estIOS = computed(() => {
 })
 
 const usdzSeul = computed(() => !props.src && !!props.iosSrc)
+
+// <model-viewer> pese 1 Mo : on ne le telecharge qu'a l'ouverture reelle du
+// dialogue, et seulement s'il y a un GLB a afficher. Un objet n'ayant qu'un
+// USDZ passe par Quick Look et n'en a aucun besoin.
+watch(() => props.visible, (ouvert) => {
+  if (ouvert && props.src) chargerModelViewer().catch(() => {})
+}, { immediate: true })
 </script>
 
 <template>

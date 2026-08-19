@@ -3,6 +3,7 @@ import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { demoModelUrl, demoModelInfo } from '@/services/glb'
 import { qrSvg } from '@/services/qrcode'
+import { chargerModelViewer } from '@/services/modelViewer'
 import { useTts } from '@/services/tts'
 
 // RÉALITÉ AUGMENTÉE — « Retour au pays ».
@@ -146,7 +147,9 @@ function raconter() {
   ttsSpeak(texte, { lang: 'fr' })
 }
 
-onMounted(() => nextTick(detecter))
+// Cette vue EXISTE pour montrer un modele : le charger des son montage est
+// justifie, contrairement au chargement global qui frappait toutes les pages.
+onMounted(() => { chargerModelViewer().catch(() => {}); nextTick(detecter) })
 onBeforeUnmount(() => {
   if (poll) clearInterval(poll)
   ttsStop()

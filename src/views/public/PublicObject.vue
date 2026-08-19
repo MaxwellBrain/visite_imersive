@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n'
 import Object3DViewer from '@/components/objects/Object3DViewer.vue'
 import GuideInline from '@/components/public/GuideInline.vue'
 import CabinetFreres from '@/components/public/CabinetFreres.vue'
-import { pubObject, pubObjectChefs, pubDispersion, pubObjectRarity, marquerVue } from '@/services/publicApi'
+import { pubObject, pubObjectModels, pubObjectChefs, pubDispersion, pubObjectRarity, marquerVue } from '@/services/publicApi'
 import RarityBadge from '@/components/public/RarityBadge.vue'
 import { useAccessStore } from '@/stores/useAccessStore'
 import { useSiteLink } from '@/composables/useSiteLink'
@@ -17,6 +17,21 @@ const { t } = useI18n()
 const access = useAccessStore()
 const route = useRoute()
 const object = ref(null)
+
+// Modeles 3D : volontairement ABSENTS de la fiche initiale (ils pesaient 2,72 Mo
+// en base64 et retardaient l'affichage de ~12 s). On ne les demande qu'a
+// l'ouverture de la visionneuse, une seule fois.
+const modeles = ref({ model3d: '', model3d_ios: '' })
+const modelesCharges = ref(false)
+
+async function ouvrirVisionneuse() {
+  if (!modelesCharges.value) {
+    const m = await pubObjectModels(object.value.id)
+    modeles.value = { model3d: m.model3d || '', model3d_ios: m.model3d_ios || '' }
+    modelesCharges.value = true
+  }
+  viewer.visible = true
+}
 const chefs = ref([])
 const dispersion = ref({ total: 0, pays: [], freres: [] })
 const rarity = ref(null)
@@ -88,7 +103,7 @@ const suggestions = computed(() =>
         <div class="obj__media ps-card">
           <img v-if="object.photo" :src="object.photo" :alt="object.nom" />
           <div v-else class="ps-ph"><i class="pi pi-box" /></div>
-          <span v-if="object.model3d || object.model3d_ios" class="ps-tag ps-tag--primary badge3d"><i class="pi pi-box" /> 3D · AR</span>
+          <span v-if="object.a_3d" class="ps-tag ps-tag--primary badge3d"><i class="pi pi-box" /> 3D · AR</span>
         </div>
 
         <div class="obj__info">
@@ -109,7 +124,7 @@ const suggestions = computed(() =>
               <router-link :to="to(`/ar/${object.id}`)" class="ps-btn">
                 <i class="pi pi-mobile" /> {{ $t('ar.cta') }}
               </router-link>
-              <button v-if="object.model3d || object.model3d_ios" class="ps-btn ps-btn--line" @click="viewer.visible = true">
+              <button v-if="object.a_3d" class="ps-btn ps-btn--line" @click="ouvrirVisionneuse">
                 <i class="pi pi-box" /> {{ $t('object.view3d') }}
               </button>
             </template>
@@ -189,8 +204,8 @@ const suggestions = computed(() =>
 
       <Object3DViewer
         v-model:visible="viewer.visible"
-        :src="object.model3d || ''"
-        :ios-src="object.model3d_ios || ''"
+        :src="modeles.model3d"
+        :ios-src="modeles.model3d_ios"
         :title="object.nom"
       />
     </template>
