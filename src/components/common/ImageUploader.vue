@@ -3,13 +3,22 @@ import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Button from 'primevue/button'
 import { compresserImage, poidsLisible } from '@/services/image'
+import { televerser } from '@/services/stockage'
 
 const { t } = useI18n()
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
   label: { type: String, default: '' },
-  height: { type: String, default: '180px' }
+  height: { type: String, default: '180px' },
+  // Bucket de destination. RENSEIGNÉ → l'image part dans le Storage et le
+  // modèle reçoit une URL. VIDE → ancien comportement, une DATA URL base64.
+  //
+  // Cette option existe parce que ce composant sert à une dizaine d'écrans
+  // (musées, secteurs, produits, événements…) dont les tables attendent encore
+  // du base64. Basculer tout le monde d'un coup, sans avoir migré leurs
+  // données, casserait ces écrans. On bascule donc un usage à la fois.
+  bucket: { type: String, default: '' }
 })
 const effLabel = computed(() => props.label || t('uploader.defaultLabel'))
 const emit = defineEmits(['update:modelValue'])
@@ -31,11 +40,28 @@ async function onFile(event) {
   if (!file) return
   busy.value = true
   try {
+    // On redimensionne TOUJOURS, y compris avant un téléversement : inutile de
+    // stocker 4000 px pour une vignette de catalogue, et le visiteur paierait
+    // ce poids à chaque affichage.
     const dataUrl = await compresserImage(file)
     failed.value = false
-    poids.value = poidsLisible(dataUrl)
-    emit('update:modelValue', dataUrl)
-  } catch {
+
+    if (props.bucket) {
+      const blob = await (await fetch(dataUrl)).blob()
+      const url = await televerser(
+        new File([blob], file.name || 'image.jpg', { type: blob.type }),
+        props.bucket
+      )
+      poids.value = poidsLisible(dataUrl)
+      emit('update:modelValue', url)
+    } else {
+      poids.value = poidsLisible(dataUrl)
+      emit('update:modelValue', dataUrl)
+    }
+  } catch (e) {
+    // Un téléversement peut échouer (réseau, quota, droits). On le signale
+    // plutôt que de laisser croire à une image enregistrée.
+    console.warn('[uploader]', e?.message || e)
     failed.value = true
   } finally {
     busy.value = false

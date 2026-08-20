@@ -24,6 +24,7 @@ import { improveDescription, generateSeo } from '@/services/aiService'
 import ImageUploader from '@/components/common/ImageUploader.vue'
 import { vignette } from '@/services/image'
 import Object3DViewer from '@/components/objects/Object3DViewer.vue'
+import { televerser } from '@/services/stockage'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -173,7 +174,11 @@ watch(
 // morte au rechargement suivant et sur tout autre appareil. Aucun modèle 3D
 // n'a donc jamais pu s'afficher en ligne, ni en réalité augmentée.
 // On enregistre désormais le contenu lui-même, comme pour les photos.
-const MODEL_MAX_MO = 12
+// Plafond aligne sur celui du bucket `modeles` (50 Mo). Il valait 12 Mo tant
+// que le modele partait en base64 dans la colonne — encodage qui ajoute encore
+// un tiers au poids. Un scan photogrammetrique texture depasse couramment
+// 20 Mo : la limite precedente le refusait sans raison technique.
+const MODEL_MAX_MO = 50
 
 // `champ` vaut 'model3d' (.glb, Android et navigateurs) ou 'model3dIos' (.usdz,
 // Quick Look sur iPhone/iPad). Les deux sont nécessaires pour couvrir tout le parc :
@@ -227,14 +232,26 @@ async function lireModele(event, champ) {
     event.target.value = ''
     return
   }
-  const reader = new FileReader()
-  reader.onload = () => {
-    form[champ] = reader.result
+  // Le modele part dans le Storage, PAS en base64. Mesure du 2026-08-19 : un
+  // maillage encode dans la colonne pesait 2,72 Mo, relus a chaque requete sur
+  // l'objet, et retardait sa fiche publique de 12 s. Ici la colonne ne recoit
+  // qu'une URL, et le fichier n'est telecharge qu'a l'ouverture de la 3D.
+  try {
+    const url = await televerser(file, 'modeles', { extensionForcee: attendu })
+    form[champ] = url
     form[`${champ}Name`] = file.name
     toast.add({ severity: 'success', summary: t('admin.objects.model3dLoaded'), detail: file.name, life: 2000 })
+  } catch (e) {
+    console.warn('[modele3d]', e?.message || e)
+    toast.add({
+      severity: 'error',
+      summary: t('admin.objects.model3dFailed'),
+      detail: e?.message || '',
+      life: 5000
+    })
+  } finally {
+    event.target.value = ''
   }
-  reader.onerror = () => toast.add({ severity: 'error', summary: t('admin.objects.model3dFailed'), life: 3000 })
-  reader.readAsDataURL(file)
 }
 
 const onModel3dFile = (e) => lireModele(e, 'model3d')
@@ -464,7 +481,7 @@ async function save() {
           <div class="vi-row">
             <div class="vi-field">
               <label>{{ $t('admin.objects.fPhoto') }}</label>
-              <ImageUploader v-model="form.photo" :label="$t('admin.objects.fPhotoUploader')" />
+              <ImageUploader v-model="form.photo" bucket="photos" :label="$t('admin.objects.fPhotoUploader')" />
             </div>
             <div class="vi-field">
               <label>{{ $t('admin.objects.fModel3d') }}</label>
