@@ -18,6 +18,7 @@ import './style.css'
 
 import App from './App.vue'
 import router from './router'
+import { activerPrechargement, prechargerAuRepos } from '@/services/prefetch'
 import i18n from './i18n'
 import { useAuthStore } from '@/stores/useAuthStore'
 
@@ -85,3 +86,19 @@ app.directive('tooltip', Tooltip)
 useAuthStore(pinia).init()
 
 app.mount('#app')
+
+// PRÉCHARGEMENT DES ROUTES — après le montage, pour ne rien disputer au premier
+// rendu. Le découpage par route évite de tout télécharger au démarrage, mais
+// fait payer le PREMIER accès à chaque page (mesuré : 1,2 s pour les musées,
+// 6,3 s pour les boutiques). On profite du survol d'un lien, pendant lequel
+// personne n'attend, pour aller chercher le code à l'avance.
+router.isReady().then(() => {
+  activerPrechargement(router)
+
+  // Les trois destinations que presque tout visiteur finit par ouvrir. On s'en
+  // tient à celles-là : tout précharger reviendrait à annuler le découpage.
+  const base = router.currentRoute.value.path.startsWith('/c/')
+    ? '/c/' + router.currentRoute.value.params.slug
+    : '/site'
+  prechargerAuRepos(router, [`${base}/musees`, `${base}/boutiques`, `${base}/genealogie`])
+})
