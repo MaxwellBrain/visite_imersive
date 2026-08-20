@@ -443,3 +443,16 @@ tr:hover .row-actions .p-button, .row-actions .p-button:focus-visible { opacity:
   #app .p-datatable .p-datatable-tbody > tr > td { padding: 0.6rem 0.7rem; }
   .row-actions .p-button { opacity: 1; }
 }
+
+/* ---------- Champs obligatoires ----------
+   Une étoile après le libellé, posée par le CSS et non écrite dans chaque
+   traduction : le libellé reste traduisible seul, et la marque est identique
+   sur les 34 écrans qui portent un formulaire.
+   `aria-hidden` n'est pas nécessaire — un pseudo-élément n'est pas lu comme du
+   contenu par les lecteurs d'écran ; l'attribut `required` de l'input reste ce
+   qui porte l'information pour eux. */
+.vi-req::after {
+  content: ' *';
+  color: #c0392b;
+  font-weight: 700;
+}

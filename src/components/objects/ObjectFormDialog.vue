@@ -381,7 +381,7 @@ async function save() {
               />
             </div>
             <div class="vi-field">
-              <label for="o-secteur">{{ $t('admin.objects.fSector') }}</label>
+              <label class="vi-req" for="o-secteur">{{ $t('admin.objects.fSector') }}</label>
               <Select
                 id="o-secteur"
                 v-model="form.sectorId"
@@ -397,7 +397,7 @@ async function save() {
 
           <div class="vi-row">
             <div class="vi-field">
-              <label for="o-nom">{{ $t('admin.objects.fName') }}</label>
+              <label class="vi-req" for="o-nom">{{ $t('admin.objects.fName') }}</label>
               <InputText
                 id="o-nom"
                 v-model="form.nom"

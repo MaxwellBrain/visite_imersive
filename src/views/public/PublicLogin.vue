@@ -139,11 +139,11 @@ async function google() {
 
         <!-- Connexion par code e-mail -->
         <form v-if="mode === 'code'" @submit.prevent="codeEnvoye ? verifierCode() : envoyerCode()">
-          <label class="sl__lbl">{{ $t('siteLogin.email') }}</label>
+          <label class="vi-req sl__lbl">{{ $t('siteLogin.email') }}</label>
           <input v-model="email" class="sl__in" type="email" autocomplete="username"
                  placeholder="vous@exemple.com" :disabled="codeEnvoye" />
           <template v-if="codeEnvoye">
-            <label class="sl__lbl">{{ $t('siteLogin.code') }}</label>
+            <label class="vi-req sl__lbl">{{ $t('siteLogin.code') }}</label>
             <input v-model="code" class="sl__in" inputmode="numeric" autocomplete="one-time-code"
                    placeholder="123456" maxlength="8" />
           </template>
@@ -164,10 +164,10 @@ async function google() {
                    :placeholder="$t('siteLogin.fullNamePlaceholder')" />
           </template>
 
-          <label class="sl__lbl">{{ $t('siteLogin.email') }}</label>
+          <label class="vi-req sl__lbl">{{ $t('siteLogin.email') }}</label>
           <input v-model="email" class="sl__in" type="email" autocomplete="username" placeholder="vous@exemple.com" />
 
-          <label class="sl__lbl">{{ $t('siteLogin.password') }}</label>
+          <label class="vi-req sl__lbl">{{ $t('siteLogin.password') }}</label>
           <input v-model="password" class="sl__in" type="password"
                  :autocomplete="mode === 'signup' ? 'new-password' : 'current-password'" placeholder="••••••••" />
 

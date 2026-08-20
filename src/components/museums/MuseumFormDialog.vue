@@ -84,7 +84,7 @@ async function save() {
     @update:visible="$emit('update:visible', $event)"
   >
     <div class="vi-field">
-      <label for="m-nom">{{ $t('admin.museums.fNameReq') }}</label>
+      <label class="vi-req" for="m-nom">{{ $t('admin.museums.fNameReq') }}</label>
       <InputText
         id="m-nom"
         v-model="form.nom"

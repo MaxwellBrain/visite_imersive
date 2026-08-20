@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { supabase } from '@/services/supabase'
 import { scopeToTenant } from '@/services/tenant'
+import { getPublicTenant } from '@/services/publicApi'
 import { useAuthStore } from '@/stores/useAuthStore'
 
 const fromRow = (r) => ({
@@ -118,10 +119,22 @@ export const useSettingsStore = defineStore('settings', () => {
   const tenantId = ref(null) // organisation dont on affiche les réglages
   let channel = null
 
-  // Trois cas :
-  //  1. tenantIdArg fourni  → site public d'une organisation précise (route /c/:slug)
-  //  2. utilisateur rattaché → ERP : les réglages de SON organisation
-  //  3. visiteur anonyme     → 1re organisation approuvée (site public historique)
+  // QUELLE organisation ? Par ordre de priorité :
+  //  1. tenantIdArg fourni   → organisation précise (le layout public le passe
+  //                            dès que l'hôte est résolu)
+  //  2. personnel connecté   → ERP : les réglages de SON organisation
+  //  3. visiteur             → l'organisation dont il consulte le site,
+  //                            déjà résolue par usePublicTenantStore
+  //
+  // IL N'Y A PLUS DE REPLI sur « la première organisation approuvée ». C'était
+  // un vestige du temps où la plateforme n'hébergeait qu'un seul site. Depuis le
+  // multi-tenant, un `load()` sans argument rapportait les réglages du locataire
+  // nº 1 — nom, logo, couleurs, coordonnées, analytics_id — et les appliquait au
+  // site consulté : sur madjin.nexacode.store, « CHEFFERIE BATOUFAM » s'affichait
+  // puis basculait sur « Fondation Max Brian » (constaté le 2026-08-20). La RLS
+  // ne rattrape pas cela : `tenant_is_public()` autorise la lecture de TOUTE
+  // organisation approuvée, pas seulement de celle du site courant. Sans
+  // organisation identifiée, on ne charge donc rien.
   //
   // `force` : ces réglages étaient rechargés à CHAQUE navigation (le layout
   // public et plusieurs vues appellent `load()` au montage), pour une donnée
@@ -131,18 +144,27 @@ export const useSettingsStore = defineStore('settings', () => {
   //
   // Sans risque de contenu périmé : l'abonnement temps réel ci-dessous
   // répercute toute modification, qu'elle vienne de l'ERP ou d'un autre onglet.
+  let derniereRequete = 0
   async function load(tenantIdArg = null, { force = false } = {}) {
     const auth = useAuthStore()
-    const dejaCharge = settings.value
-      && (tenantIdArg == null || tenantId.value === tenantIdArg)
+    const cible = tenantIdArg ?? (auth.isStaff ? auth.tenantId : getPublicTenant()) ?? null
+
+    const dejaCharge = settings.value && (cible == null || tenantId.value === cible)
     if (dejaCharge && !force) return settings.value
+    // Aucune organisation à afficher : on garde l'écran en l'état plutôt que
+    // d'emprunter l'identité d'un locataire au hasard. Seul le super-admin de la
+    // plateforme, rattaché à aucune organisation, passe outre.
+    if (cible == null && !auth.isSuperAdmin) return settings.value
 
     const base = supabase.from('site_settings').select('*')
-    let q
-    if (tenantIdArg != null) q = base.eq('tenant_id', tenantIdArg)
-    else if (auth.tenantId != null || auth.isSuperAdmin) q = scopeToTenant(base)
-    else q = base // la RLS ne renvoie déjà que les organisations approuvées
+    const q = cible != null ? base.eq('tenant_id', cible) : scopeToTenant(base)
+
+    // Le layout et la page d'accueil peuvent demander les réglages en même temps.
+    // Sans ce jeton, c'est la réponse la plus LENTE qui gagne, quelle que soit
+    // l'organisation qu'elle décrit — c'est ce qui produisait la bascule visible.
+    const jeton = ++derniereRequete
     const { data, error } = await q.order('id').limit(1).maybeSingle()
+    if (jeton !== derniereRequete) return settings.value // réponse dépassée
     if (error) console.error('[settings] load', error.message)
     else if (data) { settings.value = fromRow(data); tenantId.value = data.tenant_id ?? null }
     return settings.value

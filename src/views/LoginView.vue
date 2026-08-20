@@ -177,12 +177,12 @@ async function google() {
         <!-- Connexion par code e-mail (mot de passe oublié) -->
         <form v-if="mode === 'code'" @submit.prevent="codeEnvoye ? verifierCode() : envoyerCode()">
           <div class="vi-field">
-            <label for="l-email-c">{{ $t('admin.login.email') }}</label>
+            <label class="vi-req" for="l-email-c">{{ $t('admin.login.email') }}</label>
             <InputText id="l-email-c" v-model="email" type="email" autocomplete="username"
               placeholder="vous@exemple.com" :disabled="codeEnvoye" />
           </div>
           <div v-if="codeEnvoye" class="vi-field">
-            <label for="l-code">{{ $t('admin.login.code') }}</label>
+            <label class="vi-req" for="l-code">{{ $t('admin.login.code') }}</label>
             <InputText id="l-code" v-model="code" inputmode="numeric" autocomplete="one-time-code"
               placeholder="123456" maxlength="8" />
           </div>
@@ -239,11 +239,11 @@ async function google() {
           </transition>
 
           <div class="vi-field">
-            <label for="l-email">{{ $t('admin.login.email') }}</label>
+            <label class="vi-req" for="l-email">{{ $t('admin.login.email') }}</label>
             <InputText id="l-email" v-model="email" type="email" autocomplete="username" placeholder="vous@exemple.com" />
           </div>
           <div class="vi-field">
-            <label for="l-pw">{{ $t('admin.login.password') }}</label>
+            <label class="vi-req" for="l-pw">{{ $t('admin.login.password') }}</label>
             <InputText
               id="l-pw"
               v-model="password"

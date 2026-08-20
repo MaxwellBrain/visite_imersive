@@ -158,12 +158,12 @@ async function save() {
         <TabPanel value="0">
           <div class="vi-row">
             <div class="vi-field">
-              <label>{{ $t('admin.voice.fMuseum') }}</label>
+              <label class="vi-req">{{ $t('admin.voice.fMuseum') }}</label>
               <Select v-model="form.museumId" :options="museumOptions" option-label="label" option-value="value" filter
                 :placeholder="$t('admin.voice.fMuseumPlaceholder')" :invalid="submitted && form.museumId == null" />
             </div>
             <div class="vi-field">
-              <label>{{ $t('admin.voice.fName') }}</label>
+              <label class="vi-req">{{ $t('admin.voice.fName') }}</label>
               <InputText v-model="form.titre" :placeholder="$t('admin.voice.fNamePlaceholder')" :invalid="submitted && !form.titre.trim()" />
             </div>
           </div>

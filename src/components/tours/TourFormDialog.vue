@@ -74,7 +74,7 @@ async function save() {
     @update:visible="$emit('update:visible', $event)"
   >
     <div class="vi-field">
-      <label for="t-musee">{{ $t('admin.tours.fMuseum') }}</label>
+      <label class="vi-req" for="t-musee">{{ $t('admin.tours.fMuseum') }}</label>
       <Select
         id="t-musee"
         v-model="form.museumId"
@@ -89,7 +89,7 @@ async function save() {
     </div>
 
     <div class="vi-field">
-      <label for="t-titre">{{ $t('admin.tours.fTitle') }}</label>
+      <label class="vi-req" for="t-titre">{{ $t('admin.tours.fTitle') }}</label>
       <InputText
         id="t-titre"
         v-model="form.titre"

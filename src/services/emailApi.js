@@ -56,9 +56,18 @@ export function sendAccessUnlocked({ to, prenom, libelle, expiration, tenantId, 
 }
 
 // Accusé d'inscription d'une organisation (en attente de validation).
-export function sendTenantWelcome({ to, nomOrganisation, lien }) {
+// `adresseSite` : l'adresse publique définitive (bandjoun.nexacode.store). C'est
+// la première chose que le nouveau client cherche, et la seule qu'il ne peut pas
+// deviner — on la lui écrit noir sur blanc plutôt que de le laisser la supposer.
+export function sendTenantWelcome({ to, nomOrganisation, lien, adresseSite, tenantId }) {
   if (!to) return Promise.resolve(false)
-  return send({ type: 'bienvenue', to, nomOrganisation, lien, marque: 'MUSÉA', couleur: '#0e6f5c' })
+  return send({
+    type: 'bienvenue',
+    to, nomOrganisation, lien,
+    adresseSite: adresseSite || null,
+    tenantId: tenantId ?? null,
+    marque: 'MUSÉA', couleur: '#0e6f5c'
+  })
 }
 
 // Notification d'approbation : le site public de l'organisation est en ligne.

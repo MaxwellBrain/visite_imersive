@@ -53,7 +53,7 @@ async function submit() {
         </div>
 
         <template v-else>
-          <label class="gb-lbl">{{ $t('guestbook.fName') }}</label>
+          <label class="vi-req gb-lbl">{{ $t('guestbook.fName') }}</label>
           <input v-model="form.nom" type="text" class="gb-in" :placeholder="$t('guestbook.fNamePlaceholder')" maxlength="60" />
 
           <label class="gb-lbl">{{ $t('guestbook.fRating') }}</label>
@@ -64,7 +64,7 @@ async function submit() {
             ><i :class="n <= form.note ? 'pi pi-star-fill' : 'pi pi-star'" /></button>
           </div>
 
-          <label class="gb-lbl">{{ $t('guestbook.fMessage') }}</label>
+          <label class="vi-req gb-lbl">{{ $t('guestbook.fMessage') }}</label>
           <textarea v-model="form.message" class="gb-in gb-ta" rows="4" :placeholder="$t('guestbook.fMessagePlaceholder')" maxlength="600" />
 
           <p v-if="error" class="gb-err"><i class="pi pi-exclamation-triangle" /> {{ error }}</p>

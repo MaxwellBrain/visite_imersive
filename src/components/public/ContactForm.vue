@@ -83,18 +83,18 @@ async function submit() {
         <input id="cf-nom" v-model="form.nom" type="text" class="cf-in" maxlength="80"
                :placeholder="$t('contact.fNamePlaceholder')" autocomplete="name" />
 
-        <label class="cf-lbl" for="cf-email">{{ $t('contact.fEmail') }}</label>
+        <label class="vi-req cf-lbl" for="cf-email">{{ $t('contact.fEmail') }}</label>
         <input id="cf-email" v-model="form.email" type="email" class="cf-in" maxlength="150"
                :placeholder="$t('contact.fEmailPlaceholder')" autocomplete="email" required />
       </template>
 
       <template v-if="!sujetImpose">
-        <label class="cf-lbl" for="cf-sujet">{{ $t('contact.fSubject') }}</label>
+        <label class="vi-req cf-lbl" for="cf-sujet">{{ $t('contact.fSubject') }}</label>
         <input id="cf-sujet" v-model="form.sujet" type="text" class="cf-in" maxlength="200"
                :placeholder="$t('contact.fSubjectPlaceholder')" required />
       </template>
 
-      <label class="cf-lbl" for="cf-msg">{{ $t('contact.fMessage') }}</label>
+      <label class="vi-req cf-lbl" for="cf-msg">{{ $t('contact.fMessage') }}</label>
       <textarea id="cf-msg" v-model="form.message" class="cf-in cf-ta" rows="5" maxlength="5000"
                 :placeholder="$t('contact.fMessagePlaceholder')" required />
 

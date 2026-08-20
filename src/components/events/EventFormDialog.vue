@@ -76,7 +76,7 @@ async function save() {
     @update:visible="$emit('update:visible', $event)"
   >
     <div class="vi-field">
-      <label>{{ $t('admin.events.fTitle') }}</label>
+      <label class="vi-req">{{ $t('admin.events.fTitle') }}</label>
       <InputText v-model="form.titre" :placeholder="$t('admin.events.fTitlePlaceholder')" :invalid="submitted && !form.titre.trim()" />
     </div>
 

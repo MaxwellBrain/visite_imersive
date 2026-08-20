@@ -79,7 +79,7 @@ async function save() {
   >
     <div class="vi-row">
       <div class="vi-field">
-        <label for="i-nom">{{ $t('admin.genealogy.fLastName') }}</label>
+        <label class="vi-req" for="i-nom">{{ $t('admin.genealogy.fLastName') }}</label>
         <InputText id="i-nom" v-model="form.nom" :placeholder="$t('admin.genealogy.fLastNamePlaceholder')" :invalid="submitted && !form.nom.trim()" />
       </div>
       <div class="vi-field">

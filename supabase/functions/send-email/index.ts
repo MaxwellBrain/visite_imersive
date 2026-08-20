@@ -177,8 +177,18 @@ function build(type: string, d: Record<string, any>) {
   }
 
   if (type === 'bienvenue') {
+    // L'ADRESSE PUBLIQUE est la première chose que cherche un nouveau client, et
+    // la seule qu'il ne peut pas deviner. Tant qu'elle ne figurait pas ici, elle
+    // se devinait — mal : on a vu chercher « organisation.nexacode.store », qui
+    // n'a jamais existé. On l'écrit donc en toutes lettres.
+    const nu = (u: string) => String(u).replace(/^https?:\/\//, '')
+    const adresse = d.adresseSite
+      ? `<p style="margin:0 0 16px;line-height:1.6;font-size:15px">Votre adresse publique est :
+          <a href="${esc(d.adresseSite)}" style="color:${couleur};font-weight:600;text-decoration:none">${esc(nu(d.adresseSite))}</a></p>`
+      : ''
     const corps = `
       <p style="margin:0 0 16px;line-height:1.6;font-size:15px">Bienvenue ! L'espace de <strong>${esc(d.nomOrganisation)}</strong> a bien été créé.</p>
+      ${adresse}
       <p style="margin:0 0 16px;line-height:1.6;font-size:15px">Il est en cours de validation. Vous pourrez préparer vos contenus dès maintenant ;
       votre site public sera visible une fois l'espace approuvé.</p>`
     return {

@@ -81,12 +81,12 @@ async function save() {
   >
     <div class="vi-row">
       <div class="vi-field">
-        <label>{{ $t('admin.products.fMuseum') }}</label>
+        <label class="vi-req">{{ $t('admin.products.fMuseum') }}</label>
         <Select v-model="form.museumId" :options="museumOptions" option-label="label" option-value="value"
           :placeholder="$t('admin.products.fMuseumPlaceholder')" :invalid="submitted && form.museumId == null" />
       </div>
       <div class="vi-field">
-        <label>{{ $t('admin.products.fName') }}</label>
+        <label class="vi-req">{{ $t('admin.products.fName') }}</label>
         <InputText v-model="form.nom" :placeholder="$t('admin.products.fNamePlaceholder')" :invalid="submitted && !form.nom.trim()" />
       </div>
     </div>
@@ -103,7 +103,7 @@ async function save() {
 
     <div class="vi-row">
       <div class="vi-field">
-        <label>{{ $t('admin.products.fPrice') }}</label>
+        <label class="vi-req">{{ $t('admin.products.fPrice') }}</label>
         <InputNumber v-model="form.prix" :min="0" :max="99999999" :invalid="submitted && form.prix == null" />
       </div>
       <div class="vi-field" style="flex:0 1 130px">

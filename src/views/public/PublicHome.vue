@@ -24,7 +24,10 @@ const favorites = ref(new Set())
 const HERO_DEFAUT = '/hero/hero-main.jpg'
 
 onMounted(async () => {
-  if (!settings.settings) settings.load()
+  // Les réglages sont chargés par PublicLayout, qui SAIT quelle organisation
+  // afficher (il vient de résoudre le nom d'hôte). Les demander ici lançait une
+  // seconde requête en parallèle, partie avant que l'organisation soit connue :
+  // elle revenait avec les réglages d'un autre locataire et écrasait les bons.
   ;[museums.value, objects.value, products.value] = await Promise.all([
     pubMuseums(), pubFeaturedObjects(6), pubFeaturedProducts(4)
   ])

@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import { useAuthStore } from '@/stores/useAuthStore'
-import { parseHost } from '@/services/host'
+import { parseHost, urlPubliqueTenant } from '@/services/host'
 
 // Pages du site public — partagées entre le site historique (/site) et
 // le site d'une organisation (/c/:slug). Les noms de route sont suffixés
@@ -48,6 +48,10 @@ const routes = [
     }
   },
   { path: '/inscription', name: 'platform-signup', component: () => import('@/views/platform/SignupView.vue') },
+  // Documents juridiques de la plateforme — liés par la case à cocher de
+  // l'inscription. Publics : ils doivent être lisibles avant de créer un compte.
+  { path: '/conditions', name: 'platform-terms', component: () => import('@/views/platform/LegalView.vue') },
+  { path: '/confidentialite', name: 'platform-privacy', component: () => import('@/views/platform/LegalView.vue') },
   {
     path: '/site',
     component: () => import('@/layouts/PublicLayout.vue'),
@@ -67,7 +71,9 @@ const routes = [
       {
         path: 'dashboard',
         name: 'dashboard',
-        component: () => import('@/views/DashboardView.vue'),
+        // Aiguilleur : pilotage de la plateforme sur nexacode.store, ERP de
+        // l'organisation sur son sous-domaine. Même URL, deux postes de travail.
+        component: () => import('@/views/DashboardEntry.vue'),
         meta: { title: 'admin.nav.dashboard', icon: 'pi pi-chart-line' }
       },
       {
@@ -240,6 +246,33 @@ router.beforeEach(async (to) => {
   // Back-office plateforme : réservé au super-admin (la base le vérifie aussi).
   const needsSuperAdmin = to.matched.some((r) => r.meta.requiresSuperAdmin)
   if (needsSuperAdmin && !auth.isSuperAdmin) return { name: 'dashboard' }
+
+  // L'ERP D'UNE ORGANISATION VIT SUR SON SOUS-DOMAINE, ET NULLE PART AILLEURS.
+  //
+  //   nexacode.store/dashboard        → pilotage de la plateforme (super-admin)
+  //   madjin.nexacode.store/dashboard → ERP de la CHEFFERIE BATOUFAM
+  //
+  // Un membre du personnel arrivé sur la plateforme, ou sur le sous-domaine
+  // d'une AUTRE organisation, est renvoyé chez lui. Le renvoi change d'origine,
+  // donc `window.location` et non le routeur.
+  //
+  // Il devra s'y reconnecter : la session Supabase est conservée dans le
+  // localStorage, cloisonné par origine, et ne franchit pas les sous-domaines.
+  // C'est le prix du cloisonnement, et il est assumé — l'alternative (un cookie
+  // posé sur .nexacode.store) rendrait le jeton lisible depuis le site de
+  // n'importe quel locataire.
+  //
+  // Le super-admin échappe à la règle : il doit pouvoir intervenir partout.
+  if (needsStaff && !auth.isSuperAdmin) {
+    const { kind, slug } = parseHost()
+    const sien = auth.tenant?.slug || null
+    const ailleurs = !!sien
+      && (kind === 'platform' || (kind === 'subdomain' && slug !== sien))
+    if (ailleurs) {
+      window.location.assign(`${urlPubliqueTenant(sien)}/dashboard`)
+      return false
+    }
+  }
 
   // /login sert les deux publics. Une fois authentifié, on n'y reste pas :
   // le personnel part vers son ERP, le visiteur vers son compte. C'est aussi ce

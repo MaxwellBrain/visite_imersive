@@ -126,7 +126,7 @@ async function save() {
         <Select v-model="form.cible" :options="cibleOptions" option-label="label" option-value="value" />
       </div>
       <div v-if="form.cible === 'musee'" class="vi-field">
-        <label>{{ $t('admin.campaigns.fMuseum') }}</label>
+        <label class="vi-req">{{ $t('admin.campaigns.fMuseum') }}</label>
         <Select v-model="form.museumId" :options="museumOptions" option-label="label" option-value="value"
                 filter :invalid="submitted && form.museumId == null" />
       </div>
@@ -145,13 +145,13 @@ async function save() {
     </fieldset>
 
     <div class="vi-field">
-      <label>{{ $t('admin.campaigns.fSubject') }}</label>
+      <label class="vi-req">{{ $t('admin.campaigns.fSubject') }}</label>
       <InputText v-model="form.sujet" :placeholder="$t('admin.campaigns.fSubjectPlaceholder')"
                  :invalid="submitted && !form.sujet.trim()" />
     </div>
 
     <div class="vi-field">
-      <label>{{ $t('admin.campaigns.fBody') }}</label>
+      <label class="vi-req">{{ $t('admin.campaigns.fBody') }}</label>
       <Textarea v-model="form.contenu" rows="8" auto-resize
                 :placeholder="$t('admin.campaigns.fBodyPlaceholder')"
                 :invalid="submitted && !form.contenu.trim()" />

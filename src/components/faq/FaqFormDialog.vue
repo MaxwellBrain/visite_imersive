@@ -35,7 +35,10 @@ function close() { emit('update:visible', false) }
 
 async function save() {
   submitted.value = true
-  if (!form.question.trim()) return
+  // La réponse est annoncée obligatoire depuis toujours (étoile sur son libellé),
+  // mais rien ne la vérifiait : on pouvait enregistrer une question sans réponse,
+  // qui s'affichait vide sur le site public.
+  if (!form.question.trim() || !form.reponse.trim()) return
   try {
     if (props.faq) await store.update(props.faq.id, { ...form })
     else await store.add({ ...form })
@@ -57,12 +60,13 @@ async function save() {
     @update:visible="$emit('update:visible', $event)"
   >
     <div class="vi-field">
-      <label for="f-q">{{ $t('admin.faq.fQuestion') }}</label>
+      <label class="vi-req" for="f-q">{{ $t('admin.faq.fQuestion') }}</label>
       <InputText id="f-q" v-model="form.question" :invalid="submitted && !form.question.trim()" :placeholder="$t('admin.faq.fQuestionPlaceholder')" />
     </div>
     <div class="vi-field">
-      <label for="f-r">{{ $t('admin.faq.fAnswer') }}</label>
-      <Textarea id="f-r" v-model="form.reponse" rows="5" auto-resize :placeholder="$t('admin.faq.fAnswerPlaceholder')" />
+      <label class="vi-req" for="f-r">{{ $t('admin.faq.fAnswer') }}</label>
+      <Textarea id="f-r" v-model="form.reponse" rows="5" auto-resize
+                :invalid="submitted && !form.reponse.trim()" :placeholder="$t('admin.faq.fAnswerPlaceholder')" />
     </div>
     <div class="vi-row">
       <div class="vi-field">
