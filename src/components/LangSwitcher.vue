@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { setLocale, SUPPORTED } from '@/i18n'
 
@@ -9,8 +9,19 @@ const props = defineProps({ variant: { type: String, default: 'light' } })
 const { locale } = useI18n()
 const other = computed(() => SUPPORTED.find((l) => l !== locale.value) || 'en')
 
-function toggle() {
-  setLocale(other.value)
+// Le catalogue de l'autre langue n'est chargé qu'ici, au premier basculement :
+// il ne pèse plus sur le démarrage. D'où l'attente et l'état occupé — un
+// téléchargement de ~40 Ko qui, sur réseau lent, mérite d'être signalé.
+const bascule = ref(false)
+
+async function toggle() {
+  if (bascule.value) return
+  bascule.value = true
+  try {
+    await setLocale(other.value)
+  } finally {
+    bascule.value = false
+  }
 }
 </script>
 
@@ -19,6 +30,7 @@ function toggle() {
     class="lang"
     :class="`lang--${props.variant}`"
     type="button"
+    :disabled="bascule"
     :aria-label="$t('lang.switch')"
     :title="$t('lang.' + other)"
     @click="toggle"

@@ -19,7 +19,7 @@ import './style.css'
 import App from './App.vue'
 import router from './router'
 import { activerPrechargement, prechargerAuRepos } from '@/services/prefetch'
-import i18n from './i18n'
+import i18n, { prechargerLangue } from './i18n'
 import { useAuthStore } from '@/stores/useAuthStore'
 
 // PWA : service worker (public/sw.js — écrit à la main, sans dépendance).
@@ -85,7 +85,13 @@ app.directive('tooltip', Tooltip)
 // Vérifie la session Supabase avant le 1er rendu (le guard de route attend ensureReady()).
 useAuthStore(pinia).init()
 
-app.mount('#app')
+// Le catalogue de la langue affichée est chargé À PART du bundle principal
+// (202 Ko pour les deux langues, dont une que le visiteur ne lira jamais).
+// On attend son arrivée avant de monter : sans cela, la première image de
+// l'écran afficherait des clés brutes le temps du téléchargement.
+prechargerLangue()
+  .catch((e) => console.error('[i18n] catalogue introuvable', e))
+  .finally(() => app.mount('#app'))
 
 // PRÉCHARGEMENT DES ROUTES — après le montage, pour ne rien disputer au premier
 // rendu. Le découpage par route évite de tout télécharger au démarrage, mais
