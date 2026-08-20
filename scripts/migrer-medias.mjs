@@ -3,12 +3,19 @@
  * Migration des médias : DATA URL base64 → Storage.
  *
  * POURQUOI
- *   `objects.photo`, `objects.model3d` et `objects.model3d_ios` contiennent des
- *   DATA URL. Elles sont donc relues à CHAQUE requête sur la table, y compris
- *   par des écrans qui n'affichent qu'un titre. Mesuré le 2026-08-19 : un seul
- *   objet pesait 2,72 Mo, et la fiche publique mettait 12 s à s'afficher.
- *   Une image ou un maillage doivent être servis par le CDN du Storage, avec
- *   son cache, pas transportés dans chaque réponse SQL.
+ *   Plusieurs colonnes contiennent des DATA URL base64. Elles sont donc relues
+ *   à CHAQUE requête sur leur table, y compris par des écrans qui n'affichent
+ *   qu'un titre. Une image doit être servie par le CDN du Storage, avec son
+ *   cache, pas transportée dans chaque réponse SQL.
+ *
+ *   Mesures du 2026-08-19/20 :
+ *     - un objet portait 2,72 Mo de modèle : sa fiche mettait 12 s à s'afficher ;
+ *     - `select *` sur `museums` (4 lignes, 64 Ko) prenait 13,1 s, contre 1,2 s
+ *       en ne demandant que `id, nom` — même table, même serveur ;
+ *     - `site_settings.logo` (342 Ko) est relu à CHAQUE changement de page.
+ *
+ *   C'est cette dernière ligne qui explique la lenteur de NAVIGATION : le poids
+ *   n'est pas sur une page en particulier, il est sur toutes.
  *
  * CE QUE FAIT LE SCRIPT
  *   Pour chaque média encore en base64 : téléverse le fichier dans son bucket,
@@ -90,10 +97,28 @@ const sb = createClient(URL_PROJET, CLE_SERVICE, { auth: { persistSession: false
 // `champ` → bucket. Les modèles et les images n'ont ni le même cycle de vie ni
 // les mêmes types autorisés : les mélanger dans un bucket unique obligerait à
 // tout y autoriser.
-const MEDIAS = [
-  { champ: 'photo', bucket: 'photos', defaut: 'jpg' },
-  { champ: 'model3d', bucket: 'modeles', defaut: 'glb' },
-  { champ: 'model3d_ios', bucket: 'modeles', defaut: 'usdz' }
+// Le base64 ne se limite PAS a la table `objects` — c'est ce qu'une premiere
+// version de ce script supposait, a tort. Releve du 2026-08-20 :
+//   objects.model3d     2 781 Ko   fiche objet
+//   events.image        1 096 Ko   accueil
+//   objects.photo         354 Ko   fiche objet
+//   site_settings.logo    342 Ko   TOUTES les pages
+//   museums.photo          62 Ko   liste des musees
+// Le logo etant relu a chaque navigation, il pesait sur le moindre changement
+// de page. On balaie donc toutes les tables concernees.
+const CIBLES = [
+  { table: 'objects',       champs: [
+      { champ: 'photo',        bucket: 'photos',  defaut: 'jpg' },
+      { champ: 'photo_thumb',  bucket: 'photos',  defaut: 'jpg' },
+      { champ: 'model3d',      bucket: 'modeles', defaut: 'glb' },
+      { champ: 'model3d_ios',  bucket: 'modeles', defaut: 'usdz' } ] },
+  { table: 'museums',       champs: [{ champ: 'photo', bucket: 'photos', defaut: 'jpg' }] },
+  { table: 'events',        champs: [{ champ: 'image', bucket: 'photos', defaut: 'jpg' }] },
+  { table: 'products',      champs: [{ champ: 'image', bucket: 'photos', defaut: 'jpg' }] },
+  { table: 'campaigns',     champs: [{ champ: 'image', bucket: 'photos', defaut: 'jpg' }] },
+  { table: 'personnages',   champs: [{ champ: 'photo', bucket: 'photos', defaut: 'jpg' }] },
+  { table: 'tenants',       champs: [{ champ: 'logo',  bucket: 'photos', defaut: 'png' }] },
+  { table: 'site_settings', champs: [{ champ: 'logo',  bucket: 'photos', defaut: 'png' }] }
 ]
 
 const EXT_PAR_MIME = {
@@ -138,68 +163,78 @@ const mo = (n) => `${(n / 1048576).toFixed(2)} Mo`
 
 // ------------------------------------------------------------------ main ----
 console.log(`Projet   : ${URL_PROJET}`)
-console.log(`Mode     : ${APPLIQUER ? 'APPLICATION — les données seront modifiées' : 'SIMULATION (ajoutez --appliquer pour écrire)'}\n`)
-
-const { data: objets, error } = await sb
-  .from('objects')
-  .select('id, tenant_id, photo, model3d, model3d_ios')
-  .order('id')
-
-if (error) {
-  console.error('Lecture impossible :', error.message)
-  process.exit(1)
-}
+console.log(`Mode     : ${APPLIQUER ? 'APPLICATION — les données seront modifiées' : 'SIMULATION (ajoutez --appliquer pour écrire)'}
+`)
 
 let traites = 0
 let octetsLiberes = 0
 let echecs = 0
 
-for (const o of objets) {
-  const maj = {}
-  const lignes = []
+for (const cible of CIBLES) {
+  // Toutes les tables n'ont pas les colonnes attendues — `personnages` n'a pas
+  // de `photo`, par exemple. On demande, et si la colonne manque on passe au
+  // lieu d'interrompre toute la migration.
+  const colonnes = ['id', 'tenant_id', ...cible.champs.map((c) => c.champ)].join(', ')
+  const { data: lignes, error: eLire } = await sb.from(cible.table).select(colonnes).order('id')
 
-  for (const { champ, bucket, defaut } of MEDIAS) {
-    const valeur = o[champ]
-    if (typeof valeur !== 'string' || !valeur.startsWith('data:')) continue
+  if (eLire) {
+    // 42703 = colonne inexistante ; 42P01 = table inexistante.
+    const attendu = /does not exist|42703|42P01/i.test(eLire.message)
+    console.log(`${cible.table.padEnd(14)} ${attendu ? 'colonne absente, ignorée' : 'ERREUR : ' + eLire.message}`)
+    if (!attendu) echecs++
+    continue
+  }
 
-    const morceau = decouperDataUrl(valeur)
-    if (!morceau) { console.warn(`  objet ${o.id} · ${champ} : DATA URL illisible, ignorée`); continue }
+  let vusIci = 0
 
-    const ext = typeReel(morceau.octets, morceau.mime, defaut)
-    const chemin = `${o.tenant_id ?? 0}/${o.id}/${champ}.${ext}`
-    lignes.push(`  objet ${String(o.id).padStart(3)} · ${champ.padEnd(11)} ${mo(valeur.length).padStart(9)} → ${bucket}/${chemin}`)
+  for (const ligne of lignes || []) {
+    const maj = {}
 
-    if (!APPLIQUER) { octetsLiberes += valeur.length; continue }
+    for (const { champ, bucket, defaut } of cible.champs) {
+      const valeur = ligne[champ]
+      if (typeof valeur !== 'string' || !valeur.startsWith('data:')) continue
 
-    const { error: eUp } = await sb.storage.from(bucket).upload(chemin, morceau.octets, {
-      contentType: MIME_PAR_EXT[ext] || morceau.mime,
-      upsert: true
-    })
-    if (eUp) {
-      console.error(`  objet ${o.id} · ${champ} : téléversement échoué — ${eUp.message}`)
-      echecs++
-      continue
+      const morceau = decouperDataUrl(valeur)
+      if (!morceau) { console.warn(`  ${cible.table} #${ligne.id} · ${champ} : DATA URL illisible`); continue }
+
+      const ext = typeReel(morceau.octets, morceau.mime, defaut)
+      const chemin = `${ligne.tenant_id ?? 0}/${cible.table}-${ligne.id}-${champ}.${ext}`
+      console.log(`  ${cible.table.padEnd(14)} #${String(ligne.id).padStart(3)} · ${champ.padEnd(12)} ` +
+                  `${mo(valeur.length).padStart(9)} → ${bucket}/${chemin}`)
+      vusIci++
+
+      if (!APPLIQUER) { octetsLiberes += valeur.length; continue }
+
+      const { error: eUp } = await sb.storage.from(bucket).upload(chemin, morceau.octets, {
+        contentType: MIME_PAR_EXT[ext] || morceau.mime,
+        upsert: true
+      })
+      if (eUp) { console.error(`     téléversement échoué — ${eUp.message}`); echecs++; continue }
+
+      const { data: pub } = sb.storage.from(bucket).getPublicUrl(chemin)
+      if (!pub?.publicUrl) { console.error('     URL publique absente'); echecs++; continue }
+
+      // La colonne n'est mise à jour QU'APRÈS un téléversement réussi : un échec
+      // laisse la DATA URL en place et une relance reprend le travail.
+      maj[champ] = pub.publicUrl
+      octetsLiberes += valeur.length
     }
-    const { data: pub } = sb.storage.from(bucket).getPublicUrl(chemin)
-    if (!pub?.publicUrl) { console.error(`  objet ${o.id} · ${champ} : URL publique absente`); echecs++; continue }
 
-    // La colonne n'est mise à jour QU'APRÈS un téléversement réussi : en cas
-    // d'échec la DATA URL reste en place, et une relance reprendra le travail.
-    maj[champ] = pub.publicUrl
-    octetsLiberes += valeur.length
+    if (APPLIQUER && Object.keys(maj).length) {
+      const { error: eMaj } = await sb.from(cible.table).update(maj).eq('id', ligne.id)
+      if (eMaj) { console.error(`  ${cible.table} #${ligne.id} : mise à jour échouée — ${eMaj.message}`); echecs++; continue }
+      traites++
+    } else if (Object.keys(maj).length || vusIci) {
+      traites += 0
+    }
   }
 
-  if (!lignes.length) continue
-  console.log(lignes.join('\n'))
-
-  if (APPLIQUER && Object.keys(maj).length) {
-    const { error: eMaj } = await sb.from('objects').update(maj).eq('id', o.id)
-    if (eMaj) { console.error(`  objet ${o.id} : mise à jour échouée — ${eMaj.message}`); echecs++; continue }
-  }
-  traites++
+  if (!vusIci) console.log(`${cible.table.padEnd(14)} rien à migrer`)
 }
 
-console.log(`\n${traites} objet(s) concerné(s) · ${mo(octetsLiberes)} sortis de la base` +
+console.log('')
+console.log(`${mo(octetsLiberes)} de médias sortis de la base` +
+            (APPLIQUER ? ` · ${traites} ligne(s) mise(s) à jour` : '') +
             (echecs ? ` · ${echecs} échec(s)` : ''))
-if (!APPLIQUER) console.log('\nSimulation : rien n\'a été modifié. Relancez avec --appliquer.')
+if (!APPLIQUER) console.log("\nSimulation : rien n'a été modifié. Relancez avec --appliquer.")
 process.exit(echecs ? 1 : 0)
