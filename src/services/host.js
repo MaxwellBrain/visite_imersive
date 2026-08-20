@@ -1,22 +1,38 @@
-// Résolution de l'organisation par NOM D'HÔTE (Phase 2 — sous-domaines <slug>.musea.nexacode.store).
+// Résolution de l'organisation par NOM D'HÔTE.
+//
+// ARCHITECTURE (corrigée le 2026-08-20) :
+//   nexacode.store            LA PLATEFORME — vitrine, inscription, et
+//                             back-office du super-admin qui voit tous les
+//                             locataires.
+//   <slug>.nexacode.store     le site d'UN locataire. Le slug est choisi par
+//                             l'organisation à son inscription.
+//
+// `musea.nexacode.store` n'est donc PAS la plateforme : c'est un locataire
+// parmi les autres, au même titre que `bandjoun.nexacode.store`.
 //
 // Priorité voulue : le nom d'hôte d'abord (sous-domaine ou domaine personnalisé),
-// le chemin /c/:slug conservé en repli local (dev, aperçu). Le domaine plateforme
-// est configurable via VITE_PLATFORM_DOMAIN (défaut « musea.nexacode.store »).
+// le chemin /c/:slug conservé en repli local (dev, aperçu).
 //
 // Le domaine de plateforme peut compter plusieurs niveaux : la comparaison porte
-// sur la chaîne entière, donc « bandjoun.musea.nexacode.store » est résolu
-// correctement sans traitement particulier.
+// sur la chaîne entière, donc un déploiement sur « app.exemple.com » résoudrait
+// « bandjoun.app.exemple.com » sans traitement particulier.
 //
-// La mise en service DNS/CloudFront (joker *.musea.nexacode.store) est décrite
+// La mise en service DNS/CloudFront (joker *.nexacode.store) est décrite
 // dans infra/ ; ce module en est la couche applicative.
 
-export const PLATFORM_DOMAIN = (import.meta.env.VITE_PLATFORM_DOMAIN || 'musea.nexacode.store').toLowerCase()
+// Le repli doit valoir la RACINE, jamais un sous-domaine : si la variable
+// d'environnement venait à manquer, un défaut à « musea.nexacode.store » ferait
+// silencieusement revenir l'application à l'ancienne architecture, où la
+// plateforme occupait un sous-domaine et où `musea` ne pouvait pas être loué.
+export const PLATFORM_DOMAIN = (import.meta.env.VITE_PLATFORM_DOMAIN || 'nexacode.store').toLowerCase()
 
 // Sous-domaines système réservés (miroir de la table `slugs_reserves`) : jamais une organisation.
 export const RESERVED_SUBDOMAINS = new Set([
   'admin', 'api', 'app', 'assets', 'blog', 'c', 'cdn', 'compte', 'demo', 'dev', 'docs',
-  'erp', 'ftp', 'help', 'inscription', 'login', 'mail', 'media', 'musea', 'preview',
+  // `musea` n'est PLUS réservé : la plateforme vit désormais sur la racine
+  // (nexacode.store), et `musea.nexacode.store` est un locataire comme un autre.
+  // Le laisser ici l'aurait rendu impossible à attribuer à une organisation.
+  'erp', 'ftp', 'help', 'inscription', 'login', 'mail', 'media', 'preview',
   'site', 'smtp', 'staging', 'static', 'status', 'support', 'test', 'www'
 ])
 

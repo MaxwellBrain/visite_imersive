@@ -18,11 +18,12 @@ cd "$(dirname "$0")/.."
 
 BUCKET="${S3_BUCKET:-}"
 DISTRIBUTION="${CLOUDFRONT_DISTRIBUTION_ID:-}"
-# Domaine RÉELLEMENT servi. « musea.space » a longtemps figuré ici, alors que le
-# site vit sur musea.nexacode.store : la vérification finale annonçait donc un
-# 404 à chaque déploiement, pourtant réussi. Une alerte qui se déclenche toujours
-# est pire qu'aucune alerte — elle apprend à ne plus la lire.
-DOMAINE="${PLATFORM_DOMAIN:-musea.nexacode.store}"
+# Domaine RÉELLEMENT servi. Depuis la correction d'architecture du 2026-08-20,
+# la PLATEFORME occupe la racine de la zone : "musea.nexacode.store" n'est plus
+# qu'un locataire parmi d'autres. Vérifier l'ancien domaine annoncerait un faux
+# échec à chaque déploiement — et une alerte qui se déclenche toujours n'est
+# plus lue.
+DOMAINE="${PLATFORM_DOMAIN:-nexacode.store}"
 
 # Si les variables ne sont pas fournies, on les demande à Terraform.
 if [ -z "$BUCKET" ] && [ -d infra/.terraform ]; then
