@@ -356,9 +356,14 @@ export async function pubPersonnage(id) {
   return data
 }
 
-export async function pubAllPersonnages() {
-  const { data } = await scoped(supabase.from('personnages').select('*')).eq('published', true).order('id')
-  return data || []
+// L'arbre généalogique complet : une lignée de chefs ne change pas d'une
+// navigation à l'autre. C'était la dernière page à repayer ses données à
+// chaque visite (4,3 s mesurées en ligne le 2026-08-20).
+export function pubAllPersonnages() {
+  return memo('personnages', async () => {
+    const { data } = await scoped(supabase.from('personnages').select('*')).eq('published', true).order('id')
+    return data || []
+  })
 }
 
 // Objets liés à un personnage (avec le type de lien) — « son histoire liée à l'objet »
