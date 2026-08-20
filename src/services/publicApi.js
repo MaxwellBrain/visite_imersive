@@ -185,14 +185,20 @@ export async function pubAudioTracks(assistantId) {
   return data || []
 }
 
-export async function pubPlans() {
-  const { data } = await scoped(supabase.from('subscription_plans').select('*')).eq('actif', true).order('prix')
-  return data || []
+// Tarifs et paliers de don : parmi les données les plus stables du site, et
+// pourtant rechargées à chaque passage au panier.
+export function pubPlans() {
+  return memo('plans', async () => {
+    const { data } = await scoped(supabase.from('subscription_plans').select('*')).eq('actif', true).order('prix')
+    return data || []
+  })
 }
 
-export async function pubDonationTiers() {
-  const { data } = await scoped(supabase.from('donation_tiers').select('*')).order('montant')
-  return data || []
+export function pubDonationTiers() {
+  return memo('dons', async () => {
+    const { data } = await scoped(supabase.from('donation_tiers').select('*')).order('montant')
+    return data || []
+  })
 }
 
 export async function pubObjectChefs(objectId) {
@@ -226,19 +232,24 @@ const productFrom = (r) => ({
 })
 
 // Liste des boutiques = musées publiés ayant au moins un produit publié.
-export async function pubBoutiques() {
-  const { data, error } = await scoped(supabase
-    .from('products')
-    .select('museum_id, museums!inner(id, nom, photo, type, published)'))
-    .eq('published', true)
-  if (error) { console.error('[public] boutiques', error.message); return [] }
-  const seen = new Map()
-  for (const r of data || []) {
-    const m = r.museums
-    if (m?.published && !seen.has(m.id)) seen.set(m.id, { id: m.id, nom: m.nom, photo: m.photo, type: m.type, count: 0 })
-    if (seen.has(m?.id)) seen.get(m.id).count++
-  }
-  return [...seen.values()]
+// La LISTE des boutiques (quels musées vendent, et combien d'articles) est
+// stable. Le CONTENU d'une boutique ne l'est pas — stock et prix bougent — et
+// n'est donc volontairement PAS mémorisé : voir pubMuseumProducts plus bas.
+export function pubBoutiques() {
+  return memo('boutiques', async () => {
+    const { data, error } = await scoped(supabase
+      .from('products')
+      .select('museum_id, museums!inner(id, nom, photo, type, published)'))
+      .eq('published', true)
+    if (error) { console.error('[public] boutiques', error.message); return [] }
+    const seen = new Map()
+    for (const r of data || []) {
+      const m = r.museums
+      if (m?.published && !seen.has(m.id)) seen.set(m.id, { id: m.id, nom: m.nom, photo: m.photo, type: m.type, count: 0 })
+      if (seen.has(m?.id)) seen.get(m.id).count++
+    }
+    return [...seen.values()]
+  })
 }
 
 // Produits publiés d'un musée (sa boutique).
