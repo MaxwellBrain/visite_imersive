@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { supabase } from '@/services/supabase'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { sendTenantWelcome } from '@/services/emailApi'
+import { urlPubliqueTenant } from '@/services/host'
 import '@/assets/public-site.css'
 
 // Inscription d'une organisation : compte → création du tenant (statut « en attente »).
@@ -75,7 +76,12 @@ watch(() => org.slug, (v) => {
   }, 450)
 })
 
-const publicUrl = computed(() => `${window.location.origin}/c/${org.slug || '…'}`)
+// L'adresse ANNONCÉE est le sous-domaine — `musee-odz.nexacode.store` — et non
+// le chemin `/c/musee-odz`. C'est celle que l'organisation imprimera et
+// partagera : lui montrer un chemin donnait l'impression qu'elle n'a pas de
+// site à elle. Le joker DNS répond déjà pour n'importe quel nom : rien n'est à
+// créer dans AWS au moment de l'inscription.
+const publicUrl = computed(() => urlPubliqueTenant(org.slug) || '…')
 const canCreateAccount = computed(() => account.email.includes('@') && account.password.length >= 6)
 // Seuls le nom et l'adresse publique sont obligatoires : tout le reste peut être
 // complété plus tard depuis « Mon organisation », pour ne pas décourager l'inscription.

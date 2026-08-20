@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { supabase } from '@/services/supabase'
+import { urlPubliqueTenant, PLATFORM_DOMAIN } from '@/services/host'
 import '@/assets/public-site.css'
 
 // Vitrine de la plateforme MUSÉA : présentation + inscription des organisations.
@@ -83,14 +84,17 @@ const atouts = [
       <span class="ps-over">{{ $t('platform.tenantsOver') }}</span>
       <h2 class="pf-h2">{{ $t('platform.tenantsTitle') }}</h2>
       <div class="pf-tenants">
-        <router-link v-for="t in tenants" :key="t.slug" :to="`/c/${t.slug}`" class="pf-tenant ps-card">
+        <!-- Chaque organisation a SON site sur SON sous-domaine : on quitte donc
+             la plateforme, d'où `<a>` plutôt que `<router-link>`. Et c'est cette
+             adresse-là qu'on affiche, celle qu'elle communiquera. -->
+        <a v-for="t in tenants" :key="t.slug" :href="urlPubliqueTenant(t.slug)" class="pf-tenant ps-card">
           <i class="pi pi-building" />
           <span>
             <strong>{{ t.nom }}</strong>
-            <small>/c/{{ t.slug }}</small>
+            <small>{{ t.slug }}.{{ PLATFORM_DOMAIN }}</small>
           </span>
           <i class="pi pi-arrow-right pf-tenant__go" />
-        </router-link>
+        </a>
       </div>
     </section>
 

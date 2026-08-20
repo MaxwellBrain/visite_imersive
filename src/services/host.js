@@ -26,6 +26,36 @@
 // plateforme occupait un sous-domaine et où `musea` ne pouvait pas être loué.
 export const PLATFORM_DOMAIN = (import.meta.env.VITE_PLATFORM_DOMAIN || 'nexacode.store').toLowerCase()
 
+/**
+ * ADRESSE PUBLIQUE d'une organisation — celle qu'on montre et qu'on partage.
+ *
+ * C'est `bandjoun.nexacode.store`, et NON `nexacode.store/c/bandjoun`. Le
+ * chemin `/c/:slug` reste une porte de service : il fonctionne toujours, mais
+ * il n'est plus l'adresse d'une organisation. Montrer la forme en chemin
+ * laissait croire qu'un locataire n'a pas de site à lui.
+ *
+ * AUCUNE CONFIGURATION AWS n'est requise pour un nouveau locataire : le joker
+ * DNS `*.nexacode.store` et le certificat qui le couvre répondent déjà pour
+ * n'importe quel nom. Le sous-domaine existe à la seconde où le slug est choisi.
+ *
+ * En développement (localhost) les sous-domaines n'existent pas : on retombe
+ * alors sur `/c/:slug`, sinon tout lien deviendrait intestable hors production.
+ *
+ * À ne pas confondre avec `canonicalOrigin(tenant)` plus bas, qui exige
+ * l'organisation entière et préfère son domaine personnalisé vérifié. Ici on ne
+ * dispose parfois QUE d'un slug — au formulaire d'inscription, l'organisation
+ * n'existe pas encore.
+ */
+export function urlPubliqueTenant(slug) {
+  const s = String(slug || '').trim().toLowerCase()
+  if (!s) return ''
+  if (typeof window === 'undefined') return `https://${s}.${PLATFORM_DOMAIN}`
+
+  const host = window.location.hostname
+  if (isLocalHost(host)) return `${window.location.origin}/c/${s}`
+  return `${window.location.protocol}//${s}.${PLATFORM_DOMAIN}`
+}
+
 // Sous-domaines système réservés (miroir de la table `slugs_reserves`) : jamais une organisation.
 export const RESERVED_SUBDOMAINS = new Set([
   'admin', 'api', 'app', 'assets', 'blog', 'c', 'cdn', 'compte', 'demo', 'dev', 'docs',

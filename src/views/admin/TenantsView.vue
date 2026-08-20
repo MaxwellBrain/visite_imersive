@@ -11,6 +11,7 @@ import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import { useAdminTenantStore } from '@/stores/useAdminTenantStore'
 import { sendTenantApproved } from '@/services/emailApi'
+import { urlPubliqueTenant } from '@/services/host'
 
 // Back-office PLATEFORME : approbation et suivi de toutes les organisations.
 // L'accès est doublement verrouillé : garde de route + is_super_admin() en base.
@@ -37,7 +38,9 @@ const rows = computed(() =>
 
 function money(v) { return formatMontant(v) }
 function dateFmt(d) { return d ? new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }) : '—' }
-function publicUrl(slug) { return `${window.location.origin}/c/${slug}` }
+// Le super-admin copie et transmet cette adresse aux organisations : ce doit
+// être leur sous-domaine, jamais un chemin sur le domaine de la plateforme.
+function publicUrl(slug) { return urlPubliqueTenant(slug) }
 
 async function copyLink(slug) {
   try {

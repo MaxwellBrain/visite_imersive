@@ -9,6 +9,7 @@ import Tag from 'primevue/tag'
 import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { supabase } from '@/services/supabase'
+import { urlPubliqueTenant } from '@/services/host'
 
 const { t } = useI18n()
 const auth = useAuthStore()
@@ -40,8 +41,17 @@ function fill() {
 onMounted(fill)
 watch(() => auth.tenant, fill)
 
-// Adresse publique du site de l'organisation.
-const publicUrl = computed(() => `${window.location.origin}/c/${form.slug || '…'}`)
+// Adresse publique du site de l'organisation : son SOUS-DOMAINE, la seule
+// qu'elle ait à communiquer.
+const publicUrl = computed(() => urlPubliqueTenant(form.slug) || '…')
+// Le site du locataire vit sur un AUTRE hôte : on le quitte l'ERP pour l'ouvrir.
+// `router.push` serait resté sur le domaine de la plateforme et n'aurait jamais
+// montré l'adresse réelle à celui qui doit la communiquer.
+function ouvrirSite() {
+  const u = publicUrl.value
+  if (u && u !== '…') window.open(u, '_blank', 'noopener')
+}
+
 const statut = computed(() => auth.tenant?.statut ?? 'en_attente')
 const statutSeverity = { approuve: 'success', en_attente: 'warn', suspendu: 'danger' }
 
@@ -124,8 +134,11 @@ async function save() {
         <div class="olink">
           <code>{{ publicUrl }}</code>
           <Button icon="pi pi-copy" text :aria-label="$t('admin.org.copy')" @click="copyLink" />
+          <!-- Le site du locataire vit sur un AUTRE hôte : on quitte l'ERP, on
+               n'y navigue pas en interne. `$router.push` serait resté sur le
+               domaine de la plateforme et n'aurait jamais montré l'adresse réelle. -->
           <Button icon="pi pi-external-link" text :aria-label="$t('admin.org.open')"
-            :disabled="statut !== 'approuve'" @click="$router.push(`/c/${form.slug}`)" />
+            :disabled="statut !== 'approuve'" @click="ouvrirSite" />
         </div>
         <small class="ohint">{{ $t('admin.org.publicLinkHint') }}</small>
       </section>

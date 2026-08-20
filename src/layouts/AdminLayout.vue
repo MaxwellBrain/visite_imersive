@@ -13,6 +13,7 @@ import { useObjectStore } from '@/stores/useObjectStore'
 import { usePricingStore } from '@/stores/usePricingStore'
 import { useGenealogyStore } from '@/stores/useGenealogyStore'
 import { useMessageStore } from '@/stores/useMessageStore'
+import { urlPubliqueTenant } from '@/services/host'
 import { supabase } from '@/services/supabase'
 
 const route = useRoute()
@@ -37,10 +38,11 @@ function toggleSidebar() {
 // Badge « à traiter » : nombre d'objets en brouillon (comme les compteurs orange du template).
 const draftCount = computed(() => objectStore.items.filter((o) => !o.published).length)
 
-// « Voir le site » doit mener au site de MON organisation (/c/<slug>).
-// Sans cela, /site résout « la première organisation approuvée » et renvoie
-// tout le monde vers le site du premier inscrit.
-const lienMonSite = computed(() => (auth.tenant?.slug ? `/c/${auth.tenant.slug}` : '/site'))
+// « Voir le site » mène au SOUS-DOMAINE de mon organisation.
+// Sans le slug, `/site` résoudrait « la première organisation approuvée » et
+// renverrait tout le monde vers le site du premier inscrit.
+const lienMonSite = computed(() =>
+  auth.tenant?.slug ? urlPubliqueTenant(auth.tenant.slug) : '/site')
 
 // Badge plateforme : organisations en attente de validation (super-admin uniquement).
 const pendingTenants = ref(0)
@@ -208,9 +210,11 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
         </label>
 
         <div class="topbar__right">
-          <router-link :to="lienMonSite" class="topbar__site" target="_blank">
+          <!-- `<a>` et non `<router-link>` : le site du locataire vit sur un
+               AUTRE hôte (son sous-domaine). Le routeur ne peut pas y aller. -->
+          <a :href="lienMonSite" class="topbar__site" target="_blank" rel="noopener">
             <i class="pi pi-external-link" /> <span>{{ $t('admin.layout.viewSite') }}</span>
-          </router-link>
+          </a>
           <LangSwitcher variant="light" />
           <button class="icon-btn" v-tooltip.bottom="$t('admin.layout.notifications')" :aria-label="$t('admin.layout.notifications')" @click="toggleNotif">
             <i class="pi pi-bell" />
