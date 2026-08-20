@@ -122,8 +122,21 @@ export const useSettingsStore = defineStore('settings', () => {
   //  1. tenantIdArg fourni  → site public d'une organisation précise (route /c/:slug)
   //  2. utilisateur rattaché → ERP : les réglages de SON organisation
   //  3. visiteur anonyme     → 1re organisation approuvée (site public historique)
-  async function load(tenantIdArg = null) {
+  //
+  // `force` : ces réglages étaient rechargés à CHAQUE navigation (le layout
+  // public et plusieurs vues appellent `load()` au montage), pour une donnée
+  // qui ne bouge presque jamais. Or un aller-retour vers Supabase coûte 323 à
+  // 2 050 ms — mesuré le 2026-08-20. On saute donc l'appel si les réglages de
+  // CETTE organisation sont déjà en mémoire.
+  //
+  // Sans risque de contenu périmé : l'abonnement temps réel ci-dessous
+  // répercute toute modification, qu'elle vienne de l'ERP ou d'un autre onglet.
+  async function load(tenantIdArg = null, { force = false } = {}) {
     const auth = useAuthStore()
+    const dejaCharge = settings.value
+      && (tenantIdArg == null || tenantId.value === tenantIdArg)
+    if (dejaCharge && !force) return settings.value
+
     const base = supabase.from('site_settings').select('*')
     let q
     if (tenantIdArg != null) q = base.eq('tenant_id', tenantIdArg)
@@ -132,6 +145,7 @@ export const useSettingsStore = defineStore('settings', () => {
     const { data, error } = await q.order('id').limit(1).maybeSingle()
     if (error) console.error('[settings] load', error.message)
     else if (data) { settings.value = fromRow(data); tenantId.value = data.tenant_id ?? null }
+    return settings.value
   }
 
   // Temps réel : toute modification enregistrée (depuis l'ERP ou un autre onglet)

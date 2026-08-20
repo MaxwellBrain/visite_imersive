@@ -8,13 +8,57 @@ import { supabase } from './supabase'
 // Tant qu'aucune organisation n'est fixée, on ne filtre pas (site historique).
 
 let publicTenantId = null
-export function setPublicTenant(id) { publicTenantId = id ?? null }
+export function setPublicTenant(id) {
+  // Changer d'organisation DOIT vider le cache : sans cela, un visiteur passant
+  // d'une chefferie à une autre verrait les musées de la première.
+  if (publicTenantId !== (id ?? null)) cache.clear()
+  publicTenantId = id ?? null
+}
 export function getPublicTenant() { return publicTenantId }
 
 // Restreint une requête à l'organisation affichée.
 function scoped(q) {
   return publicTenantId == null ? q : q.eq('tenant_id', publicTenantId)
 }
+
+// ============================================================================
+// MÉMORISATION entre navigations
+// ----------------------------------------------------------------------------
+// POURQUOI : `pubMuseums()` est appelé depuis cinq vues (accueil, catalogue,
+// panier, compte, layout). Chaque navigation vers l'une d'elles refaisait la
+// requête, alors que la liste des musées ne change pas entre deux clics.
+// Mesuré le 2026-08-20 : un aller-retour vers Supabase coûte 323 à 2 050 ms
+// même pour une requête triviale. Ce temps-là ne se gagne pas en optimisant la
+// requête — il se gagne en ne la faisant pas.
+//
+// DURÉE DE VIE : 5 minutes. Assez pour que la navigation paraisse instantanée,
+// assez court pour qu'une publication faite dans l'ERP apparaisse sans que le
+// visiteur ait à vider son cache. Un cache permanent ferait gagner quelques
+// millisecondes de plus au prix d'un site qui ment sur son contenu.
+//
+// On mémorise la PROMESSE, pas seulement le résultat : deux vues qui demandent
+// la même donnée en même temps partagent alors un seul appel réseau.
+// ============================================================================
+const cache = new Map()
+const DUREE_CACHE = 5 * 60 * 1000
+
+function memo(cle, produire, duree = DUREE_CACHE) {
+  const k = `${publicTenantId ?? 'tous'}:${cle}`
+  const e = cache.get(k)
+  if (e && Date.now() - e.pose < duree) return e.promesse
+
+  const promesse = produire().catch((err) => {
+    // Un échec ne doit pas rester en cache : la tentative suivante doit pouvoir
+    // aboutir, sinon une coupure passagère condamnerait la donnée 5 minutes.
+    cache.delete(k)
+    throw err
+  })
+  cache.set(k, { pose: Date.now(), promesse })
+  return promesse
+}
+
+// À appeler après une action qui modifie le contenu public (rare côté visiteur).
+export function viderCachePublic() { cache.clear() }
 
 // Colonnes des LISTES d'objets.
 //
@@ -34,21 +78,29 @@ const COLONNES_LISTE =
   ' model3d_name, model3d_ios_name, ar_placement, ar_echelle,' +
   ' depth_map_url, amplitude_relief'
 
-export async function pubMuseums() {
-  const { data, error } = await scoped(supabase.from('museums').select('*')).eq('published', true).order('id')
-  if (error) console.error('[public] museums', error.message)
-  return data || []
+// Mémorisées : appelées depuis cinq vues, elles étaient refaites à chaque
+// navigation alors que leur contenu ne change pas entre deux clics.
+export function pubMuseums() {
+  return memo('museums', async () => {
+    const { data, error } = await scoped(supabase.from('museums').select('*')).eq('published', true).order('id')
+    if (error) { console.error('[public] museums', error.message); return [] }
+    return data || []
+  })
 }
 
-export async function pubMuseum(id) {
-  const { data } = await scoped(supabase.from('museums').select('*')).eq('id', id).eq('published', true).maybeSingle()
-  return data
+export function pubMuseum(id) {
+  return memo(`museum:${id}`, async () => {
+    const { data } = await scoped(supabase.from('museums').select('*')).eq('id', id).eq('published', true).maybeSingle()
+    return data
+  })
 }
 
-export async function pubSectors(museumId) {
-  const { data } = await scoped(supabase.from('sectors').select('*'))
-    .eq('museum_id', museumId).eq('published', true).order('id')
-  return data || []
+export function pubSectors(museumId) {
+  return memo(`sectors:${museumId}`, async () => {
+    const { data } = await scoped(supabase.from('sectors').select('*'))
+      .eq('museum_id', museumId).eq('published', true).order('id')
+    return data || []
+  })
 }
 
 export async function pubObjectsForMuseum(museumId) {
