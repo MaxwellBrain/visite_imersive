@@ -1,0 +1,80 @@
+% -----------------------------------------------------------------------------
+%  Figure 3.5 — Chaîne d'intégration et de déploiement continus en service.
+%  Bande du haut : l'enchaînement déclenché à chaque dépôt de modification.
+%  Bande du bas : le déploiement, réservé à la branche principale, qui se termine
+%  par la vérification du site réellement servi au visiteur.
+% -----------------------------------------------------------------------------
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+  % ===================== INTÉGRATION CONTINUE ================================
+  \node[blocfort, text width=2.3cm, anchor=north, minimum height=13mm] (dev)
+       at (-6.0,0) {Poste de développement\\ \texttt{git push}};
+
+  \node[bloc, text width=2.2cm, anchor=north, minimum height=13mm] (git)
+       at (-3.2,0) {\textbf{Dépôt GitHub}};
+
+  \node[bloc, text width=3.1cm, anchor=north, minimum height=13mm] (ci)
+       at (0.2,0) {\textbf{Intégration continue}\\
+                   installation, compilation,\\
+                   \texttt{terraform fmt} et \texttt{validate}};
+
+  \node[bloc, text width=3.4cm, anchor=north, minimum height=13mm] (ctrl)
+       at (4.0,0) {\textbf{Contrôles du paquet produit}\\
+                   fichiers attendus, modèles 3D valides,
+                   adresse du service de données};
+
+  \draw[fleche] (dev.east) -- (git.west);
+  \draw[fleche] (git.east) -- (ci.west);
+  \draw[fleche] (ci.east) -- (ctrl.west);
+
+  \begin{scope}[on background layer]
+    \node[couche, fit=(dev)(ctrl), draw=keycemid] (bci) {};
+  \end{scope}
+  \node[titrecouche, anchor=west] at ([xshift=6pt]bci.north west)
+       {À CHAQUE DÉPÔT DE MODIFICATION};
+
+  % ===================== CONDITION D'ARRÊT ===================================
+  \node[blocgris, text width=3.4cm, anchor=north, minimum height=9mm] (stop)
+       at (4.0,-3.0) {\textbf{Échec} : la chaîne s'arrête,\\ rien n'est publié};
+  \draw[fleche, draw=keyceorange] (ctrl.south) -- (stop.north)
+        node[etiquette, pos=0.5, anchor=east, xshift=-3pt, text=keyceorange]
+        {si un contrôle\\ échoue};
+
+  % ===================== DÉPLOIEMENT CONTINU =================================
+  \node[bloc, text width=2.5cm, anchor=north, minimum height=14mm] (oidc)
+       at (-6.0,-4.9) {\textbf{Jeton OIDC}\\ de courte durée\\
+                       \textit{aucune clé permanente}};
+
+  \node[bloc, text width=2.4cm, anchor=north, minimum height=14mm] (pub)
+       at (-2.9,-4.9) {Publication en quatre passes vers \textbf{S3}};
+
+  \node[bloc, text width=2.4cm, anchor=north, minimum height=14mm] (purge)
+       at (0.2,-4.9) {Purge du cache \textbf{CloudFront}};
+
+  \node[blocfort, text width=3.2cm, anchor=north, minimum height=14mm] (verif)
+       at (3.8,-4.9) {\textbf{Vérification du site en ligne}\\
+                      \textit{on contrôle ce que le visiteur reçoit}};
+
+  \draw[fleche] (oidc.east) -- (pub.west);
+  \draw[fleche] (pub.east) -- (purge.west);
+  \draw[fleche] (purge.east) -- (verif.west);
+
+  \begin{scope}[on background layer]
+    \node[couche, fit=(oidc)(verif), draw=keycemid] (bcd) {};
+  \end{scope}
+  \node[titrecouche, anchor=west] at ([xshift=6pt]bcd.north west)
+       {SUR LA BRANCHE PRINCIPALE SEULEMENT};
+
+  % --- passage d'une bande à l'autre -----------------------------------------
+  \draw[fleche] ([xshift=1.1cm]bci.south west) -- ([xshift=1.1cm]bcd.north west)
+        node[etiquette, pos=0.5, anchor=west, xshift=4pt]
+        {si tous les contrôles passent};
+
+  % ===================== VOIE DOCKER =========================================
+  \node[blocext, text width=6.6cm, anchor=north, minimum height=10mm] (doc)
+       at (-3.2,-7.4) {\textbf{Voie Docker} — image multi-étapes (compilation
+                       Node, puis diffusion Nginx), employée pour reproduire en
+                       local le comportement de production};
+  \draw[flechefine, draw=keyceorange] (git.south) -- ++(0,-0.55) -| (doc.north);
+
+\end{tikzpicture}

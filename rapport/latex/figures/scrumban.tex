@@ -1,0 +1,79 @@
+% -----------------------------------------------------------------------------
+%  Figure 2.1 — Le tableau Scrumban adopté pour la conduite du projet.
+%  Le flux continu vient du Kanban (flèche du haut), la revue hebdomadaire vient
+%  du Scrum (boucle du bas). La limite de travail en cours est le garde-fou.
+% -----------------------------------------------------------------------------
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+  % ===================== FLUX CONTINU (Kanban) ===============================
+  \draw[fleche, draw=keycemid, line width=1pt] (-7.3,0.9) -- (7.3,0.9);
+  \node[etiquette, text=keycemid, font=\sffamily\tiny\bfseries] at (0,0.9)
+       {flux continu, hérité du Kanban : une tâche avance dès qu'elle est prête};
+
+  % ===================== LES CINQ COLONNES ===================================
+  \foreach \x/\titre/\id in {%
+      -6.0/{Backlog}/k1,
+      -3.0/{À faire cette semaine}/k2,
+       0.0/{En cours}/k3,
+       3.0/{En vérification}/k4,
+       6.0/{Terminé}/k5}
+  {\node[blocfort, text width=2.5cm, anchor=north, minimum height=9mm]
+        (\id) at (\x,0.3) {\titre};}
+
+  % --- la limite de travail en cours -----------------------------------------
+  \node[bloc, draw=keyceorange, fill=keycesoft, text width=2.5cm, anchor=north,
+        minimum height=6mm] (wip) at (0,-0.85)
+       {\textbf{limite : 2 tâches}};
+
+  % --- cartes du Backlog -----------------------------------------------------
+  \node[bloc, text width=2.5cm, anchor=north] at (-6.0,-0.85)
+       {billetterie à code QR};
+  \node[bloc, text width=2.5cm, anchor=north] at (-6.0,-1.85)
+       {campagnes d'information};
+  \node[bloc, text width=2.5cm, anchor=north] at (-6.0,-2.85)
+       {carte de partage};
+
+  % --- cartes de la semaine --------------------------------------------------
+  \node[bloc, text width=2.5cm, anchor=north] at (-3.0,-0.85)
+       {relief 2.5D};
+  \node[bloc, text width=2.5cm, anchor=north] at (-3.0,-1.85)
+       {généalogie navigable};
+
+  % --- cartes en cours (deux au plus) ----------------------------------------
+  \node[bloc, text width=2.5cm, anchor=north] at (0,-1.75)
+       {moteur de panorama};
+  \node[bloc, text width=2.5cm, anchor=north] at (0,-2.75)
+       {assistant conversationnel};
+
+  % --- cartes en vérification ------------------------------------------------
+  \node[bloc, text width=2.5cm, anchor=north] at (3.0,-0.85)
+       {cloisonnement des données};
+
+  % --- cartes terminées ------------------------------------------------------
+  \node[bloc, text width=2.5cm, anchor=north] at (6.0,-0.85)
+       {gestion des collections};
+  \node[bloc, text width=2.5cm, anchor=north] at (6.0,-1.85)
+       {visite immersive 360\textdegree};
+
+  % --- colonnes en fond ------------------------------------------------------
+  \begin{scope}[on background layer]
+    \foreach \x in {-6.0,-3.0,0.0,3.0,6.0}
+      {\draw[rounded corners=4pt, draw=keycegrey!45, dashed, line width=0.5pt]
+            (\x-1.42,0.45) rectangle (\x+1.42,-3.65);}
+  \end{scope}
+
+  % ===================== CONDITION DE PASSAGE ================================
+  \draw[fleche, draw=keyceorange, line width=0.9pt] (4.4,-4.05) -- (7.4,-4.05)
+        node[etiquette, pos=0.42, text=keyceorange, anchor=south]
+        {passage conditionné par le succès\\ de la chaîne d'intégration continue};
+
+  % ===================== REVUE HEBDOMADAIRE (Scrum) ==========================
+  \draw[fleche, draw=keycemid, line width=1pt]
+       (7.3,-5.25) -- (-7.3,-5.25);
+  \node[etiquette, text=keycemid, font=\sffamily\tiny\bfseries] at (0,-5.25)
+       {revue hebdomadaire avec l'encadreur, héritée du Scrum : le reste
+        retourne au Backlog};
+  \draw[lien, draw=keycemid] (7.3,-3.65) -- (7.3,-5.25);
+  \draw[fleche, draw=keycemid] (-7.3,-5.25) -- (-7.3,-3.65);
+
+\end{tikzpicture}

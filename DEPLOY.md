@@ -19,6 +19,14 @@ ne se gênent pas :
 Le navigateur du visiteur charge le front depuis CloudFront, puis parle
 directement à Supabase en HTTPS. Rien à héberger entre les deux.
 
+> **Une seconde voie existe, en parallèle de celle-ci.**
+> [`DEPLOY_CONTENEURS.md`](DEPLOY_CONTENEURS.md) décrit une pile conteneurisée
+> — Docker Hub, ECR, ECS Fargate, Kubernetes, SES, Secrets Manager — montée
+> dans [`infra-conteneurs/`](infra-conteneurs/), avec son propre état Terraform.
+> Elle sert le **même artefact** sur `conteneurs.nexacode.store` et ne touche
+> à rien de ce qui est décrit ici. La voie S3 + CloudFront reste celle par
+> défaut : pour du statique pur, elle coûte vingt fois moins.
+
 ---
 
 ## Prérequis

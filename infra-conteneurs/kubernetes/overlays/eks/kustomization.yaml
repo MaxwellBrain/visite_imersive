@@ -1,0 +1,41 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# ============================================================================
+# Cluster EKS — production
+# ----------------------------------------------------------------------------
+# Deux valeurs sont à remplacer après `terraform apply` (sorties `registre_ecr`
+# et `cluster_kubernetes.role_irsa`) :
+#
+#   · l'adresse du dépôt ECR, ci-dessous en `newName` ;
+#   · l'ARN du rôle IRSA, dans serviceaccount-irsa.yaml.
+#
+# La CI, elle, ne modifie pas ce fichier : elle appelle
+# `kustomize edit set image` juste avant d'appliquer.
+# ============================================================================
+
+namespace: musea
+
+resources:
+  - ../../base
+
+images:
+  - name: musea
+    # <compte>.dkr.ecr.eu-west-3.amazonaws.com/musea
+    newName: REMPLACER_PAR_LA_SORTIE_registre_ecr
+    newTag: latest
+
+patches:
+  - path: service-lb.yaml
+  - path: serviceaccount-irsa.yaml
+
+  - target:
+      kind: Deployment
+      name: musea
+    patch: |-
+      # En production on tire toujours l'image du registre : `IfNotPresent`
+      # servirait une image périmée déjà présente sur le nœud si l'étiquette
+      # ne changeait pas.
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always

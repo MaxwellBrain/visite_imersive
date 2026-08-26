@@ -1,0 +1,71 @@
+# ============================================================================
+# Copier en terraform.tfvars puis adapter. terraform.tfvars est ignoré par git :
+# il décrit VOTRE compte.
+#
+#   cp terraform.tfvars.example terraform.tfvars
+# ============================================================================
+
+# ── Zone DNS ────────────────────────────────────────────────────────────────
+# La MÊME zone que `infra/`. Terraform ne la crée pas : il n'y ajoute que les
+# enregistrements listés dans la sortie `cohabitation_avec_infra`.
+zone_domaine   = "nexacode.store"
+hosted_zone_id = "" # vide ⇒ recherche par nom, préférable
+
+# Nom d'hôte servi par les conteneurs.
+# ⚠️ Ne JAMAIS choisir ici le slug d'une organisation locataire : cet
+# enregistrement exact l'emporterait sur le joker et rendrait son sous-domaine
+# injoignable. « conteneurs », « k8s », « app » sont sûrs.
+sous_domaine = "conteneurs"
+
+environnement = "production"
+region        = "eu-west-3"
+
+# ── Image ───────────────────────────────────────────────────────────────────
+nom_image = "musea"
+
+# Dépôt Docker Hub visé par la CI, « compte/image ». Vide ⇒ ECR seulement.
+depot_dockerhub = ""
+
+# ── ECS Fargate — la voie recommandée ───────────────────────────────────────
+activer_ecs           = true
+cpu_tache             = 256 # 0,25 vCPU : largement assez pour nginx
+memoire_tache         = 512
+taches_minimum        = 2 # une par zone de disponibilité
+taches_maximum        = 6
+utiliser_fargate_spot = true # ~70 % d'économie sur les tâches au-delà de la première
+
+# ── EKS — Kubernetes managé, facultatif ─────────────────────────────────────
+# ⚠️ Le plan de contrôle est facturé à l'heure : ~70 $/mois AVANT le premier
+# nœud. Les manifestes de kubernetes/ tournent à l'identique sur un cluster
+# local (kind, Docker Desktop) : de quoi démontrer Kubernetes sans rien payer.
+# Ne passer à true que le jour où le trafic le justifie.
+activer_eks          = false
+version_kubernetes   = "1.31"
+type_instance_noeuds = "t3.small"
+noeuds_souhaites     = 2
+
+# ── SES — expédition de courriel ────────────────────────────────────────────
+# Installé sur un sous-domaine dédié pour ne toucher à AUCUN enregistrement
+# SendGrid existant. Les deux routes coexistent.
+activer_ses                = true
+sous_domaine_notifications = "notif" # ⇒ identité notif.nexacode.store
+
+# true crée une clé IAM durable pour les Edge Functions Supabase (qui tournent
+# hors d'AWS et ne peuvent pas endosser de rôle). La clé secrète atterrit alors
+# dans le fichier d'état : à n'activer qu'en connaissance de cause.
+creer_utilisateur_ses = false
+
+# ── Déploiement continu ─────────────────────────────────────────────────────
+# Dépôt autorisé à déployer, « proprietaire/depot ». Vide ⇒ aucun rôle créé
+# (l'infrastructure se monte quand même, on déploie alors depuis son poste).
+depot_github = ""
+
+# false si le compte possède DÉJÀ un fournisseur OIDC GitHub — c'est le cas dès
+# que `infra/` a été appliqué avec un depot_github renseigné. Vérifier avant :
+#   aws iam list-open-id-connect-providers
+creer_fournisseur_oidc_github = false
+
+# ── Alertes ─────────────────────────────────────────────────────────────────
+# AWS envoie un message de confirmation : sans clic sur le lien, aucune alerte
+# n'arrivera jamais.
+email_alertes = ""

@@ -1,0 +1,263 @@
+% =============================================================================
+%  LIMINAIRES — dédicace, remerciements, sigles, résumé, abstract, listes
+%  (La première de couverture et la page de garde ne sont pas incluses.)
+% =============================================================================
+
+% --------------------------------------------------------------------- DÉDICACE
+\entete{Dédicace}
+\chapter*{DÉDICACE}
+\addcontentsline{toc}{chapter}{DÉDICACE}
+
+\vspace{2cm}
+\begin{flushright}
+\begin{minipage}{0.62\textwidth}
+\begin{flushright}
+{\large\itshape Je dédie ce rapport à :}\\[1.4cm]
+{\Large\itshape\color{keyceblue} mes parents,}\\[0.5cm]
+{\large\itshape pour la confiance, la patience et les sacrifices\\
+consentis tout au long de ces années de formation.}
+\end{flushright}
+\end{minipage}
+\end{flushright}
+\vspace*{\fill}
+
+% ---------------------------------------------------------------- REMERCIEMENTS
+\cleardoublepage
+\entete{Remerciements}
+\chapter*{REMERCIEMENTS}
+\addcontentsline{toc}{chapter}{REMERCIEMENTS}
+
+Un travail de fin d'études n'est jamais l'œuvre d'une seule personne. Nous
+souhaitons exprimer notre reconnaissance envers toutes celles et tous ceux qui
+ont joué un rôle dans l'élaboration de ce travail. C'est ainsi que nous
+adressons un merci des plus sincères :
+
+\begin{itemize}
+  \item \textbf{aux membres du jury}, pour l'honneur qu'ils nous font en
+        acceptant d'évaluer ce travail et pour le temps consacré à sa lecture ;
+
+  \item \textbf{à M. GOUDJOU Blondon}, notre encadreur académique, pour ses
+        précieux apports, son accompagnement constant et la rigueur d'esprit
+        qu'il a su nous transmettre tout au long de la rédaction de ce travail ;
+
+  \item \textbf{à M. Adrien GHONSI}, notre encadreur professionnel au sein du
+        \emph{Think Tank} Foudjem, pour sa disponibilité, la pertinence de ses
+        conseils et le suivi rigoureux qu'il a assuré durant le stage ; c'est à
+        lui que nous devons la formulation initiale du problème de la visite
+        immersive, dont ce travail est issu ;
+
+  \item \textbf{à la Fondation Jean Félicien Gacha}, pour nous avoir accueilli
+        en qualité de stagiaire, pour nous avoir ouvert ses espaces et ses
+        archives, et pour nous avoir accordé la confiance ainsi que les
+        ressources nécessaires à la réalisation de nos missions ;
+
+  \item \textbf{à l'ensemble du corps enseignant de l'Institut Supérieur KEYCE
+        Informatique \& Intelligence Artificielle}, campus de Bafoussam, pour
+        la qualité des enseignements dispensés et pour leurs conseils ;
+
+  \item \textbf{à tous les membres de notre famille}, qui n'ont cessé de nous
+        épauler tant sur le plan moral que sur le plan financier ;
+
+  \item \textbf{à nos camarades de promotion}, pour l'émulation, l'entraide et
+        les relectures ;
+
+  \item \textbf{à toutes les personnes} qui, n'étant pas citées plus haut, ont
+        contribué d'une manière ou d'une autre à l'aboutissement de ce travail.
+\end{itemize}
+
+% -------------------------------------------------- LISTE DES SIGLES ET ABRÉVIATIONS
+\cleardoublepage
+\entete{Liste des sigles et abréviations}
+\chapter*{LISTE DES SIGLES ET ABRÉVIATIONS}
+\addcontentsline{toc}{chapter}{LISTE DES SIGLES ET ABRÉVIATIONS}
+
+\begingroup
+\setstretch{1.15}
+\small
+\begin{longtable}{@{}L{2.6cm}@{\hspace{0.6em}}L{11.6cm}@{}}
+\textbf{ACM}      & \emph{AWS Certificate Manager} — service de gestion des certificats de sécurité \\
+\textbf{API}      & \emph{Application Programming Interface} — interface de programmation applicative \\
+\textbf{ARCore}   & Cadriciel de réalité augmentée de Google pour Android \\
+\textbf{AWS}      & \emph{Amazon Web Services} — fournisseur d'infrastructure en nuage \\
+\textbf{CDN}      & \emph{Content Delivery Network} — réseau de diffusion de contenu \\
+\textbf{CI/CD}    & \emph{Continuous Integration / Continuous Deployment} — intégration et déploiement continus \\
+\textbf{CRUD}     & \emph{Create, Read, Update, Delete} — les quatre opérations de base sur une donnée \\
+\textbf{DNS}      & \emph{Domain Name System} — système de noms de domaine \\
+\textbf{ECR}      & \emph{Elastic Container Registry} — registre d'images de conteneurs d'AWS \\
+\textbf{ECS}      & \emph{Elastic Container Service} — orchestrateur de conteneurs d'AWS \\
+\textbf{EKS}      & \emph{Elastic Kubernetes Service} — service Kubernetes géré d'AWS \\
+\textbf{ERP}      & \emph{Enterprise Resource Planning} — progiciel de gestion intégré \\
+\textbf{FCFA}     & Franc de la Coopération Financière en Afrique Centrale \\
+\textbf{FinOps}   & \emph{Financial Operations} — discipline de pilotage des coûts du nuage \\
+\textbf{GLB}      & \emph{GL Transmission Format Binary} — format de fichier 3D binaire \\
+\textbf{HNSW}     & \emph{Hierarchical Navigable Small World} — structure d'index pour la recherche vectorielle \\
+\textbf{HTTPS}    & \emph{HyperText Transfer Protocol Secure} — protocole web chiffré \\
+\textbf{IA}       & Intelligence Artificielle \\
+\textbf{IaC}      & \emph{Infrastructure as Code} — infrastructure décrite sous forme de code \\
+\textbf{JSON}     & \emph{JavaScript Object Notation} — format d'échange de données \\
+\textbf{JWT}      & \emph{JSON Web Token} — jeton d'authentification signé \\
+\textbf{LiDAR}    & \emph{Light Detection And Ranging} — télémétrie par laser \\
+\textbf{LLM}      & \emph{Large Language Model} — grand modèle de langue \\
+\textbf{MIME}     & \emph{Multipurpose Internet Mail Extensions} — étiquette de type de fichier \\
+\textbf{OIDC}     & \emph{OpenID Connect} — protocole d'authentification déléguée \\
+\textbf{PWA}      & \emph{Progressive Web App} — application web installable \\
+\textbf{QR}       & \emph{Quick Response} — code-barres à deux dimensions \\
+\textbf{RA}       & Réalité Augmentée \\
+\textbf{RAG}      & \emph{Retrieval-Augmented Generation} — génération augmentée par la recherche \\
+\textbf{RLS}      & \emph{Row Level Security} — sécurité au niveau de la ligne \\
+\textbf{S3}       & \emph{Simple Storage Service} — service de stockage d'objets d'AWS \\
+\textbf{SaaS}     & \emph{Software as a Service} — logiciel en tant que service \\
+\textbf{SGBD}     & Système de Gestion de Base de Données \\
+\textbf{SPA}      & \emph{Single Page Application} — application web à page unique \\
+\textbf{SQL}      & \emph{Structured Query Language} — langage de requête structuré \\
+\textbf{TLS}      & \emph{Transport Layer Security} — protocole de chiffrement des échanges \\
+\textbf{TTS}      & \emph{Text To Speech} — synthèse vocale \\
+\textbf{2TUP}     & \emph{Two Track Unified Process} — processus unifié à deux branches \\
+\textbf{UML}      & \emph{Unified Modeling Language} — langage de modélisation unifié \\
+\textbf{URL}      & \emph{Uniform Resource Locator} — adresse web \\
+\textbf{USDZ}     & \emph{Universal Scene Description Zipped} — format 3D d'Apple \\
+\textbf{VR}       & \emph{Virtual Reality} — réalité virtuelle \\
+\textbf{WebGL}    & \emph{Web Graphics Library} — interface graphique 3D du navigateur \\
+\textbf{WebXR}    & Interface de réalité augmentée et virtuelle du navigateur \\
+\end{longtable}
+\endgroup
+
+% ----------------------------------------------------------------------- RÉSUMÉ
+\cleardoublepage
+\entete{Résumé}
+\chapter*{RÉSUMÉ}
+\addcontentsline{toc}{chapter}{RÉSUMÉ}
+
+\begingroup
+\setstretch{1.4}
+
+La valorisation numérique du patrimoine culturel constitue aujourd'hui un enjeu
+majeur pour les institutions désireuses d'élargir leur audience au-delà de leurs
+murs. La Fondation Jean Félicien Gacha, implantée à Bangoulap dans la région de
+l'Ouest du Cameroun, a exprimé le besoin de permettre à ses visiteurs de
+découvrir ses espaces sans contrainte de déplacement. C'est dans ce cadre que
+s'inscrit notre stage, effectué du 20 juin au 20 août 2026 au sein du
+\emph{Think Tank} Foudjem de la Fondation. Le constat de départ est simple :
+la découverte des espaces et des collections demeure conditionnée à une venue
+sur place, ce qui écarte les publics éloignés, la diaspora et les personnes à
+mobilité réduite, et ne permet pas de faire connaître le patrimoine de la
+structure à l'échelle numérique. Lorsqu'une présence en ligne existe, elle se
+réduit le plus souvent à une vitrine figée : des photographies plates, des
+notices courtes, aucune sensation d'espace, aucun lien entre les objets et
+aucune possibilité de poser une question.
+
+L'objectif général de l'étude était de concevoir et de réaliser une plateforme
+numérique unifiée capable de restituer à distance l'expérience de la visite.
+Sur le plan méthodologique, l'étude relève du niveau intégrateur : il s'agit
+d'une recherche interactive, conduite selon une approche mixte, associant
+l'analyse documentaire, l'observation directe des espaces, des entretiens
+semi-directifs avec le personnel de la Fondation et une enquête par
+questionnaire auprès d'un échantillon de visiteurs. La construction du logiciel
+a suivi le processus unifié 2TUP, modélisé en UML, et a été conduite selon une
+démarche DevOps où chaque modification du code est vérifiée puis mise en
+production automatiquement.
+
+La plateforme obtenue, nommée MUSÉA, articule quatre ensembles. Un progiciel de
+gestion intégré, couplé à un site public, centralise la gestion des musées, des
+salles, des œuvres, de la billetterie, de la boutique et des visiteurs. Un
+parcours immersif à 360 degrés, complété par la modélisation en trois dimensions
+et la réalité augmentée, permet de se déplacer dans les salles, de saisir un
+objet et de le poser à sa taille réelle dans son propre salon. Un assistant
+conversationnel fondé sur une architecture de génération augmentée par la
+recherche répond aux questions des visiteurs à partir des seuls documents
+validés par la Fondation. Enfin, un dispositif de rapprochement documentaire
+retrouve, dans les collections ouvertes du monde, les œuvres apparentées à
+celles de la Fondation. L'ensemble est déployé sur une infrastructure en nuage
+et son coût de fonctionnement est mesuré selon les principes du FinOps. Les
+hypothèses de départ ont été vérifiées : la restitution spatiale, l'ancrage
+documentaire de l'assistant et l'ouverture de l'architecture aux institutions
+partenaires ont été observés et mesurés.
+
+\endgroup
+
+\vspace{0.6cm}
+\noindent\textbf{Mots clés :} visite immersive ; réalité augmentée ;
+génération augmentée par la recherche ; DevOps ; patrimoine numérique.
+
+% --------------------------------------------------------------------- ABSTRACT
+\cleardoublepage
+\entete{Abstract}
+\chapter*{ABSTRACT}
+\addcontentsline{toc}{chapter}{ABSTRACT}
+
+\begingroup
+\setstretch{1.4}
+\selectlanguage{english}
+
+The digital promotion of cultural heritage has become a major challenge for
+institutions wishing to reach audiences beyond their physical premises. The Jean
+Félicien Gacha Foundation, based in Bangoulap in the West Region of Cameroon,
+expressed the need to let visitors discover its spaces without having to travel.
+This is the context of our internship, carried out from 20 June to 20 August
+2026 within the Foundation's Foudjem Think Tank. The initial observation is
+straightforward: discovering the spaces and the collections still requires being
+physically present, which excludes distant audiences, the diaspora and people
+with reduced mobility, and prevents the institution's heritage from being known
+at a digital scale. Where an online presence does exist, it is usually a static
+showcase: flat photographs, short captions, no sense of space, no connection
+between objects and no way of asking a question.
+
+The general objective of the study was to design and build a unified digital
+platform able to restore the experience of a visit remotely. Methodologically,
+the study belongs to the integrative level: it is interactive research,
+conducted through a mixed approach combining documentary analysis, direct
+observation of the premises, semi-structured interviews with the Foundation's
+staff and a questionnaire survey of a sample of visitors. Software construction
+followed the 2TUP unified process, modelled in UML, and was carried out
+according to a DevOps approach in which every change to the code is verified and
+then released automatically.
+
+The resulting platform, named MUSÉA, brings together four sets of features. An
+enterprise resource planning system, coupled with a public website, centralises
+the management of museums, rooms, artefacts, ticketing, the shop and visitors.
+A 360-degree immersive tour, complemented by three-dimensional modelling and
+augmented reality, makes it possible to move through the rooms, to select an
+object and to place it at its real size in one's own living room. A
+conversational assistant based on a retrieval-augmented generation architecture
+answers visitors' questions using only documents validated by the Foundation.
+Finally, a documentary matching mechanism finds, in the world's open
+collections, the artefacts related to those of the Foundation. The whole system
+is deployed on a cloud infrastructure whose running cost is measured according
+to FinOps principles. The initial hypotheses were verified: spatial
+restitution, the documentary grounding of the assistant and the openness of the
+architecture to partner institutions were all observed and measured.
+
+\selectlanguage{french}
+\endgroup
+
+\vspace{0.6cm}
+\noindent\textbf{Keywords:} immersive tour; augmented reality;
+retrieval-augmented generation; DevOps; digital heritage.
+
+% ------------------------------------------------------------ LISTE DES TABLEAUX
+\cleardoublepage
+\entete{Liste des tableaux}
+\addcontentsline{toc}{chapter}{LISTE DES TABLEAUX}
+\begingroup
+\setstretch{1.1}
+\listoftables
+\endgroup
+
+% ------------------------------------------------------------- LISTE DES FIGURES
+\cleardoublepage
+\entete{Liste des figures}
+\addcontentsline{toc}{chapter}{LISTE DES FIGURES}
+\begingroup
+\setstretch{1.1}
+\listoffigures
+\endgroup
+
+% ---------------------------------------------------------------------- SOMMAIRE
+\cleardoublepage
+\entete{Sommaire}
+\begingroup
+\renewcommand{\contentsname}{SOMMAIRE}
+\setstretch{1.2}
+\etocsetnexttocdepth{chapter}
+\tableofcontents
+\endgroup

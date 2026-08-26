@@ -66,7 +66,7 @@ async function rediger(system: string, user: string, maxTokens = 1200): Promise<
 async function callGroq(system: string, user: string, maxTokens: number): Promise<string | null> {
   const key = Deno.env.get('GROQ_API_KEY') || Deno.env.get('GROK_API_KEY')
   if (!key) return null
-  const model = Deno.env.get('GROQ_MODEL') || 'llama-3.3-70b-versatile'
+  const model = Deno.env.get('GROQ_MODEL') || 'openai/gpt-oss-120b'
   const ctrl = new AbortController()
   const timer = setTimeout(() => ctrl.abort(), 25000)
   try {

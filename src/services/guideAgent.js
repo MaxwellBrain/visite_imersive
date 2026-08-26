@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { getPublicTenant } from './publicApi'
 
 // Agent guide ANCRÉ sur le contenu publié (§3.3). Aucune écriture, périmètre limité (§3.4).
 //
@@ -11,6 +12,12 @@ import { supabase } from './supabase'
 // Appel de l'Edge Function (reformulation LLM ancrée, clé serveur). Renvoie { text, links }.
 async function askRemote(question, scope = {}, cards = []) {
   const body = { question }
+  // CLOISONNEMENT. Sans cette ligne le guide interroge le contenu publié de TOUTES
+  // les organisations approuvées : la RLS (`tenant_is_public`) distingue « publié »
+  // de « non publié », pas « chez moi » de « chez le voisin ». Un visiteur de la
+  // chefferie A verrait donc les œuvres de la chefferie B.
+  const tenantId = getPublicTenant()
+  if (tenantId != null) body.tenantId = tenantId
   if (scope.museumId) body.museumId = scope.museumId
   if (scope.sectorId) body.sectorId = scope.sectorId
   // Œuvres du monde : c'est le NAVIGATEUR qui interroge les collections ouvertes
@@ -28,6 +35,42 @@ async function askRemote(question, scope = {}, cards = []) {
     links: Array.isArray(data.links) ? data.links : [],
     cards: Array.isArray(data.cards) ? data.cards : [],
     source: data.source,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// RÉÉCRITURE DES CHEMINS AU PRÉFIXE COURANT
+//
+// L'agent exprime ses chemins sur le site historique (`/site/objets/32`). Or une
+// organisation peut être servie en `/c/<slug>/…` (développement, aperçu, et le
+// domaine de plateforme). Laisser `/site` tel quel ferait sortir le visiteur de
+// son organisation — pire, sur le domaine de plateforme `/site` redirige vers la
+// vitrine (voir le beforeEnter du routeur) : le lien casse purement et simplement.
+// ---------------------------------------------------------------------------
+function auPrefixeCourant(chemin) {
+  if (typeof window === 'undefined' || typeof chemin !== 'string') return chemin
+  const m = /^\/c\/([^/]+)/.exec(window.location.pathname)
+  return m ? chemin.replace(/^\/site(?=\/|$)/, `/c/${m[1]}`) : chemin
+}
+
+// Le modèle glisse parfois du Markdown (`**gras**`) que la bulle affiche tel quel,
+// puisqu'elle rend du texte brut. On le retire ici plutôt que de compter sur une
+// consigne : selon le moteur qui répond, la consigne passe ou ne passe pas.
+function sansMarkdown(t) {
+  return String(t || '')
+    .replace(/\*\*+([^*]+)\*\*+/g, '$1')   // **gras**
+    .replace(/__([^_]+)__/g, '$1')          // __gras__
+    .replace(/^#{1,6}\s+/gm, '')            // titres
+}
+
+
+// Applique les deux nettoyages à une réponse complète.
+function normaliserReponse(r) {
+  return {
+    ...r,
+    text: sansMarkdown(r.text),
+    links: (r.links || []).map((l) => ({ ...l, to: auPrefixeCourant(l.to) })),
+    cards: (r.cards || []).map((c) => (c.to ? { ...c, to: auPrefixeCourant(c.to) } : c)),
   }
 }
 
@@ -62,11 +105,11 @@ export async function ask(question, scope = {}) {
   }
 
   try {
-    const r = await askRemote(q, scope, cards)
+    const brut = await askRemote(q, scope, cards)
     // L'IA a rédigé le texte ; on garantit que les vignettes suivent.
-    if (cards.length && !(r.cards || []).length) r.cards = cards
-    journaliser(q, scope, r.source)
-    return r
+    if (cards.length && !(brut.cards || []).length) brut.cards = cards
+    journaliser(q, scope, brut.source)
+    return normaliserReponse(brut)
   } catch (e) {
     console.warn('[guide] Edge Function indisponible, repli local :', e?.message || e)
     const r = await askLocal(q, scope)
@@ -84,7 +127,7 @@ export async function ask(question, scope = {}) {
       } catch { /* la recherche mondiale ne doit jamais bloquer la réponse locale */ }
     }
     journaliser(q, scope, 'grounded')   // repli local : on n'a pas su répondre par l'IA
-    return r
+    return normaliserReponse(r)
   }
 }
 
@@ -181,15 +224,19 @@ async function askLocal(question, scope = {}) {
     }
   }
 
+  // Même cloisonnement que le chemin nominal : un repli qui fuite reste une fuite.
+  const tid = getPublicTenant()
+  const cl = (r) => (tid == null ? r : r.eq('tenant_id', tid))
+
   const kw = keywords(q)
   if (!kw.length) {
     // Repli scopé : sans mot-clé mais dans un musée/salle, on présente le lieu.
     if (scope.sectorId) {
-      const s = await supabase.from('sectors').select('nom,description,histoire').eq('id', scope.sectorId).maybeSingle()
+      const s = await cl(supabase.from('sectors').select('nom,description,histoire').eq('id', scope.sectorId)).maybeSingle()
       if (s.data) return { text: `« ${s.data.nom} » — ${s.data.histoire || s.data.description || ''}`.trim(), links: [] }
     }
     if (scope.museumId) {
-      const m = await supabase.from('museums').select('nom,description,histoire').eq('id', scope.museumId).maybeSingle()
+      const m = await cl(supabase.from('museums').select('nom,description,histoire').eq('id', scope.museumId)).maybeSingle()
       if (m.data) return { text: `${m.data.nom} : ${m.data.histoire || m.data.description || ''}`.trim(), links: [] }
     }
     return { text: "Pouvez-vous préciser ? Je peux localiser un objet, présenter un musée ou raconter l'histoire d'un chef.", links: [] }
@@ -197,14 +244,14 @@ async function askLocal(question, scope = {}) {
   const orNom = kw.map((k) => `nom.ilike.%${k}%`).join(',')
 
   // 1) FAQ
-  const faq = await supabase
+  const faq = await cl(supabase
     .from('faq').select('question,reponse').eq('visible', true)
-    .or(kw.map((k) => `question.ilike.%${k}%`).join(',')).limit(1)
+    .or(kw.map((k) => `question.ilike.%${k}%`).join(','))).limit(1)
   if (faq.data?.length) return { text: faq.data[0].reponse, links: [] }
 
   // 2) Secteurs (localisation)
-  const sec = await supabase
-    .from('sectors').select('nom, museums(id,nom,published)').eq('published', true).or(orNom).limit(2)
+  const sec = await cl(supabase
+    .from('sectors').select('nom, museums(id,nom,published)').eq('published', true).or(orNom)).limit(2)
   const secHit = (sec.data || []).filter((s) => s.museums?.published)
   if (secHit.length) {
     const s = secHit[0]
@@ -215,9 +262,9 @@ async function askLocal(question, scope = {}) {
   }
 
   // 3) Objets
-  const obj = await supabase
+  const obj = await cl(supabase
     .from('objects').select('id,nom,description,sectors(nom, museums(nom))').eq('published', true)
-    .or(kw.map((k) => `nom.ilike.%${k}%,nom_commun.ilike.%${k}%`).join(',')).limit(3)
+    .or(kw.map((k) => `nom.ilike.%${k}%,nom_commun.ilike.%${k}%`).join(','))).limit(3)
   if (obj.data?.length) {
     const first = obj.data[0]
     const loc = first.sectors?.museums?.nom ? ` (au ${first.sectors.museums.nom})` : ''
@@ -228,9 +275,9 @@ async function askLocal(question, scope = {}) {
   }
 
   // 4) Personnages
-  const pers = await supabase
+  const pers = await cl(supabase
     .from('personnages').select('nom,prenom,titre,biographie').eq('published', true)
-    .or(kw.map((k) => `nom.ilike.%${k}%,prenom.ilike.%${k}%,titre.ilike.%${k}%`).join(',')).limit(2)
+    .or(kw.map((k) => `nom.ilike.%${k}%,prenom.ilike.%${k}%,titre.ilike.%${k}%`).join(','))).limit(2)
   if (pers.data?.length) {
     const p = pers.data[0]
     const nom = p.prenom ? `${p.prenom} ${p.nom}` : p.nom
@@ -238,7 +285,7 @@ async function askLocal(question, scope = {}) {
   }
 
   // 5) Musées
-  const mus = await supabase.from('museums').select('id,nom,description').eq('published', true).or(orNom).limit(2)
+  const mus = await cl(supabase.from('museums').select('id,nom,description').eq('published', true).or(orNom)).limit(2)
   if (mus.data?.length) {
     const m = mus.data[0]
     return { text: `${m.nom} : ${m.description || ''}`, links: [{ label: `Découvrir ${m.nom}`, to: `/site/musees/${m.id}` }] }

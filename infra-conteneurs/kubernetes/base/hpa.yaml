@@ -1,0 +1,37 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: musea
+  namespace: musea
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: musea
+
+  minReplicas: 2
+  maxReplicas: 6
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          # Pourcentage du `requests` du conteneur, pas du nœud. Avec
+          # requests.cpu = 50m, 60 % signifie 30m consommés — un seuil
+          # atteint bien plus vite qu'on ne l'imagine.
+          averageUtilization: 60
+
+  # Sans cette section, l'autoscaler oscille : il ajoute des pods, la charge
+  # retombe, il les retire, la charge remonte. Monter vite, redescendre
+  # lentement, c'est ce qui stabilise.
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 120

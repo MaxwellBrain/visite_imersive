@@ -1,0 +1,41 @@
+% -----------------------------------------------------------------------------
+%  Figure 3.1 — Organigramme de la Fondation Jean Félicien Gacha
+%  Le Département Think Tank Fou'ndjem est en position d'état-major, rattaché
+%  directement à la direction, et mis en évidence en orange : c'est l'entité
+%  d'accueil du stage.
+% -----------------------------------------------------------------------------
+\begin{tikzpicture}
+
+  % --- direction générale ----------------------------------------------------
+  \node[blocfort, text width=3.8cm, minimum height=9mm] (dir) at (0,0)
+       {Direction générale};
+
+  % --- département d'accueil (état-major) ------------------------------------
+  \node[bloc, draw=keyceorange, fill=keycesoft, line width=1.1pt,
+        text width=3.3cm, minimum height=9mm] (tt) at (5.9,0)
+       {\textbf{Département \emph{Think Tank} Fou'ndjem}\\[1pt]
+        {\tiny\itshape entité d'accueil du stage}};
+  \draw[lien, draw=keyceorange, line width=1pt] (dir.east) -- (tt.west);
+
+  % --- bus horizontal des pôles opérationnels --------------------------------
+  \draw[lien] (dir.south) -- (0,-1.5);
+  \draw[lien] (-6.0,-1.5) -- (6.0,-1.5);
+
+  \foreach \x/\nom in {%
+      -6.0/{Conservation\\ et exposition},
+      -3.0/{Ateliers\\ et résidences},
+       0.0/{Accueil\\ du public},
+       3.0/{Communication},
+       6.0/{Administration\\ et finances}}
+  {%
+    \draw[lien] (\x,-1.5) -- (\x,-1.95);
+    \node[bloc, text width=2.4cm, anchor=north, minimum height=10mm]
+         at (\x,-1.95) {\nom};
+  }
+
+  % --- légende ---------------------------------------------------------------
+  \node[blocnote, anchor=north west, text width=13.5cm] at (-6.9,-3.5)
+       {Trait orange : rattachement d'état-major (conseil et réflexion).
+        Traits gris : rattachement hiérarchique (pôles opérationnels).};
+
+\end{tikzpicture}

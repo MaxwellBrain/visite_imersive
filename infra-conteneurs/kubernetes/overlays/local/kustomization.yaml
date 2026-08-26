@@ -1,0 +1,62 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# ============================================================================
+# Cluster LOCAL — kind, minikube, ou le Kubernetes intégré à Docker Desktop.
+# ----------------------------------------------------------------------------
+# C'est l'overlay de la démonstration : mêmes objets qu'en production, zéro
+# facture. Il permet de montrer en soutenance une mise à jour progressive, une
+# panne de pod rattrapée toute seule, une montée en charge — sur un cluster
+# qui tourne sur le portable.
+#
+#   docker build -t musea:local \
+#     --build-arg VITE_SUPABASE_URL=... \
+#     --build-arg VITE_SUPABASE_ANON_KEY=... .
+#   kind load docker-image musea:local          # inutile sous Docker Desktop
+#   kubectl apply -k infra-conteneurs/kubernetes/overlays/local
+#   kubectl -n musea rollout status deploy/musea
+#   open http://localhost:30080
+# ============================================================================
+
+namespace: musea
+
+resources:
+  - ../../base
+
+images:
+  - name: musea
+    newName: musea
+    newTag: local
+
+patches:
+  # NodePort : Docker Desktop et kind exposent alors le port sur localhost,
+  # sans avoir besoin d'un répartiteur de charge — qui, en local, resterait
+  # bloqué en « Pending » indéfiniment.
+  - target:
+      kind: Service
+      name: musea
+    patch: |-
+      - op: replace
+        path: /spec/type
+        value: NodePort
+      - op: add
+        path: /spec/ports/0/nodePort
+        value: 30080
+
+  - target:
+      kind: ConfigMap
+      name: musea-config
+    patch: |-
+      - op: replace
+        path: /data/environnement
+        value: local
+
+  # L'image est locale : `IfNotPresent` évite que Kubernetes n'aille la
+  # chercher sur Docker Hub et n'échoue en ImagePullBackOff.
+  - target:
+      kind: Deployment
+      name: musea
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent

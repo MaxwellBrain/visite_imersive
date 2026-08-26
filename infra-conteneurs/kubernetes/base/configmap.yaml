@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: musea-config
+  namespace: musea
+data:
+  # Configuration NON sensible seulement. Les secrets ne passent jamais par un
+  # ConfigMap : ils sont lisibles par quiconque a le droit de lire l'espace de
+  # noms, et apparaissent en clair dans un `kubectl get -o yaml`.
+  # Pour les vrais secrets sur EKS, voir kubernetes/README.md — Secrets Manager
+  # est monté via le pilote CSI, jamais recopié dans un objet Secret.
+  environnement: "production"

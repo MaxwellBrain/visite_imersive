@@ -456,3 +456,43 @@ tr:hover .row-actions .p-button, .row-actions .p-button:focus-visible { opacity:
   color: #c0392b;
   font-weight: 700;
 }
+
+/* ============================================================================
+   MOBILE — ce que PrimeVue ne dimensionne pas pour le doigt
+   ----------------------------------------------------------------------------
+   Ces règles valent pour TOUTE l'application, ERP compris : c'est aussi sur un
+   téléphone qu'un conservateur scanne un billet à l'entrée ou corrige une
+   notice depuis une salle.
+   ============================================================================ */
+@media (max-width: 640px) {
+  /* Le toast est large de 400 px EN DUR. Sur un écran de 375, il dépasse des
+     deux côtés — mesuré : bord gauche à -45 px, bord droit à 355.
+     SANS le préfixe `#app` : PrimeVue téléporte le toast dans <body>, hors de
+     l'application. Une règle préfixée ne l'atteint jamais — c'est ce qui a
+     laissé le débordement en place au premier essai.
+     Et `.p-toast.p-component` plutôt que `.p-toast` seul : le thème PrimeVue
+     est injecté APRÈS cette feuille, donc à spécificité égale c'est lui qui
+     l'emporte. Deux classes suffisent à passer devant, sans `!important`. */
+  .p-toast.p-component {
+    width: auto;
+    max-width: none;
+    left: 0.75rem;
+    right: 0.75rem;
+  }
+
+  /* 44 px de haut : les boutons ronds d'action faisaient 36 px, ceux des
+     barres d'outils 30 à 36. Trop petits pour être visés sans zoomer. */
+  #app .p-button { min-height: 44px; }
+  #app .p-button.p-button-icon-only { min-width: 44px; }
+
+  /* Un champ de moins de 44 px pousse iOS à zoomer à la mise au point, ce qui
+     décale toute la page. La taille de police y participe aussi : en dessous
+     de 16 px, Safari zoome quoi qu'on fasse. */
+  #app .p-inputtext,
+  #app .p-select,
+  #app .p-textarea,
+  #app .p-password input { min-height: 44px; font-size: 16px; }
+
+  /* Les dialogues collaient aux bords : on leur rend une marge. */
+  .p-dialog.p-component { max-width: calc(100vw - 1.5rem); margin: 0.75rem; }
+}

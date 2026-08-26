@@ -1,0 +1,554 @@
+% =============================================================================
+%  CHAPITRE 2 — MÉTHODOLOGIE DE L'ÉTUDE
+% =============================================================================
+\entete{Chapitre 2 — Méthodologie de l'étude}
+\chapter{Méthodologie de l'étude}
+\label{chap:methodo}
+
+\introchap
+
+La valeur d'un résultat tient à la rigueur du chemin qui y mène. Ce chapitre
+expose donc, avec le détail nécessaire à sa reproduction, la démarche suivie
+pour conduire l'étude. Il précise successivement la nature de la recherche
+entreprise et l'approche méthodologique retenue (section~\ref{sec:nature}), les
+variables et les indicateurs au moyen desquels le phénomène a été mesuré
+(section~\ref{sec:variables}), la population concernée et l'échantillon
+effectivement étudié (section~\ref{sec:echantillon}), les outils de collecte et
+les techniques d'analyse des données (section~\ref{sec:outils}), puis la méthode
+d'ingénierie logicielle et la démarche d'industrialisation adoptées pour
+construire l'artefact (sections~\ref{sec:2tup} et~\ref{sec:devops}). Il se clôt
+sur l'énoncé des difficultés rencontrées et des limites méthodologiques
+assumées.
+
+% =============================================================================
+\section{Nature de l'étude et approche méthodologique}
+\label{sec:nature}
+
+\subsection{Niveau et type de recherche}
+
+Le choix du niveau de recherche détermine la profondeur du traitement
+scientifique et, par voie de conséquence, les méthodes admissibles. Quatre
+niveaux sont habituellement distingués : perceptuel, appréhensif, compréhensif
+et intégrateur.
+
+La présente étude relève du \textbf{niveau intégrateur}. Nous ne nous sommes en
+effet pas limité à décrire une situation ni à en expliquer les causes : nous
+sommes intervenu sur la réalité observée en concevant, en construisant et en
+mettant en service un dispositif destiné à la transformer. Le type d'étude
+correspondant est la \textbf{recherche interactive}, également désignée dans la
+littérature en systèmes d'information sous le nom de \emph{recherche par la
+conception} (Hevner et al., 2004). Elle se caractérise par :
+
+\begin{itemize}
+  \item une forte interaction avec les acteurs du terrain — le personnel de la
+        Fondation a été associé à chaque étape ;
+  \item une démarche participative, les besoins ayant été formulés, corrigés et
+        arbitrés avec l'encadreur professionnel ;
+  \item la résolution d'un problème réel et non d'un cas d'école ;
+  \item le recours au prototypage : chaque fonctionnalité a été construite,
+        soumise, éprouvée, puis corrigée.
+\end{itemize}
+
+Ce niveau excède ce qui est exigé d'un travail de licence, lequel peut se
+limiter au niveau perceptuel ou appréhensif. Ce choix se justifie par la nature
+même de la commande : la Fondation n'attendait pas un diagnostic, elle attendait
+un outil.
+
+\subsection{Approche méthodologique}
+
+Nous avons retenu une \textbf{approche mixte}, associant les apports qualitatifs
+et quantitatifs, pour trois raisons.
+
+\begin{enumerate}
+  \item La compréhension du besoin — ce qu'une institution patrimoniale attend
+        d'une visite à distance — appelle des données qualitatives : entretiens,
+        observation, analyse des documents internes.
+  \item L'évaluation du dispositif construit appelle au contraire des données
+        quantitatives : temps de réponse, taux de réussite, scores de
+        correspondance, coûts mesurés.
+  \item Le croisement des deux permet de vérifier qu'un dispositif
+        techniquement performant est également jugé utile et utilisable par
+        ceux à qui il est destiné, conformément au modèle d'acceptation évoqué
+        au chapitre précédent.
+\end{enumerate}
+
+Le tableau~\ref{tab:approche} récapitule la répartition des deux approches selon
+les objectifs poursuivis.
+
+\begin{table}[htbp]
+\centering
+\caption{Articulation des approches qualitative et quantitative selon les objectifs}
+\label{tab:approche}
+\small
+\begin{tabularx}{\textwidth}{|L{2.4cm}|L{3.4cm}|X|}
+\hline
+\rowcolor{keycetete}
+\thead{Approche} & \thead{Objectifs concernés} & \thead{Nature des données recueillies} \\ \hline
+Qualitative & Compréhension du besoin, étude de l'existant, arbitrages de conception &
+Comptes rendus d'entretiens, notes d'observation, documents internes de la Fondation, retours d'usage \\ \hline
+Quantitative & Évaluation du dispositif, vérification des hypothèses &
+Mesures de performance, scores de correspondance documentaire, taux de réussite, relevés de coûts, réponses au questionnaire \\ \hline
+\end{tabularx}
+\source{Élaboré par nos soins.}
+\end{table}
+
+% =============================================================================
+\section{Variables et indicateurs de l'étude}
+\label{sec:variables}
+
+\subsection{Identification des variables}
+
+L'hypothèse générale énoncée en introduction affirme qu'une plateforme réunissant
+quatre composantes permet de restituer à distance l'essentiel de l'expérience de
+visite. La \textbf{variable expliquée} est donc :
+
+\begin{itemize}
+  \item \textbf{VE — la qualité de l'expérience de visite à distance}, entendue
+        comme la capacité du dispositif à procurer au visiteur éloigné une
+        perception des lieux, une compréhension des œuvres et une possibilité
+        d'interrogation comparables à celles d'une visite sur place.
+\end{itemize}
+
+Quatre \textbf{variables explicatives} composent cette hypothèse, une par
+hypothèse spécifique :
+
+\begin{itemize}
+  \item \textbf{V1 — la restitution spatiale des espaces et des œuvres} ;
+  \item \textbf{V2 — la mise en relation documentaire entre institutions} ;
+  \item \textbf{V3 — l'ancrage documentaire de l'assistant conversationnel} ;
+  \item \textbf{V4 — le cloisonnement et l'ouverture de l'architecture}.
+\end{itemize}
+
+\subsection{Opérationnalisation : les indicateurs}
+
+Une variable n'est exploitable que si l'on sait la mesurer. Le
+tableau~\ref{tab:variables} présente, pour chaque variable, les indicateurs
+retenus, leur unité et la source de la mesure.
+
+\begin{table}[htbp]
+\centering
+\caption{Variables, indicateurs et sources de mesure}
+\label{tab:variables}
+\footnotesize
+\begin{tabularx}{\textwidth}{|L{2.5cm}|X|L{2.2cm}|L{2.6cm}|}
+\hline
+\rowcolor{keycetete}
+\thead{Variable} & \thead{Indicateurs} & \thead{Unité} & \thead{Source de la mesure} \\ \hline
+\multirow{5}{*}{\parbox{2.5cm}{\textbf{V1}\\ Restitution spatiale}}
+ & Nombre de salles restituées en panorama & effectif & Base de données \\ \cline{2-4}
+& Nombre de points d'intérêt cliquables & effectif & Base de données \\ \cline{2-4}
+& Délai d'affichage d'une salle & secondes & Mesure navigateur \\ \cline{2-4}
+& Écart dimensionnel du modèle 3D & centimètres & Mesure sur maillage \\ \cline{2-4}
+& Couverture des appareils testés & \% & Essais sur appareils \\ \hline
+\multirow{5}{*}{\parbox{2.5cm}{\textbf{V2}\\ Mise en relation documentaire}}
+ & Nombre de collections interrogées & effectif & Journal des appels \\ \cline{2-4}
+& Nombre d'œuvres apparentées identifiées & effectif & Table des rapprochements \\ \cline{2-4}
+& Score de correspondance & /100 & Algorithme de notation \\ \cline{2-4}
+& Taux de validation par le conservateur & \% & Table des rapprochements \\ \cline{2-4}
+& Nombre de pays de dispersion & effectif & Données de dispersion \\ \hline
+\multirow{5}{*}{\parbox{2.5cm}{\textbf{V3}\\ Ancrage documentaire de l'assistant}}
+ & Taux de réponses appuyées sur un document interne & \% & Grille d'évaluation \\ \cline{2-4}
+& Taux d'aveu d'ignorance en l'absence de source & \% & Grille d'évaluation \\ \cline{2-4}
+& Taux de refus des questions hors périmètre & \% & Grille d'évaluation \\ \cline{2-4}
+& Délai moyen de réponse & secondes & Journal serveur \\ \cline{2-4}
+& Questions restées sans réponse & effectif & Journal des questions \\ \hline
+\multirow{4}{*}{\parbox{2.5cm}{\textbf{V4}\\ Cloisonnement et ouverture}}
+ & Tables protégées par une règle de sécurité & effectif & Schéma de la base \\ \cline{2-4}
+& Tentatives d'accès inter-organisations refusées & \% & Essais d'intrusion \\ \cline{2-4}
+& Délai de création d'une organisation & minutes & Essai de bout en bout \\ \cline{2-4}
+& Lignes de code à modifier pour un nouvel arrivant & effectif & Analyse du code \\ \hline
+\end{tabularx}
+\source{Élaboré par nos soins.}
+\end{table}
+
+\encadre{Note de méthode}{%
+Le choix d'indicateurs \emph{observables sur le système lui-même} — et non
+seulement déclarés par les utilisateurs — répond à une exigence de vérifiabilité.
+Un taux de refus des questions hors périmètre se constate ; une satisfaction
+déclarée s'interprète. Les deux ont été recueillis, mais les premiers fondent la
+vérification des hypothèses et les seconds l'éclairent.}
+
+% =============================================================================
+\section{Population et échantillon}
+\label{sec:echantillon}
+
+\subsection{Population de l'étude}
+
+La population de l'étude est constituée de trois ensembles d'acteurs concernés
+par la valorisation numérique du patrimoine de la Fondation Jean Félicien Gacha
+au cours de la période du 20~juin au 20~août 2026 :
+
+\begin{itemize}
+  \item \textbf{le personnel de la Fondation et du \emph{Think Tank} Foudjem},
+        c'est-à-dire les personnes intervenant dans la gestion des espaces, des
+        collections, de l'accueil et de la communication ;
+  \item \textbf{les visiteurs de la Fondation}, présents sur le site durant la
+        période, âgés de dix-huit ans et plus ;
+  \item \textbf{les institutions patrimoniales de la région de l'Ouest}
+        susceptibles de rejoindre la plateforme : chefferies, musées et
+        associations culturelles.
+\end{itemize}
+
+\subsection{Technique d'échantillonnage et taille de l'échantillon}
+
+Compte tenu de la taille réduite et bien identifiée des populations concernées,
+un échantillonnage probabiliste n'aurait apporté aucun gain de représentativité.
+Nous avons donc retenu deux techniques \textbf{non probabilistes} :
+
+\begin{itemize}
+  \item \textbf{le choix raisonné} pour le personnel : ont été retenues les
+        personnes exerçant effectivement une responsabilité sur les espaces, les
+        collections ou la communication, seules à même de renseigner les
+        pratiques réelles ;
+  \item \textbf{la convenance} pour les visiteurs : ont été sollicitées les
+        personnes présentes sur le site durant les journées d'observation et
+        ayant accepté de répondre.
+\end{itemize}
+
+Le tableau~\ref{tab:echantillon} présente la composition de l'échantillon.
+
+\begin{table}[htbp]
+\centering
+\caption{Composition de l'échantillon de l'étude}
+\label{tab:echantillon}
+\small
+\begin{tabularx}{\textwidth}{|X|C{2.4cm}|C{2.6cm}|L{3.4cm}|}
+\hline
+\rowcolor{keycetete}
+\thead{Catégorie d'acteurs} & \thead{Effectif} & \thead{Technique} & \thead{Outil de collecte} \\ \hline
+Personnel de la Fondation et du \emph{Think Tank} Foudjem & 06 & Choix raisonné & Entretien semi-directif \\ \hline
+Visiteurs présents sur le site & 42 & Convenance & Questionnaire \\ \hline
+Institutions patrimoniales approchées & 03 & Choix raisonné & Entretien exploratoire \\ \hline
+\rowcolor{keycetotal}
+\textbf{Total} & \textbf{51} & — & — \\ \hline
+\end{tabularx}
+\source{Enquête de terrain, juin--août 2026.}
+\end{table}
+
+Cet échantillon ne prétend pas à la représentativité statistique. Il vise la
+\emph{saturation de l'information} : les entretiens ont été conduits jusqu'à ce
+que les échanges cessent d'apporter des éléments nouveaux, critère usuel en
+recherche qualitative.
+
+% =============================================================================
+\section{Outils de collecte et techniques d'analyse des données}
+\label{sec:outils}
+
+\subsection{Outils de collecte}
+
+Quatre outils ont été mobilisés, chacun rattaché à un type de donnée précis.
+
+\begin{enumerate}
+  \item \textbf{Le guide d'entretien semi-directif} (annexe~\ref{ann:guide}).
+        Organisé autour de quatre thèmes — pratiques actuelles de valorisation,
+        difficultés rencontrées, attentes vis-à-vis d'un dispositif à distance,
+        contraintes de moyens — il a permis de recueillir les besoins auprès du
+        personnel. Sa forme semi-directive laisse à l'interlocuteur la liberté
+        d'aborder des points non anticipés, ce qui s'est révélé décisif : la
+        question de la dispersion des œuvres apparentées n'était pas prévue au
+        départ et a émergé d'un entretien.
+
+  \item \textbf{Le questionnaire} (annexe~\ref{ann:questionnaire}). Adressé aux
+        visiteurs, il comporte dix-huit questions fermées et deux questions
+        ouvertes, réparties en quatre rubriques : profil du répondant, pratiques
+        numériques, attentes relatives à une visite à distance, appréciation du
+        prototype après démonstration. Un pré-test auprès de cinq personnes a
+        conduit à reformuler trois questions jugées ambiguës et à supprimer une
+        question redondante.
+
+  \item \textbf{La grille d'observation.} Utilisée lors des visites guidées,
+        elle a servi à relever le parcours effectif des visiteurs dans les
+        espaces, les points d'arrêt, les questions spontanément posées au guide
+        et la durée moyenne de stationnement devant les œuvres. Ces relevés ont
+        directement orienté la conception du parcours immersif et
+        l'identification des questions que l'assistant devait savoir traiter.
+
+  \item \textbf{La fiche documentaire.} Elle a encadré le dépouillement des
+        documents internes de la Fondation — inventaires, notices, plaquettes,
+        photographies d'archives — ainsi que la revue de la littérature
+        scientifique et de la documentation technique des éditeurs.
+\end{enumerate}
+
+\subsection{Techniques d'analyse}
+
+\subsubsection{Analyse qualitative}
+
+Les entretiens ont fait l'objet d'une \textbf{analyse thématique de contenu}.
+Après retranscription, les propos ont été découpés en unités de sens, codées,
+puis regroupées en catégories. Cinq thèmes ont émergé : l'accessibilité, la
+perception de l'espace, la mise en relation des objets, la fiabilité de
+l'information et la pérennité économique du dispositif. Aucun logiciel spécialisé
+n'a été employé : le volume traité — six entretiens — ne le justifiait pas, et un
+dépouillement manuel systématique offrait une maîtrise supérieure du codage.
+
+\subsubsection{Analyse quantitative}
+
+Les réponses au questionnaire ont été traitées par \textbf{statistique
+descriptive} : effectifs, fréquences, pourcentages et moyennes, présentés sous
+forme de tableaux et de graphiques. Les mesures relevées sur le système
+— délais, scores, taux — ont fait l'objet de comparaisons avant/après, notamment
+pour évaluer l'apport de l'enrichissement des requêtes documentaires. Le tableur
+a suffi à ces traitements.
+
+\subsubsection{Évaluation de l'assistant conversationnel}
+
+L'assistant a été évalué au moyen d'une \textbf{grille d'évaluation} appliquée à
+un jeu de questions construit à l'avance
+(annexe~\ref{ann:grille}). Ce jeu comporte quatre familles de questions :
+
+\begin{itemize}
+  \item des questions \textbf{documentées}, dont la réponse figure dans les
+        textes fournis par la Fondation — l'assistant doit répondre exactement ;
+  \item des questions \textbf{non documentées}, portant sur le périmètre de la
+        Fondation mais sans source disponible — l'assistant doit reconnaître
+        qu'il ne sait pas ;
+  \item des questions \textbf{hors périmètre} (météo, actualité, informatique
+        générale) — l'assistant doit refuser poliment ;
+  \item des questions \textbf{pièges}, formulées de manière à suggérer une
+        réponse fausse — l'assistant ne doit pas suivre la suggestion.
+\end{itemize}
+
+Cette construction est délibérée : elle mesure non seulement ce que l'assistant
+sait, mais surtout ce qu'il refuse d'inventer, qui est le critère décisif en
+médiation culturelle.
+
+% =============================================================================
+\section{Méthode d'ingénierie logicielle}
+\label{sec:2tup}
+
+\subsection{Choix du langage de modélisation}
+
+Le langage de modélisation unifié (UML) a été retenu pour la conception. Ce
+choix se justifie par trois arguments :
+
+\begin{itemize}
+  \item \textbf{la standardisation} : UML étant une norme reconnue de l'Object
+        Management Group, les modèles produits restent lisibles par tout
+        intervenant ultérieur, ce qui importe pour un système destiné à être
+        repris par la Fondation ;
+  \item \textbf{la souplesse} : ses diagrammes couvrent aussi bien la structure
+        des données que les flux d'interaction, ce qui convient à un système
+        composite associant gestion, immersion et assistance ;
+  \item \textbf{la qualité de la documentation produite} : les diagrammes
+        constituent une documentation durable, indispensable à la maintenance.
+\end{itemize}
+
+UML~2 propose treize diagrammes, répartis entre une vue statique et une vue
+dynamique, comme le montre le tableau~\ref{tab:uml}. Parmi eux, trois ont été
+retenus : le diagramme de cas d'utilisation, le diagramme de classes et le
+diagramme de séquence, complétés par un diagramme de déploiement pour
+l'infrastructure.
+
+\begin{table}[htbp]
+\centering
+\caption{Les deux vues d'UML~2 et leurs diagrammes respectifs}
+\label{tab:uml}
+\small
+\begin{tabularx}{\textwidth}{|X|X|}
+\hline
+\rowcolor{keycetete}
+\thead{Diagrammes structurels (vue statique)} & \thead{Diagrammes comportementaux (vue dynamique)} \\ \hline
+Diagramme de classes & Diagramme de cas d'utilisation \\ \hline
+Diagramme d'objets & Diagramme de séquence \\ \hline
+Diagramme de composants & Diagramme d'activités \\ \hline
+Diagramme de déploiement & Diagramme d'états-transitions \\ \hline
+Diagramme de paquetages & Diagramme de communication \\ \hline
+Diagramme de structure composite & Diagramme global d'interaction \\ \hline
+& Diagramme de temps \\ \hline
+\end{tabularx}
+\source{Adapté de la spécification UML~2 de l'Object Management Group.}
+\end{table}
+
+\subsection{Choix du processus : 2TUP}
+
+UML est un langage, non une méthode : il faut lui adjoindre un processus. Parmi
+les processus fondés sur UML — RUP, OMT, OOSE, 2TUP — notre choix s'est porté sur
+le \textbf{2TUP} (\emph{Two Track Unified Process}), déclinaison du processus
+unifié développée pour répondre aux systèmes d'information soumis à des
+changements constants.
+
+L'expression « deux branches » désigne les deux axes que le processus traite
+séparément avant de les réunir :
+
+\begin{itemize}
+  \item la \textbf{branche fonctionnelle}, qui part de l'expression des besoins
+        des utilisateurs et aboutit au modèle du métier, indépendamment de toute
+        technique ;
+  \item la \textbf{branche technique}, qui part des contraintes techniques
+        — matériel, réseau, plateformes cibles, sécurité — et aboutit à
+        l'architecture ;
+  \item la \textbf{branche de réalisation}, qui fusionne les deux précédentes en
+        une conception préliminaire puis détaillée, avant le codage et les
+        essais.
+\end{itemize}
+
+Ce processus s'est révélé particulièrement adapté à notre cas. Les contraintes
+techniques du projet — impossibilité d'ajouter des dépendances logicielles,
+nécessité d'un fonctionnement sur téléphone d'entrée de gamme, exigence de
+cloisonnement entre organisations — étaient si structurantes qu'elles méritaient
+d'être instruites en parallèle des besoins, et non après eux.
+
+\begin{figure}[htbp]
+\centering
+\aplacer{7cm}{Représenter le cycle en Y du processus 2TUP : à gauche la branche
+fonctionnelle (capture des besoins fonctionnels $\rightarrow$ analyse), à droite
+la branche technique (capture des besoins techniques $\rightarrow$ conception
+générique), la jonction en conception préliminaire, puis conception détaillée,
+codage et essais, enfin recette. Faire figurer, sur chaque branche, les
+livrables produits dans le cadre du présent projet.}
+\caption{Le cycle en Y du processus 2TUP appliqué au projet}
+\label{fig:2tup}
+\source{Adapté de Roques et Vallée (2007).}
+\end{figure}
+
+% =============================================================================
+\section{Démarche d'industrialisation : le choix du DevOps}
+\label{sec:devops}
+
+\subsection{Justification du choix}
+
+La construction d'un logiciel ne s'achève pas à l'écriture du code : encore
+faut-il le livrer, le corriger et le faire évoluer sans interrompre le service.
+Trois raisons ont conduit à adopter une démarche DevOps dès le début du projet
+plutôt qu'à la fin.
+
+\begin{enumerate}
+  \item \textbf{La sécurité du travail.} Un stage de deux mois ne laisse aucune
+        marge pour reconstruire ce qui aurait été cassé sans qu'on s'en
+        aperçoive. Des contrôles automatiques déclenchés à chaque modification
+        signalent la régression en quelques minutes.
+
+  \item \textbf{La reproductibilité.} La Fondation devra un jour reprendre le
+        système. Une mise en production qui repose sur une suite de gestes
+        manuels mémorisés par une seule personne n'est pas transmissible ; une
+        mise en production décrite dans un fichier l'est.
+
+  \item \textbf{La sensibilité du dispositif aux détails d'exploitation.}
+        L'expérience du projet a montré qu'un modèle tridimensionnel servi avec
+        une étiquette de type erronée s'affiche correctement dans le navigateur
+        mais empêche toute session de réalité augmentée. Ce type d'anomalie ne
+        se voit pas à l'œil : il se vérifie automatiquement, ou il passe
+        inaperçu jusqu'au jour de la démonstration.
+\end{enumerate}
+
+\subsection{Les pratiques retenues}
+
+Quatre pratiques ont été mises en œuvre :
+
+\begin{itemize}
+  \item \textbf{le contrôle de version} de l'intégralité du projet, code
+        applicatif et description de l'infrastructure comprise ;
+  \item \textbf{l'intégration continue} : chaque dépôt de modification déclenche
+        la compilation et une batterie de contrôles portant sur le résultat
+        produit ;
+  \item \textbf{le déploiement continu} : une modification acceptée est publiée
+        automatiquement, avec purge du cache de diffusion et vérification, après
+        coup, de ce que reçoit réellement le visiteur ;
+  \item \textbf{l'infrastructure décrite par le code}, afin que l'environnement
+        de production puisse être recréé à l'identique.
+\end{itemize}
+
+La chaîne effectivement mise en place et son évolution proposée sont décrites
+respectivement au chapitre~3 et au chapitre~4.
+
+% =============================================================================
+\section{Outils et environnement de l'étude}
+\label{sec:outilsetude}
+
+Le tableau~\ref{tab:outils} recense les outils employés, en distinguant leur
+rôle dans le travail.
+
+\begin{table}[htbp]
+\centering
+\caption{Outils, technologies et environnements mobilisés}
+\label{tab:outils}
+\footnotesize
+\begin{tabularx}{\textwidth}{|L{3.0cm}|L{3.9cm}|X|}
+\hline
+\rowcolor{keycetete}
+\thead{Domaine} & \thead{Outil ou technologie} & \thead{Rôle dans le travail} \\ \hline
+\multirow{4}{*}{\parbox{3.0cm}{Interface}}
+ & Vue~3 & Cadriciel de construction de l'interface \\ \cline{2-3}
+& Vite~5 & Chaîne de compilation et serveur de développement \\ \cline{2-3}
+& PrimeVue~4 & Bibliothèque de composants d'interface pour l'ERP \\ \cline{2-3}
+& Pinia, Vue~Router, Vue~I18n & État applicatif, navigation, bilinguisme \\ \hline
+\multirow{4}{*}{\parbox{3.0cm}{Données et services}}
+ & PostgreSQL~17 & Base de données relationnelle \\ \cline{2-3}
+& Supabase & Authentification, sécurité au niveau de la ligne, fonctions serveur \\ \cline{2-3}
+& \texttt{pgvector} (index HNSW) & Stockage et recherche des plongements \\ \cline{2-3}
+& Deno & Exécution des fonctions serveur \\ \hline
+\multirow{3}{*}{\parbox{3.0cm}{Immersion et 3D}}
+ & WebGL (moteur écrit sur mesure) & Rendu des panoramas à 360~degrés et du relief \\ \cline{2-3}
+& \texttt{model-viewer}, WebXR & Affichage 3D et réalité augmentée \\ \cline{2-3}
+& Meshroom, Blender & Photogrammétrie et préparation des maillages \\ \hline
+\multirow{3}{*}{\parbox{3.0cm}{Intelligence artificielle}}
+ & Groq (modèles Llama) & Génération et reformulation de texte \\ \cline{2-3}
+& \texttt{gte-small} & Production des plongements lexicaux \\ \cline{2-3}
+& ElevenLabs & Synthèse vocale du guide \\ \hline
+\multirow{5}{*}{\parbox{3.0cm}{Industrialisation}}
+ & Git, GitHub & Contrôle de version et hébergement du dépôt \\ \cline{2-3}
+& GitHub Actions & Intégration et déploiement continus \\ \cline{2-3}
+& Docker & Conteneurisation de l'application \\ \cline{2-3}
+& Terraform & Description de l'infrastructure \\ \cline{2-3}
+& AWS (S3, CloudFront, Route~53, ACM, IAM) & Hébergement et diffusion \\ \hline
+\multirow{3}{*}{\parbox{3.0cm}{Conception et rédaction}}
+ & Visual Studio Code & Édition du code \\ \cline{2-3}
+& \texttt{draw.io} & Réalisation des schémas \\ \cline{2-3}
+& \LaTeX & Composition du présent rapport \\ \hline
+\end{tabularx}
+\source{Élaboré par nos soins.}
+\end{table}
+
+% =============================================================================
+\section{Difficultés rencontrées et limites méthodologiques}
+
+L'honnêteté méthodologique commande d'exposer les obstacles rencontrés, car ils
+conditionnent la portée des résultats.
+
+\begin{enumerate}
+  \item \textbf{Impossibilité d'installer de nouvelles bibliothèques.} Le poste
+        de travail utilisé pendant le stage ne permettait pas l'installation de
+        nouvelles dépendances logicielles. Cette contrainte, subie et non
+        choisie, a eu une conséquence majeure : le moteur de panorama, le moteur
+        de relief, l'encodeur de codes QR, le générateur de fichiers 3D et le
+        globe de dispersion ont dû être écrits intégralement. Ce qui semblait
+        une entrave s'est révélé instructif — le dispositif final ne dépend
+        d'aucune bibliothèque tierce pour ses fonctions les plus visibles — mais
+        a coûté un temps considérable.
+
+  \item \textbf{Absence de clés d'accès à quatre grandes collections.} Europeana,
+        le Rijksmuseum, la Smithsonian Institution et les Harvard Art Museums
+        exigent une clé que nous n'avons pu obtenir dans les délais. Le
+        rapprochement documentaire porte donc sur cinq sources et non sur neuf,
+        ce qui minore mécaniquement le nombre d'œuvres apparentées trouvées.
+
+  \item \textbf{Comparaison portant sur le texte et non sur l'image.} Faute de
+        processeur graphique et de possibilité d'installer un modèle de vision,
+        les plongements ont été calculés sur les descriptions textuelles des
+        œuvres et non sur leurs photographies. Deux objets visuellement
+        semblables mais décrits différemment peuvent donc échapper au
+        rapprochement. Cette limite est explicitement assumée et figure parmi
+        les perspectives.
+
+  \item \textbf{Essais de réalité augmentée limités.} Le décodage des codes QR
+        par caméra et le démarrage effectif d'une session de réalité augmentée
+        n'ont pu être éprouvés que sur un nombre restreint d'appareils, le poste
+        de développement ne disposant pas des interfaces nécessaires.
+
+  \item \textbf{Taille de l'échantillon.} Conduite auprès d'une institution
+        unique et d'un échantillon de convenance, l'étude ne permet pas de
+        généralisation statistique. Ses enseignements sont transférables sous
+        réserve de vérification.
+\end{enumerate}
+
+\conclchap
+
+Ce chapitre a exposé la démarche de l'étude : une recherche interactive de
+niveau intégrateur, conduite selon une approche mixte, dont les quatre variables
+explicatives ont été rendues mesurables par un ensemble d'indicateurs
+observables sur le système lui-même. Il a précisé la population, l'échantillon,
+les outils de collecte et les techniques d'analyse, puis la méthode
+d'ingénierie — le processus 2TUP appuyé sur UML — et la démarche
+d'industrialisation retenue. Les limites assumées y ont été énoncées sans
+détour, car elles bornent la portée des résultats. Le chapitre suivant présente
+le terrain, les données recueillies et les résultats obtenus.

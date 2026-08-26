@@ -5,13 +5,22 @@
 //   SENDGRID_API_KEY  — Twilio SendGrid, clé de la forme « SG.… »
 //                       (alias acceptés : SEND_GRID_API_KEY, TWILIO_SENDGRID_API_KEY)
 //   RESEND_API_KEY    — Resend
-//   EMAIL_PROVIDER    — facultatif : « sendgrid » ou « resend » pour forcer le choix
+//   AWS_SES_ACCESS_KEY_ID + AWS_SES_SECRET_ACCESS_KEY — Amazon SES
+//                       (+ AWS_SES_REGION, AWS_SES_CONFIGURATION_SET ; voir ses.ts)
+//   EMAIL_PROVIDER    — facultatif : « sendgrid », « resend » ou « ses »
 //   EMAIL_FROM        — expéditrice, ex. « MUSÉA <contact@votredomaine.cm> »
 //
-// Sans EMAIL_PROVIDER, la première clé trouvée l'emporte, SendGrid en tête.
+// Sans EMAIL_PROVIDER, la première clé trouvée l'emporte, SendGrid en tête,
+// puis Resend, puis SES. Poser une clé SES ne change donc RIEN à une
+// installation qui expédie déjà : il faut EMAIL_PROVIDER=ses pour basculer.
 //
 // Types gérés : recu_commande | acces_debloque | organisation_approuvee | bienvenue
-//               | campagne | reponse_message
+//               | campagne | reponse_message | nouvelle_organisation
+//
+// SUPER_ADMIN_EMAIL — destinataire des alertes internes (nouvelle_organisation).
+// Ce type est le seul à ne PAS recevoir de destinataire du frontend : l'adresse
+// de l'administrateur de la plateforme n'a pas à circuler dans le navigateur.
+// Secret absent = alerte ignorée en silence, l'inscription aboutit quand même.
 //
 // Sans clé configurée, la fonction répond 200 { skipped: true } : l'application
 // continue de fonctionner normalement, seul l'e-mail n'est pas envoyé.
@@ -23,6 +32,9 @@
 //              du compte, depuis onboarding@resend.dev.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+// Troisième route d'expédition, ajoutée sans rien retirer : SES n'est retenu
+// que si SendGrid et Resend sont absents, ou si EMAIL_PROVIDER=ses le demande.
+import { sesConfigure, viaSes } from './ses.ts'
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -120,6 +132,24 @@ function build(type: string, d: Record<string, any>) {
     return {
       sujet: `Votre espace est en ligne — ${marque}`,
       html: layout({ titre: 'Votre organisation est approuvée', corps, marque, couleur, lien: d.lien, lienTexte: 'Voir mon site' })
+    }
+  }
+
+  // ALERTE INTERNE — une organisation vient de s'inscrire et attend une décision.
+  // Sans cet e-mail, personne n'est prévenu : le super-admin doit penser de
+  // lui-même à ouvrir le back-office, et le client attend sans comprendre.
+  if (type === 'nouvelle_organisation') {
+    const corps = `
+      <p style="margin:0 0 16px;line-height:1.6;font-size:15px"><strong>${esc(d.nomOrganisation)}</strong> vient de créer son espace et attend votre approbation.</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 4px;font-size:14px">
+        <tr><td style="padding:6px 0;color:#5c615c">Adresse prévue</td><td style="padding:6px 0;text-align:right"><strong>${esc(d.adresseSite || '—')}</strong></td></tr>
+        <tr><td style="padding:6px 0;color:#5c615c">Contact</td><td style="padding:6px 0;text-align:right">${esc(d.contactEmail || '—')}</td></tr>
+        <tr><td style="padding:6px 0;color:#5c615c">Type</td><td style="padding:6px 0;text-align:right">${esc(d.typeOrganisation || '—')}</td></tr>
+      </table>
+      <p style="margin:16px 0 0;line-height:1.6;font-size:14px;color:#5c615c">Tant qu'elle n'est pas approuvée, son site reste introuvable pour le public.</p>`
+    return {
+      sujet: `À valider : ${sujetLigne(d.nomOrganisation)} — ${marque}`,
+      html: layout({ titre: 'Nouvelle organisation à valider', corps, marque, couleur, lien: d.lien, lienTexte: 'Ouvrir la file de validation' })
     }
   }
 
@@ -221,6 +251,12 @@ function resolveProvider(): { provider: string; key: string | null; from: string
     || Deno.env.get('SEND_GRID_API_KEY')
     || Deno.env.get('TWILIO_SENDGRID_API_KEY')
   const resendKey = Deno.env.get('RESEND_API_KEY')
+  // SES demande deux valeurs (clé d'accès ET clé secrète) : `sesConfigure()`
+  // vérifie les deux. Seule la clé d'accès circule ici, la secrète est relue
+  // au moment de signer — elle n'a aucune raison de traverser ce module.
+  const sesKey = sesConfigure()
+    ? (Deno.env.get('AWS_SES_ACCESS_KEY_ID') || Deno.env.get('AWS_ACCESS_KEY_ID') || null)
+    : null
   const choix = (Deno.env.get('EMAIL_PROVIDER') || '').toLowerCase()
 
   // Une expéditrice commune évite d'avoir à reconfigurer en changeant de service.
@@ -231,8 +267,15 @@ function resolveProvider(): { provider: string; key: string | null; from: string
 
   if (choix === 'sendgrid') return { provider: 'sendgrid', key: sendgridKey ?? null, from }
   if (choix === 'resend') return { provider: 'resend', key: resendKey ?? null, from }
+  if (choix === 'ses') return { provider: 'ses', key: sesKey, from }
+
+  // Ordre de repli INCHANGÉ : SendGrid d'abord, Resend ensuite. SES ne prend la
+  // main que si aucun des deux n'est configuré — poser une clé SES ne modifie
+  // donc jamais le comportement d'une installation qui expédie déjà.
   if (sendgridKey) return { provider: 'sendgrid', key: sendgridKey, from }
-  return { provider: 'resend', key: resendKey ?? null, from }
+  if (resendKey) return { provider: 'resend', key: resendKey, from }
+  if (sesKey) return { provider: 'ses', key: sesKey, from }
+  return { provider: 'resend', key: null, from }
 }
 
 // « MUSÉA <contact@domaine.cm> » → { nom, email }. SendGrid exige les deux séparés,
@@ -285,7 +328,23 @@ Deno.serve(async (req) => {
   try { body = await req.json() } catch { return json({ error: 'bad_json' }, 400) }
 
   const { type, to, tenantId, orderId, ...data } = body || {}
-  if (!type || !to) return json({ error: 'missing_fields' }, 400)
+  if (!type) return json({ error: 'missing_fields' }, 400)
+
+  // ALERTE INTERNE — l'adresse du super-admin n'a rien à faire dans le
+  // navigateur : le front demande l'envoi, le serveur décide à qui. Elle vient
+  // du secret SUPER_ADMIN_EMAIL, sinon des profils portant ce rôle.
+  let destinataire: string = to
+  if (type === 'nouvelle_organisation' && !destinataire) {
+    // `profiles` ne porte pas l'adresse (elle vit dans auth.users) : on passe
+    // donc par un secret, ce qui évite en prime d'exposer au navigateur
+    // l'adresse de l'administrateur de la plateforme.
+    //   Supabase → Edge Functions → Secrets → SUPER_ADMIN_EMAIL
+    destinataire = Deno.env.get('SUPER_ADMIN_EMAIL') || ''
+    // Sans destinataire, on s'arrête sans bruit : une inscription réussie ne
+    // doit pas échouer parce que personne n'est joignable côté plateforme.
+    if (!destinataire) return json({ skipped: true, raison: 'super_admin_email_absent' })
+  }
+  if (!destinataire) return json({ error: 'missing_fields' }, 400)
 
   // `orderId` est extrait ci-dessus pour la journalisation, mais le gabarit du reçu
   // l'affiche aussi (« Commande n°… ») : sans ce réajout il valait `undefined` dans
@@ -303,7 +362,7 @@ Deno.serve(async (req) => {
   const log = async (statut: string, erreur?: string, providerId?: string) => {
     try {
       await admin.from('email_log').insert({
-        tenant_id: tenantId ?? null, type, destinataire: to, sujet: message.sujet,
+        tenant_id: tenantId ?? null, type, destinataire, sujet: message.sujet,
         statut, erreur: erreur ?? null, order_id: orderId ?? null,
         provider_id: providerId ?? null,
         // Sans clé, aucun service n'a été sollicité : inscrire « resend » (la branche
@@ -315,14 +374,18 @@ Deno.serve(async (req) => {
 
   // Aucune clé configurée : on ne bloque pas l'application.
   if (!key) {
-    await log('desactive', 'aucune cle API e-mail (SENDGRID_API_KEY ou RESEND_API_KEY)')
+    await log('desactive', 'aucune cle API e-mail (SENDGRID_API_KEY, RESEND_API_KEY ou AWS_SES_ACCESS_KEY_ID)')
     return json({ skipped: true, reason: 'no_api_key' })
   }
 
   try {
     const envoi = provider === 'sendgrid'
-      ? await viaSendGrid(key, from, String(to), message)
-      : await viaResend(key, from, String(to), message)
+      ? await viaSendGrid(key, from, String(destinataire), message)
+      : provider === 'ses'
+        // SES relit ses identifiants lui-même : la clé secrète n'a pas à
+        // transiter par cette fonction.
+        ? await viaSes(from, String(destinataire), message)
+        : await viaResend(key, from, String(destinataire), message)
 
     if (!envoi.ok) {
       await log('echec', `${envoi.status}: ${envoi.detail.slice(0, 300)}`)

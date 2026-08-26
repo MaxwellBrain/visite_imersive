@@ -2,7 +2,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '@/stores/useSettingsStore'
-import { pubMuseums, pubFeaturedObjects, pubFeaturedProducts, oeuvresPopulaires } from '@/services/publicApi'
+import { pubMuseums, pubFeaturedObjects, pubFeaturedProducts, oeuvresPopulaires, pubObjects3D } from '@/services/publicApi'
+import Objet3DVedette from '@/components/public/Objet3DVedette.vue'
 import ProductCard from '@/components/public/ProductCard.vue'
 import InstallPwa from '@/components/public/InstallPwa.vue'
 import EventsSection from '@/components/public/EventsSection.vue'
@@ -18,18 +19,26 @@ const settings = useSettingsStore()
 const museums = ref([])
 const objects = ref([])
 const products = ref([])
+// Œuvres à faire tourner en 3D dès l'accueil. Trois suffisent : au-delà, on
+// ferait tourner plusieurs scènes WebGL en même temps sur le téléphone du
+// visiteur, ce qui se paie en batterie avant de se payer en émerveillement.
+const objets3d = ref([])
 const favorites = ref(new Set())
 
 // Visuel du hero : réglable dans l'ERP, avec repli sur la photo livrée.
-const HERO_DEFAUT = '/hero/hero-main.jpg'
+// Version web de la même photo. L'originale fait 7952 × 5304 px pour 1,3 Mo :
+// tout visiteur d'un site sans visuel personnalisé la téléchargeait en entier,
+// pour l'afficher dans un cadre de 1200 px de large. Ramenée à 1920 px, elle
+// pèse 113 Ko et se voit exactement pareil.
+const HERO_DEFAUT = '/hero/hero-plateforme.jpg'
 
 onMounted(async () => {
   // Les réglages sont chargés par PublicLayout, qui SAIT quelle organisation
   // afficher (il vient de résoudre le nom d'hôte). Les demander ici lançait une
   // seconde requête en parallèle, partie avant que l'organisation soit connue :
   // elle revenait avec les réglages d'un autre locataire et écrasait les bons.
-  ;[museums.value, objects.value, products.value] = await Promise.all([
-    pubMuseums(), pubFeaturedObjects(6), pubFeaturedProducts(4)
+  ;[museums.value, objects.value, products.value, objets3d.value] = await Promise.all([
+    pubMuseums(), pubFeaturedObjects(6), pubFeaturedProducts(4), pubObjects3D(3)
   ])
   // MISE EN AVANT AUTOMATIQUE — les œuvres les plus consultées passent devant.
   // On ne remplace la sélection que si l'audience mesurée est SUFFISANTE : avec
@@ -121,6 +130,28 @@ function toggleFav(id) {
         <div><strong>{{ b.t }}</strong><span>{{ b.s }}</span></div>
       </div>
     </div>
+
+    <!-- EN 3D, TOUT DE SUITE.
+         Les œuvres modélisées tournent d'elles-mêmes dès qu'on arrive à leur
+         hauteur : la promesse du site se voit avant d'être lue. Le visiteur
+         peut les faire pivoter à la main, ou ouvrir la fiche pour la RA. -->
+    <section v-if="objets3d.length" class="wrap sec3d">
+      <div class="sec-head">
+        <div>
+          <span class="sec-over">{{ $t('home.obj3dOver') }}</span>
+          <h2>{{ $t('home.obj3dTitle') }}</h2>
+        </div>
+      </div>
+      <p class="sec3d__lead">{{ $t('home.obj3dLead') }}</p>
+      <div class="sec3d__grille">
+        <Objet3DVedette
+          v-for="o in objets3d"
+          :key="o.id"
+          :objet="o"
+          :lien="to(`/objets/${o.id}`)"
+        />
+      </div>
+    </section>
 
     <!-- Œuvres à la une -->
     <section v-if="objects.length" class="wrap">
@@ -281,6 +312,11 @@ function toggleFav(id) {
 
 /* ===== Sections ===== */
 .wrap { max-width: 1240px; margin: 0 auto; padding: 3.4rem 1.5rem 0; }
+
+/* Œuvres en 3D — la grille s'adapte : trois de front sur écran large, une seule
+   sur téléphone, où faire tourner un modèle demande déjà toute la place. */
+.sec3d__lead { max-width: 68ch; color: #5c615c; line-height: 1.65; margin: -0.9rem 0 1.5rem; font-size: 0.94rem; }
+.sec3d__grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
 .sec-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.6rem; }
 .sec-over { display: block; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--site-primary); margin-bottom: 0.35rem; }
 .sec-head h2 { font-family: 'Anton', 'Inter', sans-serif; font-weight: 400; text-transform: uppercase; font-size: clamp(1.5rem, 3vw, 2.1rem); letter-spacing: 0.01em; margin: 0; color: #101210; }

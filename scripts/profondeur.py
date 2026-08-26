@@ -121,6 +121,7 @@ def rattacher(externe_id, url):
     r.raise_for_status()
 
 
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--limite", type=int, default=10)

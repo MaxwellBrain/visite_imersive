@@ -149,6 +149,12 @@ export default {
     themeMuseums: 'museums',
     discoverWork: 'Discover the work',
     featured: 'Featured works',
+    // Works in 3D, rotating right on the home page.
+    obj3dOver: 'In three dimensions',
+    obj3dTitle: 'Turn around the work',
+    obj3dLead: 'These pieces are modelled: they rotate on their own, and you can spin them with your finger. Open the record to place them in your own room in augmented reality.',
+    obj3dLoading: 'Loading the model…',
+    obj3dOpen: 'See it large',
     ourMuseums: 'Our museums',
     workFallback: 'Heritage work',
     bandTitle: 'From the object to the chief, trace the lineage',
@@ -171,6 +177,39 @@ export default {
     installed: 'App installed',
     iosHint: 'On iPhone/iPad: tap Share then "Add to Home Screen".',
     manualHint: 'In your browser menu (⋮), choose "Install app" or "Add to Home screen".',
+  },
+  // Platform setup (/installation) — designating the super-admin.
+  setup: {
+    checking: 'Checking the platform…',
+    title: 'Set up the platform',
+    lead: 'Designate the platform administrator. They approve organisations, verify domains, and see every tenant.',
+    tabNew: 'Create an account',
+    tabExisting: 'Use an existing account',
+    existingNote: 'Sign in with an account you already have: it will receive the platform administrator role.',
+    fName: 'Your name',
+    fNamePlaceholder: 'First and last name',
+    fEmail: 'Email address',
+    fPassword: 'Password',
+    fPasswordPlaceholder: 'At least 6 characters',
+    fPasswordConfirm: 'Confirm password',
+    fPasswordExisting: 'Account password',
+    create: 'Create and become administrator',
+    claim: 'Become administrator',
+    onceOnly: 'This page works only once. As soon as an administrator is designated it closes for good — the check is done by the database, not the browser.',
+    errMismatch: 'The two passwords do not match.',
+    err_mismatch: 'The two passwords do not match.',
+    err_incomplet: 'Enter a valid email address and a password of at least 6 characters.',
+    err_email_pris: 'That address already has an account. Use “Use an existing account”.',
+    err_identifiants: 'Wrong address or password.',
+    err_deja_configure: 'An administrator has already been designated for this platform.',
+    err_non_authentifie: 'The session could not be opened. Try again.',
+    err_profil_introuvable: 'No profile is attached to this account.',
+    closedTitle: 'Platform already set up',
+    closedLead: 'An administrator has already been designated. This page no longer has any effect.',
+    goLogin: 'Go to sign in',
+    doneTitle: 'All set',
+    doneLead: 'You are the platform administrator. Organisations awaiting approval are on your dashboard.',
+    goDashboard: 'Open the dashboard'
   },
   // Platform legal documents (/conditions and /confidentialite).
   legal: {
@@ -211,6 +250,33 @@ export default {
     }
   },
   platform: {
+    // Super-admin validation queue: approvals and custom domains.
+    validation: {
+      title: 'Awaiting your decision',
+      refresh: 'Refresh',
+      empty: 'Nothing is waiting for a decision.',
+      pendingOrgs: 'Organisations to approve ({n})',
+      pendingDomains: 'Domains to verify ({n})',
+      approve: 'Approve',
+      reject: 'Reject',
+      approved: 'Organisation approved — its site is now live.',
+      rejected: 'Organisation rejected.',
+      confirmApprove: 'Approve “{nom}”? Its public site becomes visible immediately.',
+      confirmReject: 'Reject “{nom}”? Its space will stay unreachable for the public.',
+      confirmForce: 'Mark {domaine} as verified without DNS proof? Only do this if you know this domain really belongs to that organisation.',
+      check: 'Check DNS',
+      force: 'Force',
+      domainForced: 'Domain marked as verified (without DNS proof).',
+      domainOk: 'Domain verified: the expected TXT record is in place.',
+      domainKo: 'Domain not verified — the TXT record is missing or different.',
+      domainHelp: 'Verification queries the DNS. It only succeeds once the organisation has created the TXT record below: that is the proof it owns the domain.',
+      toCreate: 'Record to create at the domain’s DNS host:',
+      copy: 'Copy',
+      copied: 'Copied.',
+      found: 'Found instead:',
+      routing: 'The domain currently points to:',
+      lastTry: 'Last attempt:'
+    },
     // PLATFORM dashboard (nexacode.store/dashboard, super-admin only).
     dash: {
       title: 'Platform overview',
@@ -247,12 +313,87 @@ export default {
     a4: 'Online shop', a4d: 'Sell books, crafts and souvenirs; direct ordering via WhatsApp.',
     a5: 'Genealogy of lineages', a5d: 'Publish the dynasties and link each work to the sovereign who carried it.',
     a6: 'QR code ticketing', a6d: 'Sell access online and scan tickets at the entrance.',
+    a7: 'Your identity, not ours', a7d: 'Your colours, your logo, your visuals: the site is yours, not a template anyone can spot.',
+    a8: 'What the public actually looks at', a8d: 'Your most viewed works and the questions left unanswered, measured day after day.',
+
+    // Visitor experience — DESCRIPTIVE captions: these photos illustrate
+    // immersive setups, they are not screenshots of the platform.
+    xpOver: 'The experience',
+    xpTitle: 'What a visitor lives, once your collections are online',
+    xpLead: '3D and augmented reality are not gimmicks: they show what a display case cannot — an object from every angle, a room as it once was, a gesture nobody performs any more.',
+    xp1: 'The object takes its place again', xp1d: 'The visitor raises a tablet and the room recovers its colours, its hangings, its former life.',
+    xp2: 'Immersion, standing in the room', xp2d: 'A headset, and you step into a vanished place in the middle of the collection itself.',
+    xp3: 'Interpretation in your pocket', xp3d: 'Everyone explores at their own pace, guided by the markers the curator laid down.',
+    xp4: 'Heritage, differently', xp4d: 'Technology does not erase the work: it shows it to those who will never be able to come.',
+    xp5: 'Places we thought were lost', xp5d: 'What burned, what collapsed, what was taken away: all of it can still be visited.',
+
+    // The problem — stated plainly, because institutions live it.
+    probOver: 'The situation',
+    probTitle: 'An immense heritage, almost invisible online',
+    prob1: 'A brochure site is no longer enough', prob1d: 'A few photos and an introduction: visitors look, then close the tab. Nothing to explore, nothing to take away.',
+    prob2: 'Immersive tech stays out of reach', prob2d: '3D, augmented reality, an intelligent guide — each is a project of months, on a budget few institutions have.',
+    prob3: 'Everything rests on a rare skill', prob3d: 'With no developer at hand, the smallest update waits, and the site visibly ages.',
+    probSolution: 'MUSÉA brings all of it together in one platform, ready the day you sign up.',
+
+    // Social proof — no testimonials yet, so we say the truth: the platform is
+    // starting, and that is a reason to be part of it.
+    proofTitle: 'You run a museum, a chieftaincy, a foundation?',
+    proofLead: 'The platform is welcoming its first institutions. Joining now shapes what the tool becomes — and your site goes live this week.',
+    proofCount: '{n} organisations already online',
+
+    // Frequently asked questions — exact answers, verifiable in the product.
+    faqOver: 'Good to know',
+    faqTitle: 'The questions we get asked',
+    faqQ1: 'Do we need technical skills?',
+    faqR1: 'No. You fill in forms: a museum, rooms, works with their photos. Everything happens in your space, without a line of code. An assistant can even build your first structure from a plain description.',
+    faqQ2: 'How do we get 3D models of our works?',
+    faqR2: 'Two ways. If you already have models, you upload them. Otherwise the platform guides a photo shoot around the object; the 3D reconstruction is then done offline from those images.',
+    faqQ3: 'Can we use our own domain name?',
+    faqR3: 'Yes. Your space starts on a .nexacode.store address, available immediately. You can then point your own domain at it: you prove it belongs to you by adding a DNS record, which the platform verifies.',
+    faqQ4: 'Can the intelligent guide talk about OUR collections?',
+    faqR4: 'It only answers from what you have published: your records, your museums, your tours. Questions it could not handle are reported back to you — they show exactly which records need enriching.',
+    faqQ5: 'Are we tied to a contract length?',
+    faqR5: 'No. You can ask for your space to be closed at any time; your content is then removed from the public site. It stays yours — that is written into the terms of use.',
+
+    // Footer
+    footNav: 'The product',
+    footLegal: 'Legal',
+    footContact: 'Contact',
+    footRights: 'All rights reserved.',
     stepsOver: 'How it works',
     stepsTitle: 'Four steps to go live',
     s1: 'Create your account', s1d: 'A few details are enough, no credit card.',
     s2: 'Name your space', s2d: 'Choose your public address, for example bandjoun.nexacode.store.',
     s3: 'Add your content', s3d: 'Museums, rooms, works, products and events from your back office.',
     s4: 'Publish', s4d: 'After approval your site is visible to everyone — and you can connect your own domain.',
+    // Reunified memory: the open collections queried to find scattered works.
+    // Wording deliberately exact — these institutions are not partners, and
+    // saying otherwise would be false.
+    sourcesOver: 'Reunified memory',
+    sourcesTitle: 'The collections we query',
+    sourcesLead: 'A work taken from a chieftaincy often sleeps in a museum on the other side of the world. MUSÉA queries the major open collections to find it and tie it back to where it came from — {n} holding institutions identified so far.',
+
+    // Immersive band — what the platform is about, without borrowing any hosted
+    // organisation's content.
+    bandOver: 'Living heritage',
+    bandTitle: 'Every chieftaincy holds a story that only needs a place to be told',
+    bandLead: 'Masks, thrones, calling drums, lineages passed down by word of mouth. MUSÉA gives that heritage an address, a showcase and the tools to share it — without it ever leaving the hands of those it belongs to.',
+    locNewYork: 'New York',
+    locChicago: 'Chicago',
+    locCleveland: 'Cleveland',
+    locLondon: 'London',
+    locGermany: 'Germany',
+    locEurope: 'Europe',
+    locIntl: 'International',
+    sourcesCaption: 'These objects were made to be worn, danced, handed down. Finding them in the world’s museums is how that link is restored.',
+    sourcesCount: '{n} institutions',
+    sourcesMany: 'Thousands of institutions',
+    sourcesNote: 'Public collections queried through their open APIs. These institutions are not partners of MUSÉA and have no contractual link with the platform.',
+    // Figures banner — labels only; the numbers come from the database.
+    kOrgs: 'Organisations',
+    kMuseums: 'Museums',
+    kRooms: 'Rooms',
+    kWorks: 'Works online',
     tenantsOver: 'Already here',
     tenantsTitle: 'Organisations online',
     finalTitle: 'Ready to open your digital museum?',
@@ -816,6 +957,7 @@ export default {
     sug1: 'Do you have the Mousgoum huts?',
     sug2: 'Tell me about La Vague Bleue',
     sug3: 'Which museums can I visit?',
+    seeHere: 'See it in our rooms',
   },
   guideInline: {
     defaultTitle: 'Ask the guide',
@@ -2111,6 +2253,15 @@ export default {
       domainHint: 'Without https:// or www — example: chefferie-bandjoun.cm',
       domainPending: 'Domain saved. It will become active once the DNS setup is verified by the MUSÉA team.',
       domainVerified: 'Domain verified and active.',
+      // Proof of domain ownership
+      dnsToCreate: 'Create this record at your domain’s DNS host, then run the check. This is what proves the domain is yours:',
+      dnsCopy: 'Copy the record',
+      dnsCopied: 'Record copied.',
+      dnsCheck: 'Check now',
+      dnsOk: 'Domain verified. Your site will answer at this address as soon as the domain points to the platform.',
+      dnsKo: 'Record not found yet. A DNS change can take up to a few hours to propagate.',
+      dnsLastTry: 'Last check:',
+      dnsSaveFirst: 'Save this domain first: the record to create will then be shown.',
       saved: 'Organisation updated',
       failed: 'Save failed',
     },

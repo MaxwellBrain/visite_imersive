@@ -3,6 +3,7 @@ dist
 .git
 .github
 infra
+infra-conteneurs
 certs
 .env
 .env.*

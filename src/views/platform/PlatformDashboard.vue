@@ -16,6 +16,7 @@ import Tag from 'primevue/tag'
 import { formatMontant } from '@/constants/options'
 import { useAdminTenantStore } from '@/stores/useAdminTenantStore'
 import { urlPubliqueTenant } from '@/services/host'
+import ValidationQueue from '@/components/platform/ValidationQueue.vue'
 
 const router = useRouter()
 const store = useAdminTenantStore()
@@ -92,6 +93,11 @@ function versOrganisations() { router.push('/plateforme/organisations') }
       </span>
       <i class="pi pi-arrow-right pd-alerte__go" />
     </button>
+
+    <!-- Ce qui attend une décision, traitable ici même : approuver une
+         organisation, vérifier un domaine. Sans cela, le super-admin devait
+         parcourir la liste complète pour découvrir ce qui bloquait. -->
+    <ValidationQueue />
 
     <h2 class="pd-sec">{{ $t('platform.dash.hosted') }}</h2>
     <div class="pd-vols">

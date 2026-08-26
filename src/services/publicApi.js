@@ -131,6 +131,26 @@ export async function pubObject(id) {
 // Modeles 3D d'un objet, charges A L'OUVERTURE de la visionneuse seulement.
 // Renvoie un objet vide en cas d'echec : la fiche reste consultable, seule la
 // 3D manque — jamais l'inverse.
+// ŒUVRES EN 3D, MISES EN AVANT SUR L'ACCUEIL.
+//
+// `model3d` est volontairement absent de la sélection commune (voir plus haut) :
+// c'est une URL par objet, inutile aux listes. Ici on la veut, mais seulement
+// pour la poignée d'œuvres qu'on va faire tourner — et en UNE requête, pas une
+// par objet comme le ferait `pubObjectModels` appelé en boucle.
+//
+// Filtre `not model3d is null` : `a_3d` peut être coché sans qu'aucun fichier
+// n'ait été déposé, et une visionneuse sans modèle n'affiche qu'une erreur.
+export function pubObjects3D(limite = 3) {
+  return memo(`objets3d:${limite}`, async () => {
+    const { data, error } = await scoped(supabase.from('objects')
+      .select('id, nom, nom_commun, photo, photo_thumb, model3d, model3d_ios, ar_placement, ar_echelle'))
+      .eq('published', true).eq('a_3d', true).not('model3d', 'is', null)
+      .order('id', { ascending: false }).limit(limite)
+    if (error) { console.warn('[public] objets 3D', error.message); return [] }
+    return data || []
+  })
+}
+
 export async function pubObjectModels(id) {
   const { data, error } = await scoped(supabase.from('objects')
     .select('model3d, model3d_ios')).eq('id', id).eq('published', true).maybeSingle()

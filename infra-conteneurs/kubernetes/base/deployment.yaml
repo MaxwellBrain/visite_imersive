@@ -1,0 +1,154 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: musea
+  namespace: musea
+  labels:
+    app.kubernetes.io/name: musea
+    app.kubernetes.io/component: frontal
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: musea
+
+  # Mise à jour progressive : on ajoute un pod neuf AVANT d'en retirer un
+  # ancien. `maxUnavailable: 0` est la ligne qui garantit qu'aucune requête ne
+  # tombe pendant un déploiement — la valeur par défaut (25 %) accepte, elle,
+  # de réduire la capacité en pleine bascule.
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+
+  # Un pod qui ne devient jamais prêt bloquerait le déploiement indéfiniment.
+  # Au-delà de 3 minutes, le Deployment est marqué en échec — ce que la CI
+  # détecte avec `kubectl rollout status`, qui rend alors la main en erreur.
+  progressDeadlineSeconds: 180
+
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: musea
+        app.kubernetes.io/component: frontal
+    spec:
+      serviceAccountName: musea
+
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101 # l'utilisateur « nginx » de l'image alpine
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+
+      # Étale les répliques sur des nœuds — et, sur EKS, sur des zones —
+      # différents. Sans cette contrainte, l'ordonnanceur a parfaitement le
+      # droit de poser les deux répliques sur le même nœud, et la redondance
+      # devient décorative.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          # ScheduleAnyway et non DoNotSchedule : sur un cluster local à un
+          # seul nœud, la contrainte stricte laisserait le second pod en
+          # « Pending » pour toujours.
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: musea
+
+      containers:
+        - name: musea
+          # Remplacée par l'étiquette réelle : `kustomize edit set image`
+          # dans la CI, ou le champ `images:` de l'overlay.
+          image: musea:latest
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+
+          env:
+            - name: MUSEA_ENVIRONNEMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: musea-config
+                  key: environnement
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            # nginx écrit ses fichiers temporaires : la racine reste
+            # accessible en écriture, mais les répertoires qui comptent sont
+            # montés en mémoire ci-dessous.
+            readOnlyRootFilesystem: false
+
+          # Deux sondes, deux rôles distincts — les confondre est l'erreur la
+          # plus répandue sur Kubernetes :
+          #
+          #   readiness — « puis-je recevoir du trafic ? » Un échec RETIRE le
+          #               pod du Service, sans le tuer.
+          #   liveness  — « suis-je irrécupérable ? » Un échec REDÉMARRE le
+          #               conteneur.
+          #
+          # Une liveness trop nerveuse transforme une surcharge passagère en
+          # boucle de redémarrages, donc en panne réelle. D'où le seuil plus
+          # tolérant ici.
+          readinessProbe:
+            httpGet:
+              path: /sante
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
+
+          livenessProbe:
+            httpGet:
+              path: /sante
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 5
+
+          # `requests` = ce que l'ordonnanceur réserve ; `limits` = le plafond.
+          # Sans requests, Kubernetes entasse les pods jusqu'à saturer le nœud.
+          # Sans limits, un pod emballé emporte ses voisins avec lui.
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              # Pas de limite de CPU : la limiter provoque du « throttling »
+              # même quand le nœud est inoccupé, ce qui allonge les temps de
+              # réponse sans rien protéger. La mémoire, elle, se plafonne —
+              # c'est elle qui tue le nœud quand elle déborde.
+              memory: 192Mi
+
+          volumeMounts:
+            - name: cache-nginx
+              mountPath: /var/cache/nginx
+            - name: execution
+              mountPath: /var/run
+            - name: temporaire
+              mountPath: /tmp
+
+      # Volumes en mémoire : le conteneur ne dépend d'aucun disque, donc
+      # n'importe quel nœud peut l'accueillir.
+      volumes:
+        - name: cache-nginx
+          emptyDir: {}
+        - name: execution
+          emptyDir: {}
+        - name: temporaire
+          emptyDir: {}
+
+      # Laisse à nginx le temps de terminer les requêtes en cours avant de
+      # partir. La valeur par défaut (30 s) convient ; on l'explicite pour
+      # rappeler qu'elle existe.
+      terminationGracePeriodSeconds: 30

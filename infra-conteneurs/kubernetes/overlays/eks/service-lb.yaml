@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: musea
+  namespace: musea
+  annotations:
+    # NLB plutôt que le Classic Load Balancer historique : moins cher, et
+    # surtout géré par le contrôleur intégré à EKS — donc AUCUN composant
+    # supplémentaire à installer dans le cluster.
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+
+    # Sonde du répartiteur, distincte des sondes du pod : elle décide de ce qui
+    # reçoit du trafic AVANT que Kubernetes n'entre en jeu.
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: "http"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: "/sante"
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "8080"
+
+    # Sans cette annotation, l'adresse IP du visiteur est remplacée par celle
+    # du répartiteur dans tous les journaux.
+    service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: "*"
+spec:
+  type: LoadBalancer
+  # Un NLB ne termine pas le TLS ici : le certificat vit sur le répartiteur.
+  # Pour du HTTPS avec certificat ACM et un vrai routage par chemin, préférer
+  # un Ingress ALB — voir exemple-ingress-alb.yaml et le README.
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP

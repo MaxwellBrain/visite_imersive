@@ -64,9 +64,27 @@ async function send(text) {
                 {{ l.label }} <i class="pi pi-arrow-right" />
               </router-link>
             </div>
-            <!-- Œuvres apparentées retrouvées dans les musées du monde (API ouvertes). -->
+            <!-- DEUX FAMILLES DE VIGNETTES, volontairement distinguées.
+                 Nos œuvres mènent à leur fiche SUR LE SITE ; les pièces étrangères
+                 ouvrent un onglet vers le musée qui les conserve. Les afficher de
+                 la même façon ferait croire que nos pièces sont à New York. -->
             <div v-if="m.cards?.length" class="msg__cards">
-              <a v-for="(c, k) in m.cards" :key="k" :href="c.url" target="_blank" rel="noopener" class="wcard">
+              <router-link
+                v-for="(c, k) in m.cards.filter((x) => x.interne)" :key="`i${k}`"
+                :to="c.to" class="wcard" @click="open = false"
+              >
+                <img v-if="c.image" :src="c.image" :alt="c.title" loading="lazy" />
+                <div class="wcard__body">
+                  <strong>{{ c.title }}</strong>
+                  <span v-if="c.subtitle" class="wcard__sub">{{ c.subtitle }}</span>
+                  <span v-if="c.description" class="wcard__desc">{{ c.description }}</span>
+                  <span class="wcard__src"><i class="pi pi-arrow-right" /> {{ $t('guideChat.seeHere') }}</span>
+                </div>
+              </router-link>
+              <a
+                v-for="(c, k) in m.cards.filter((x) => !x.interne)" :key="`e${k}`"
+                :href="c.url" target="_blank" rel="noopener" class="wcard"
+              >
                 <img v-if="c.image" :src="c.image" :alt="c.title" loading="lazy" />
                 <div class="wcard__body">
                   <strong>{{ c.title }}</strong>

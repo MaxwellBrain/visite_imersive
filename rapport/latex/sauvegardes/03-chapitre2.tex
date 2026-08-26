@@ -1,0 +1,481 @@
+% =============================================================================
+%  CHAPITRE 2 : MÉTHODOLOGIE DE L'ÉTUDE
+% =============================================================================
+\entete{Chapitre 2 : Méthodologie de l'étude}
+\chapter{Méthodologie de l'étude}
+\label{chap:methodo}
+
+\introchap
+
+La valeur d'un résultat tient à la rigueur du chemin qui y mène. Ce chapitre
+expose donc la démarche suivie, avec le détail nécessaire à sa reproduction. Il
+précise le type de recherche entreprise, la manière dont le phénomène étudié a
+été rendu mesurable, les personnes auprès desquelles les données ont été
+recueillies, les outils employés pour les recueillir et les analyser, puis la
+méthode de conduite du projet informatique. Il se clôt sur les difficultés
+rencontrées et les limites assumées, qui bornent la portée des résultats.
+
+% =============================================================================
+\section{Nature de l'étude et approche méthodologique}
+\label{sec:nature}
+
+\subsection{Niveau et type de recherche}
+
+Le choix du niveau de recherche détermine la profondeur du traitement
+scientifique et, par voie de conséquence, les méthodes admissibles. Quatre
+niveaux sont habituellement distingués : perceptuel, appréhensif, compréhensif
+et intégrateur.
+
+La présente étude relève du \textbf{niveau intégrateur}. Nous ne nous sommes en
+effet pas limité à décrire une situation ni à en expliquer les causes : nous
+sommes intervenu sur la réalité observée en concevant, en construisant et en
+mettant en service un dispositif destiné à la transformer. Le type d'étude
+correspondant est la \textbf{recherche interactive}, également désignée dans la
+littérature en systèmes d'information sous le nom de \emph{recherche par la
+conception} (Hevner et al., 2004). Elle se caractérise par :
+
+\begin{itemize}
+  \item une forte interaction avec les acteurs du terrain : le personnel de la
+        Fondation a été associé à chaque étape ;
+  \item une démarche participative, les besoins ayant été formulés, corrigés et
+        arbitrés avec l'encadreur professionnel ;
+  \item la résolution d'un problème réel et non d'un cas d'école ;
+  \item le recours au prototypage : chaque fonctionnalité a été construite,
+        soumise, éprouvée, puis corrigée.
+\end{itemize}
+
+Ce niveau excède ce qui est exigé d'un travail de licence, lequel peut se
+limiter au niveau perceptuel ou appréhensif. Ce choix se justifie par la nature
+même de la commande : la Fondation n'attendait pas un diagnostic, elle attendait
+un outil.
+
+\subsection{Approche méthodologique}
+
+Nous avons retenu une \textbf{approche mixte}, associant les apports qualitatifs
+et quantitatifs, pour trois raisons.
+
+\begin{enumerate}
+  \item La compréhension du besoin, ce qu'une institution patrimoniale attend
+        d'une visite à distance, appelle des données qualitatives : entretiens,
+        observation, analyse des documents internes.
+  \item L'évaluation du dispositif construit appelle au contraire des données
+        quantitatives : temps de réponse, taux de réussite, scores de
+        correspondance, coûts mesurés.
+  \item Le croisement des deux permet de vérifier qu'un dispositif
+        techniquement performant est également jugé utile et utilisable par
+        ceux à qui il est destiné.
+\end{enumerate}
+
+% =============================================================================
+\section{Variables et indicateurs de l'étude}
+\label{sec:variables}
+
+\subsection{Identification des variables}
+
+Conformément à la méthode, les variables de l'étude sont extraites de
+l'hypothèse : les composantes énoncées dans l'hypothèse générale en constituent
+les variables explicatives, et l'effet attendu en constitue la variable
+expliquée. Chaque variable explicative correspond ainsi à une hypothèse
+spécifique, et une seule.
+
+La \textbf{variable expliquée} est l'effet recherché :
+
+\begin{itemize}
+  \item \textbf{la qualité de l'expérience de visite à distance}, entendue comme
+        la capacité du dispositif à procurer au visiteur éloigné une perception
+        des lieux, une compréhension des œuvres et une possibilité
+        d'interrogation comparables à celles d'une visite sur place.
+\end{itemize}
+
+Les quatre \textbf{variables explicatives} sont les composantes qui produisent
+cet effet :
+
+\begin{itemize}
+  \item \textbf{Variable explicative 1 : la restitution spatiale des espaces et
+        des œuvres}, c'est-à-dire les panoramas à 360 degrés reliés entre eux,
+        la présentation en trois dimensions et la réalité augmentée à taille
+        réelle (hypothèse spécifique 1) ;
+  \item \textbf{Variable explicative 2 : le rapprochement documentaire avec les
+        collections ouvertes}, c'est-à-dire la recherche automatique des œuvres
+        apparentées et leur validation par le conservateur (hypothèse spécifique
+        2) ;
+  \item \textbf{Variable explicative 3 : l'ancrage documentaire de l'assistant
+        conversationnel}, c'est-à-dire la construction des réponses à partir des
+        seuls documents validés par la Fondation (hypothèse spécifique 3) ;
+  \item \textbf{Variable explicative 4 : l'isolation des données au niveau de la
+        base}, c'est-à-dire le mécanisme qui empêche une organisation de
+        consulter les données d'une autre, et dont dépend la possibilité
+        d'accueillir de nouvelles institutions sans modifier le code (hypothèse
+        spécifique 4).
+\end{itemize}
+
+\subsection{Opérationnalisation : les indicateurs}
+
+Une variable n'est exploitable que si l'on sait la mesurer. Le
+tableau~\ref{tab:variables} présente, pour chaque variable, les indicateurs
+retenus, leur unité et la source de la mesure.
+
+\begin{table}[htbp]
+\centering
+\caption{Variables, indicateurs et sources de mesure}
+\label{tab:variables}
+\footnotesize
+\begin{tabularx}{\textwidth}{|L{2.5cm}|X|L{2.2cm}|L{2.6cm}|}
+\hline
+\rowcolor{keycetete}
+\thead{Variable} & \thead{Indicateurs} & \thead{Unité} & \thead{Source de la mesure} \\ \hline
+\multirow{5}{*}{\parbox{2.5cm}{\textbf{Variable 1}\\ Restitution spatiale}}
+ & Nombre de salles restituées en panorama & effectif & Base de données \\ \cline{2-4}
+& Nombre de points d'intérêt cliquables & effectif & Base de données \\ \cline{2-4}
+& Délai d'affichage d'une salle & secondes & Mesure navigateur \\ \cline{2-4}
+& Écart dimensionnel du modèle 3D & centimètres & Mesure sur maillage \\ \cline{2-4}
+& Couverture des appareils testés & \% & Essais sur appareils \\ \hline
+\multirow{5}{*}{\parbox{2.5cm}{\textbf{Variable 2}\\ Mise en relation documentaire}}
+ & Nombre de collections interrogées & effectif & Journal des appels \\ \cline{2-4}
+& Nombre d'œuvres apparentées identifiées & effectif & Table des rapprochements \\ \cline{2-4}
+& Score de correspondance & /100 & Algorithme de notation \\ \cline{2-4}
+& Taux de validation par le conservateur & \% & Table des rapprochements \\ \cline{2-4}
+& Nombre de pays de dispersion & effectif & Données de dispersion \\ \hline
+\multirow{5}{*}{\parbox{2.5cm}{\textbf{Variable 3}\\ Ancrage documentaire de l'assistant}}
+ & Taux de réponses appuyées sur un document interne & \% & Grille d'évaluation \\ \cline{2-4}
+& Taux d'aveu d'ignorance en l'absence de source & \% & Grille d'évaluation \\ \cline{2-4}
+& Taux de refus des questions hors périmètre & \% & Grille d'évaluation \\ \cline{2-4}
+& Délai moyen de réponse & secondes & Journal serveur \\ \cline{2-4}
+& Questions restées sans réponse & effectif & Journal des questions \\ \hline
+\multirow{4}{*}{\parbox{2.5cm}{\textbf{Variable 4}\\ Cloisonnement et ouverture}}
+ & Tables protégées par une règle de sécurité & effectif & Schéma de la base \\ \cline{2-4}
+& Tentatives d'accès inter-organisations refusées & \% & Essais d'intrusion \\ \cline{2-4}
+& Délai de création d'une organisation & minutes & Essai de bout en bout \\ \cline{2-4}
+& Lignes de code à modifier pour un nouvel arrivant & effectif & Analyse du code \\ \hline
+\end{tabularx}
+\source{Élaboré par nos soins.}
+\end{table}
+
+% =============================================================================
+\section{Population et échantillon}
+\label{sec:echantillon}
+
+\subsection{Population de l'étude}
+
+La population de l'étude est constituée de trois ensembles d'acteurs concernés
+par la valorisation numérique du patrimoine de la Fondation Jean Félicien Gacha
+au cours de la période du 20~juin au 20~août 2026 :
+
+\begin{itemize}
+  \item \textbf{le personnel de la Fondation et du \emph{Think Tank} Fou'ndjem},
+        c'est-à-dire les personnes intervenant dans la gestion des espaces, des
+        collections, de l'accueil et de la communication ;
+  \item \textbf{les visiteurs de la Fondation}, présents sur le site durant la
+        période, âgés de dix-huit ans et plus.
+\end{itemize}
+
+\subsection{Technique d'échantillonnage et taille de l'échantillon}
+
+Compte tenu de la taille réduite et bien identifiée des populations concernées,
+un échantillonnage probabiliste n'aurait apporté aucun gain de représentativité.
+Nous avons donc retenu deux techniques \textbf{non probabilistes} :
+
+\begin{itemize}
+  \item \textbf{le choix raisonné} pour le personnel : ont été retenues les
+        personnes exerçant effectivement une responsabilité sur les espaces, les
+        collections ou la communication, seules à même de renseigner les
+        pratiques réelles ;
+  \item \textbf{la convenance} pour les visiteurs : ont été sollicitées les
+        personnes présentes sur le site durant les journées d'observation et
+        ayant accepté de répondre.
+\end{itemize}
+
+Le tableau~\ref{tab:echantillon} présente la composition de l'échantillon.
+
+\begin{table}[htbp]
+\centering
+\caption{Composition de l'échantillon de l'étude}
+\label{tab:echantillon}
+\small
+\begin{tabularx}{\textwidth}{|X|C{2.4cm}|C{2.6cm}|L{3.4cm}|}
+\hline
+\rowcolor{keycetete}
+\thead{Catégorie d'acteurs} & \thead{Effectif} & \thead{Technique} & \thead{Outil de collecte} \\ \hline
+Personnel de la Fondation et du \emph{Think Tank} Fou'ndjem & 06 & Choix raisonné & Entretien semi-directif \\ \hline
+Visiteurs présents sur le site & 42 & Convenance & Questionnaire \\ \hline
+\rowcolor{keycetotal}
+\textbf{Total} & \textbf{48} & — & — \\ \hline
+\end{tabularx}
+\source{Enquête de terrain, juin--août 2026.}
+\end{table}
+
+Cet échantillon ne prétend pas à la représentativité statistique. Il vise la
+\emph{saturation de l'information} : les entretiens ont été conduits jusqu'à ce
+que les échanges cessent d'apporter des éléments nouveaux, critère usuel en
+recherche qualitative.
+
+% =============================================================================
+\section{Outils de collecte et techniques d'analyse des données}
+\label{sec:outils}
+
+\subsection{Outils de collecte}
+
+Quatre outils ont été mobilisés, chacun rattaché à un type de donnée précis.
+
+\begin{enumerate}
+  \item \textbf{Le guide d'entretien semi-directif} (annexe~\ref{ann:guide}),
+        organisé autour de quatre thèmes : pratiques de valorisation,
+        difficultés, attentes et contraintes de moyens. Sa forme semi-directive
+        s'est révélée décisive : la question de la dispersion des œuvres
+        apparentées n'était pas prévue et a émergé d'un entretien.
+
+  \item \textbf{Le questionnaire} (annexe~\ref{ann:questionnaire}), adressé aux
+        visiteurs : dix-huit questions fermées et deux ouvertes, en quatre
+        rubriques. Un pré-test auprès de cinq personnes a conduit à reformuler
+        trois questions ambiguës et à en supprimer une.
+
+  \item \textbf{La grille d'observation}, utilisée lors des visites guidées pour
+        relever le parcours effectif des visiteurs, leurs points d'arrêt et les
+        questions spontanément posées au guide. Ces relevés ont orienté la
+        conception du parcours immersif.
+
+  \item \textbf{La fiche documentaire}, qui a encadré le dépouillement des
+        inventaires, notices et plaquettes de la Fondation, ainsi que la revue
+        de la littérature scientifique.
+\end{enumerate}
+
+\subsection{Techniques d'analyse}
+
+Les entretiens ont fait l'objet d'une \textbf{analyse thématique de contenu} :
+après retranscription, les propos ont été découpés en unités de sens, codés,
+puis regroupés en catégories, d'où ont émergé cinq thèmes, l'accessibilité, la
+perception de l'espace, la mise en relation des objets, la fiabilité de
+l'information et la pérennité économique du dispositif. Aucun logiciel
+spécialisé n'a été employé, le volume traité ne le justifiant pas et un
+dépouillement manuel offrant une maîtrise supérieure du codage. Les réponses au
+questionnaire ont pour leur part été traitées par \textbf{statistique
+descriptive}, sous forme d'effectifs, de fréquences, de pourcentages et de
+moyennes présentés en tableaux et en graphiques ; les mesures relevées sur le
+système, délais, scores et taux, ont fait l'objet de comparaisons avant et après
+traitement, notamment pour évaluer l'apport de l'enrichissement des requêtes
+documentaires. Le tableur a suffi à ces calculs.
+
+L'assistant conversationnel a été évalué séparément, au moyen d'une
+\textbf{grille d'évaluation} appliquée à un jeu de questions construit à
+l'avance (annexe~\ref{ann:grille}). Ce jeu comporte quatre familles : des
+questions \textbf{documentées}, dont la réponse figure dans les textes fournis
+par la Fondation et auxquelles l'assistant doit répondre exactement ; des
+questions \textbf{non documentées}, portant sur le périmètre de la Fondation
+mais sans source disponible, face auxquelles il doit reconnaître qu'il ne sait
+pas ; des questions \textbf{hors périmètre}, comme la météo ou l'actualité,
+qu'il doit refuser poliment ; et des questions \textbf{pièges}, formulées de
+manière à suggérer une réponse fausse, qu'il ne doit pas suivre. Cette
+construction est délibérée : elle mesure non seulement ce que l'assistant sait,
+mais surtout ce qu'il refuse d'inventer, critère décisif en médiation
+culturelle.
+\section{Méthode de conduite du projet}
+\label{sec:devops}
+
+La conduite du projet a reposé sur deux méthodes complémentaires, qui ne
+répondent pas à la même question. La première, le \textbf{Scrumban}, organise le
+travail : elle dit dans quel ordre les tâches sont traitées et à quel rythme
+elles sont présentées à l'encadreur. La seconde, le \textbf{DevOps}, organise la
+livraison : elle dit comment une modification écrite parvient jusqu'aux
+utilisateurs sans casser ce qui fonctionnait.
+
+\subsection{Le Scrumban comme méthode de travail}
+
+Les méthodes agiles ont remplacé la planification détaillée par des cycles
+courts au terme desquels une version utilisable est présentée. Deux d'entre
+elles dominent. Le \textbf{Scrum} découpe le travail en sprints de durée fixe,
+avec des rôles et des réunions ritualisées. Le \textbf{Kanban} supprime les
+sprints au profit d'un flux continu : les tâches circulent sur un tableau, de
+« à faire » à « terminé », et une limite est posée sur le nombre de tâches
+menées de front, afin d'éviter que tout soit commencé et rien achevé.
+
+Le \textbf{Scrumban} combine les deux : le flux continu et la limitation du
+travail en cours viennent du Kanban, la cadence régulière de revue vient du
+Scrum. C'est cette méthode que nous avons retenue, pour quatre raisons propres
+au contexte du stage.
+
+\begin{enumerate}
+  \item \textbf{Le projet était conduit par une seule personne.} Les rituels du
+        Scrum, mêlée quotidienne, estimation collective, revue de sprint en
+        équipe, n'ont pas de sens à un seul développeur : ils consommeraient du
+        temps sans produire de coordination.
+
+  \item \textbf{Le besoin a évolué en cours de route.} La question du
+        rapprochement documentaire n'était pas prévue et a émergé d'un
+        entretien. Un sprint figé aurait obligé à attendre la fin du cycle pour
+        l'intégrer ; le flux continu du Kanban permet d'insérer une tâche dès
+        qu'elle est priorisée.
+
+  \item \textbf{Une cadence de revue restait nécessaire.} L'encadreur
+        professionnel suivait un programme hebdomadaire. Conserver du Scrum une
+        revue chaque semaine, alignée sur ce programme, donnait un rendez-vous
+        régulier de démonstration et d'arbitrage. Le chronogramme présenté au
+        chapitre~3 en est la trace directe.
+
+  \item \textbf{Le risque principal était la dispersion.} Le projet comporte
+        vingt fonctionnalités hétérogènes. La limite de travail en cours du
+        Kanban, fixée à deux tâches, a été le garde-fou le plus utile : elle
+        oblige à terminer avant d'entreprendre.
+\end{enumerate}
+
+\begin{figure}[htbp]
+\centering
+\aplacer{5.2cm}{Représenter le tableau Scrumban employé pendant le stage.
+Dessiner cinq colonnes : \textbf{Backlog} (réservoir des tâches issues du cahier
+des charges), \textbf{À faire cette semaine} (sélection arbitrée avec
+l'encadreur), \textbf{En cours} avec la mention « limite : 2 tâches »,
+\textbf{En vérification} (contrôles automatiques et essais) et \textbf{Terminé}.
+Faire figurer quelques cartes d'exemple issues du projet (moteur de panorama,
+assistant conversationnel, cloisonnement des données). Ajouter, au-dessus des
+colonnes, la flèche du flux continu venant du Kanban, et en dessous la boucle de
+\emph{revue hebdomadaire avec l'encadreur} venant du Scrum, qui repart du
+Backlog. Indiquer que le passage de « En vérification » à « Terminé » est
+conditionné par le succès de la chaîne d'intégration continue.}
+\caption{Le tableau Scrumban adopté pour la conduite du projet}
+\label{fig:scrumban}
+\source{Élaboré par nos soins.}
+\end{figure}
+
+\subsection{Le DevOps comme démarche de livraison}
+
+La construction d'un logiciel ne s'achève pas à l'écriture du code : encore
+faut-il le livrer, le corriger et le faire évoluer sans interrompre le service.
+Trois raisons ont conduit à adopter une démarche DevOps dès le début du projet
+plutôt qu'à la fin.
+
+\begin{enumerate}
+  \item \textbf{La sécurité du travail.} Un stage de deux mois ne laisse aucune
+        marge pour reconstruire ce qui aurait été cassé sans qu'on s'en
+        aperçoive. Des contrôles automatiques déclenchés à chaque modification
+        signalent la régression en quelques minutes.
+
+  \item \textbf{La reproductibilité.} La Fondation devra un jour reprendre le
+        système. Une mise en production qui repose sur une suite de gestes
+        manuels mémorisés par une seule personne n'est pas transmissible ; une
+        mise en production décrite dans un fichier l'est.
+
+  \item \textbf{La sensibilité du dispositif aux détails d'exploitation.}
+        L'expérience du projet a montré qu'un modèle tridimensionnel servi avec
+        une étiquette de type erronée s'affiche correctement dans le navigateur
+        mais empêche toute session de réalité augmentée. Ce type d'anomalie ne
+        se voit pas à l'œil : il se vérifie automatiquement, ou il passe
+        inaperçu jusqu'au jour de la démonstration.
+\end{enumerate}
+
+\subsection{Les pratiques retenues}
+
+Quatre pratiques ont été mises en œuvre :
+
+\begin{itemize}
+  \item \textbf{le contrôle de version} de l'intégralité du projet, code
+        applicatif et description de l'infrastructure comprise ;
+  \item \textbf{l'intégration continue} : chaque dépôt de modification déclenche
+        la compilation et une batterie de contrôles portant sur le résultat
+        produit ;
+  \item \textbf{le déploiement continu} : une modification acceptée est publiée
+        automatiquement, avec purge du cache de diffusion et vérification, après
+        coup, de ce que reçoit réellement le visiteur ;
+  \item \textbf{l'infrastructure décrite par le code}, afin que l'environnement
+        de production puisse être recréé à l'identique.
+\end{itemize}
+
+La chaîne effectivement mise en place et son évolution proposée sont décrites
+respectivement au chapitre~3 et au chapitre~4.
+
+% =============================================================================
+\section{Outils et environnement de l'étude}
+\label{sec:outilsetude}
+
+Le tableau~\ref{tab:outils} recense les outils employés, en distinguant leur
+rôle dans le travail.
+
+\begin{table}[htbp]
+\centering
+\caption{Outils, technologies et environnements mobilisés}
+\label{tab:outils}
+\footnotesize
+\begin{tabularx}{\textwidth}{|L{3.0cm}|L{3.9cm}|X|}
+\hline
+\rowcolor{keycetete}
+\thead{Domaine} & \thead{Outil ou technologie} & \thead{Rôle dans le travail} \\ \hline
+\multirow{4}{*}{\parbox{3.0cm}{Interface}}
+ & Vue~3 & Cadriciel de construction de l'interface \\ \cline{2-3}
+& Vite~5 & Chaîne de compilation et serveur de développement \\ \cline{2-3}
+& PrimeVue~4 & Bibliothèque de composants d'interface pour l'ERP \\ \cline{2-3}
+& Pinia, Vue~Router, Vue~I18n & État applicatif, navigation, bilinguisme \\ \hline
+\multirow{4}{*}{\parbox{3.0cm}{Données et services}}
+ & PostgreSQL~17 & Base de données relationnelle \\ \cline{2-3}
+& Supabase & Authentification, sécurité au niveau de la ligne, fonctions serveur \\ \cline{2-3}
+& \texttt{pgvector} (index HNSW) & Stockage et recherche des plongements \\ \cline{2-3}
+& Deno & Exécution des fonctions serveur \\ \hline
+\multirow{3}{*}{\parbox{3.0cm}{Immersion et 3D}}
+ & WebGL (moteur écrit sur mesure) & Rendu des panoramas à 360~degrés et du relief \\ \cline{2-3}
+& \texttt{model-viewer}, WebXR & Affichage 3D et réalité augmentée \\ \cline{2-3}
+& Meshroom, Blender & Photogrammétrie et préparation des maillages \\ \hline
+\multirow{3}{*}{\parbox{3.0cm}{Intelligence artificielle}}
+ & Groq (modèles Llama) & Génération et reformulation de texte \\ \cline{2-3}
+& \texttt{gte-small} & Production des plongements lexicaux \\ \cline{2-3}
+& ElevenLabs & Synthèse vocale du guide \\ \hline
+\multirow{5}{*}{\parbox{3.0cm}{Industrialisation}}
+ & Git, GitHub & Contrôle de version et hébergement du dépôt \\ \cline{2-3}
+& GitHub Actions & Intégration et déploiement continus \\ \cline{2-3}
+& Docker & Conteneurisation de l'application \\ \cline{2-3}
+& Terraform & Description de l'infrastructure \\ \cline{2-3}
+& AWS (S3, CloudFront, Route~53, ACM, IAM) & Hébergement et diffusion \\ \hline
+\multirow{3}{*}{\parbox{3.0cm}{Conception et rédaction}}
+ & Visual Studio Code & Édition du code \\ \cline{2-3}
+& \texttt{draw.io} & Réalisation des schémas \\ \cline{2-3}
+& \LaTeX & Composition du présent rapport \\ \hline
+\end{tabularx}
+\source{Élaboré par nos soins.}
+\end{table}
+
+% =============================================================================
+\section{Difficultés rencontrées et limites méthodologiques}
+
+L'honnêteté méthodologique commande d'exposer les obstacles rencontrés, car ils
+conditionnent la portée des résultats.
+
+\begin{enumerate}
+  \item \textbf{Un format de modélisation 3D imposé par Apple.} L'application
+        utilisée pour modéliser les objets en trois dimensions ne produisait
+        qu'un seul format de sortie, l'USDZ, propre à l'écosystème d'Apple. Or
+        les navigateurs et les appareils Android ne le lisent pas : en l'état,
+        la moitié du public visé n'aurait rien vu. La difficulté a été levée en
+        introduisant une étape de conversion vers le format GLB, qui est le
+        format d'échange du web. Chaque œuvre dispose donc désormais de ses deux
+        versions, l'USDZ pour les appareils Apple et le GLB pour les autres.
+
+  \item \textbf{La mise en place des sous-domaines par institution.} Pour qu'une
+        institution qui rejoint la plateforme dispose de sa propre adresse, il
+        fallait faire exister un sous-domaine par organisation. Le montage s'est
+        révélé plus délicat que prévu : il exige un certificat de sécurité
+        couvrant à la fois le domaine principal et l'ensemble de ses
+        sous-domaines, obtenu auprès du service de gestion des certificats
+        d'AWS, ainsi que des enregistrements à caractère générique dans la zone
+        hébergée de Route 53. La validation du certificat passe par le système
+        de noms de domaine public : tant que la délégation du domaine n'est pas
+        effective, la demande reste en attente puis expire, sans message
+        explicite. C'est la difficulté qui a demandé le plus de tentatives.
+
+  \item \textbf{Absence de clés d'accès à quatre grandes collections.} Europeana,
+        le Rijksmuseum, la Smithsonian Institution et les Harvard Art Museums
+        exigent une clé que nous n'avons pu obtenir. Le rapprochement porte donc
+        sur cinq sources et non sur neuf, ce qui minore le nombre d'œuvres
+        apparentées trouvées.
+
+  \item \textbf{Comparaison portant sur le texte et non sur l'image.} Faute de
+        processeur graphique, les plongements ont été calculés sur les
+        descriptions écrites et non sur les photographies : deux objets
+        semblables mais décrits différemment peuvent échapper au rapprochement.
+\end{enumerate}
+
+\conclchap
+
+Ce chapitre a exposé la démarche de l'étude : une recherche interactive de
+niveau intégrateur, conduite selon une approche mixte, dont les quatre variables
+explicatives ont été rendues mesurables par un ensemble d'indicateurs
+observables sur le système lui-même. Il a précisé la population, l'échantillon,
+les outils de collecte et les techniques d'analyse, puis la démarche
+d'industrialisation retenue. Les limites assumées y ont été énoncées sans
+détour, car elles bornent la portée des résultats. Le chapitre suivant présente
+le terrain, les données recueillies et les résultats obtenus.

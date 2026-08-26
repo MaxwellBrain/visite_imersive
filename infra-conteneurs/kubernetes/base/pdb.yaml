@@ -1,0 +1,14 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: musea
+  namespace: musea
+spec:
+  # Protège des interruptions VOLONTAIRES : vidange d'un nœud, mise à jour de
+  # Kubernetes, reprise d'une instance Spot. Sans ce budget, un `kubectl drain`
+  # peut retirer les deux répliques en même temps et couper le service pendant
+  # une opération pourtant planifiée.
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: musea

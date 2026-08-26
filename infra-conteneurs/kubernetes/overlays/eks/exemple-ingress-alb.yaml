@@ -1,0 +1,47 @@
+# ============================================================================
+# EXEMPLE — non appliqué par kustomize (absent de kustomization.yaml).
+# ----------------------------------------------------------------------------
+# Un Ingress ALB apporte ce que le NLB ne fait pas : terminaison TLS avec un
+# certificat ACM, redirection du port 80 vers 443, routage par chemin ou par
+# nom d'hôte — exactement ce que fait déjà l'ALB monté par ECS.
+#
+# Il EXIGE le contrôleur AWS Load Balancer, qui ne fait pas partie d'EKS et
+# s'installe séparément :
+#
+#   helm repo add eks https://aws.github.io/eks-charts
+#   helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+#     -n kube-system --set clusterName=<nom du cluster> \
+#     --set serviceAccount.create=false \
+#     --set serviceAccount.name=aws-load-balancer-controller
+#
+# Le contrôleur a besoin de son propre rôle IRSA, avec une politique fournie
+# par AWS. Tant qu'il n'est pas installé, cet Ingress reste sans adresse et
+# rien ne l'indique : c'est le piège classique.
+#
+#   kubectl apply -f exemple-ingress-alb.yaml
+# ============================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: musea
+  namespace: musea
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: REMPLACER_PAR_L_ARN_DU_CERTIFICAT
+    alb.ingress.kubernetes.io/healthcheck-path: /sante
+spec:
+  ingressClassName: alb
+  rules:
+    - host: k8s.nexacode.store
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: musea
+                port:
+                  number: 80

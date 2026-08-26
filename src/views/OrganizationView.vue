@@ -41,6 +41,61 @@ function fill() {
 onMounted(fill)
 watch(() => auth.tenant, fill)
 
+// ---------------------------------------------------- domaine personnalisé --
+//
+// La plateforme n'a aucun moyen de savoir qu'un domaine saisi ici appartient
+// vraiment à cette organisation. On demande donc une preuve : un enregistrement
+// TXT que seul le détenteur du domaine peut poser. Le jeton est propre à
+// l'organisation, secret (table à part, RLS), et régénéré si le domaine change.
+const verification = ref(null)
+const verifEnCours = ref(false)
+const verifResultat = ref(null)
+
+const enregistrementDns = computed(() =>
+  verification.value
+    ? `_musea.${verification.value.domaine}   TXT   musea-verification=${verification.value.jeton}`
+    : '')
+
+async function chargerVerification() {
+  if (!auth.tenantId) return
+  const { data } = await supabase
+    .from('tenant_domain_verification')
+    .select('domaine, jeton, dernier_essai, dernier_resultat')
+    .eq('tenant_id', auth.tenantId)
+    .maybeSingle()
+  verification.value = data || null
+}
+onMounted(chargerVerification)
+// Enregistrer un nouveau domaine régénère le jeton : on le relit.
+watch(() => auth.tenant?.custom_domain, chargerVerification)
+
+async function copierDns() {
+  try {
+    await navigator.clipboard.writeText(enregistrementDns.value)
+    toast.add({ severity: 'success', summary: t('admin.org.dnsCopied'), life: 1600 })
+  } catch {
+    toast.add({ severity: 'warn', summary: enregistrementDns.value, life: 8000 })
+  }
+}
+
+async function verifierMonDomaine() {
+  verifEnCours.value = true
+  verifResultat.value = null
+  try {
+    const { data, error } = await supabase.functions.invoke('verifier-domaine', {
+      body: { tenantId: auth.tenantId }
+    })
+    if (error) throw new Error(error.message)
+    verifResultat.value = data
+    if (data?.ok) await auth.fetchRole() // le drapeau vient de changer
+    await chargerVerification()
+  } catch (e) {
+    toast.add({ severity: 'error', summary: e.message, life: 4000 })
+  } finally {
+    verifEnCours.value = false
+  }
+}
+
 // Adresse publique du site de l'organisation : son SOUS-DOMAINE, la seule
 // qu'elle ait à communiquer.
 const publicUrl = computed(() => urlPubliqueTenant(form.slug) || '…')
@@ -185,11 +240,34 @@ async function save() {
           <InputText v-model="form.customDomain" placeholder="chefferie-bandjoun.cm" />
           <small class="ohint">{{ $t('admin.org.domainHint') }}</small>
         </div>
-        <Message v-if="form.customDomain && !auth.tenant.domain_verified" severity="info" :closable="false">
-          {{ $t('admin.org.domainPending') }}
-        </Message>
-        <Message v-else-if="auth.tenant.domain_verified" severity="success" :closable="false">
+        <Message v-if="auth.tenant?.domain_verified" severity="success" :closable="false">
           {{ $t('admin.org.domainVerified') }}
+        </Message>
+
+        <!-- PREUVE DE POSSESSION — sans cet enregistrement, la vérification ne
+             peut pas aboutir : la plateforme n'a aucun moyen de savoir que ce
+             domaine est bien le vôtre. Le jeton est propre à l'organisation et
+             change si le domaine change. -->
+        <template v-else-if="verification">
+          <Message severity="info" :closable="false">{{ $t('admin.org.domainPending') }}</Message>
+          <p class="ohint" style="margin-top:.9rem">{{ $t('admin.org.dnsToCreate') }}</p>
+          <code class="odns">{{ enregistrementDns }}</code>
+          <div class="odns__act">
+            <Button size="small" text icon="pi pi-copy" :label="$t('admin.org.dnsCopy')"
+                    @click="copierDns" />
+            <Button size="small" outlined icon="pi pi-search" :loading="verifEnCours"
+                    :label="$t('admin.org.dnsCheck')" @click="verifierMonDomaine" />
+          </div>
+          <Message v-if="verifResultat" :severity="verifResultat.ok ? 'success' : 'warn'" :closable="false">
+            {{ verifResultat.ok ? $t('admin.org.dnsOk') : $t('admin.org.dnsKo') }}
+          </Message>
+          <small v-if="verification.dernier_essai" class="ohint">
+            {{ $t('admin.org.dnsLastTry') }} {{ new Date(verification.dernier_essai).toLocaleString('fr-FR') }}
+          </small>
+        </template>
+
+        <Message v-else-if="form.customDomain" severity="info" :closable="false">
+          {{ $t('admin.org.dnsSaveFirst') }}
         </Message>
       </section>
     </div>
@@ -210,4 +288,9 @@ async function save() {
 .ohint { display: block; font-size: 0.78rem; color: var(--vi-muted); margin-top: 0.35rem; }
 .ook { display: block; font-size: 0.78rem; color: #0e6f5c; font-weight: 600; margin-top: 0.35rem; }
 .oerr { display: block; font-size: 0.78rem; color: #c0392b; font-weight: 600; margin-top: 0.35rem; }
+
+/* Enregistrement DNS à recopier : il doit se lire caractère par caractère,
+   d'où la police à chasse fixe et la coupure autorisée en fin de ligne. */
+.odns { display: block; margin: 0.5rem 0; padding: 0.7rem 0.8rem; background: #101210; color: #e8f0ec; border-radius: 6px; font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; font-size: 0.78rem; line-height: 1.6; word-break: break-all; }
+.odns__act { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
 </style>

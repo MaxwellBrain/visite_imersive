@@ -1,0 +1,554 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+(rapport.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-12-24>
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/base\report.cls
+Document Class: report 2025/01/22 v1.4n Standard LaTeX document class
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/base\size12.clo))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/base\fontenc.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/babel\babel.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/babel\txtbabel.def)
+*************************************
+* Local config file bblopts.cfg used
+*
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/arabi\bblopts.cfg)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/babel/locale/fr\babel
+-french.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/babel-french\french.l
+df
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/babel-french\french3.
+ldf)))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/carlisle\scalefnt.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\mathptmx.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\helvet.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/graphics\keyval.sty))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\courier.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/iftex\ifvtex.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/iftex\iftex.sty))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/geometry\geometry.cfg))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/setspace\setspace.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/xcolor\xcolor.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\color.cfg)
+
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
+)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/graphics\mathcolor.ltx)
+) (C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/colortbl\colortbl.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tools\array.sty))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/graphics\dvipsnam.def)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphics.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/graphics\trig.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/graphics-cfg\graphics.c
+fg)))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tools\longtable.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tools\tabularx.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/multirow\multirow.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/ragged2e\ragged2e.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/enumitem\enumitem.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amssymb.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\amsfonts.sty))
+ (C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\pifont.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\upzd.fd)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\upsy.fd))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/fancyhdr\fancyhdr.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/etoc\etoc.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.sty
+)) (C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tools\multicol.sty))
+ (C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/titlesec\titlesec.sty)
+
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcolorbox.sty
+
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/pgf/frontendlayer\tikz.
+sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/pgf/basiclayer\pgf.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgfrcs.st
+y
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfutil
+-common.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfutil
+-latex.def)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfrcs.
+code.tex
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf\pgf.revision.tex)
+))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/pgf/basiclayer\pgfcore.
+sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/pgf/systemlayer\pgfsys.
+sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsy
+s.code.tex
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfkeys
+.code.tex
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfkeys
+libraryfiltered.code.tex))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgf.c
+fg)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsy
+s-pdftex.def
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsy
+s-common-pdf.def)))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsy
+ssoftpath.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/systemlayer\pgfsy
+sprotocol.code.tex))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+e.code.tex
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmath.code
+.tex
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathutil.
+code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathparse
+r.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.basic.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.trigonometric.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.random.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.comparison.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.base.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.round.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.misc.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfunct
+ions.integerarithmetics.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathcalc.
+code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmathfloat
+.code.tex))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfint.code.
+tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+epoints.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+epathconstruct.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+epathusage.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+escopes.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+egraphicstate.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+etransformations.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+equick.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+eobjects.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+epathprocessing.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+earrows.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+eshade.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+eimage.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+eexternal.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+elayers.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+etransparency.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+epatterns.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/basiclayer\pgfcor
+erdf.code.tex)))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodule
+shapes.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodule
+plot.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/pgf/compatibility\pgfco
+mp-version-0-65.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/pgf/compatibility\pgfco
+mp-version-1-18.sty))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgffor.st
+y
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/pgf/utilities\pgfkeys.s
+ty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgfkeys
+.code.tex))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/pgf/math\pgfmath.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/math\pgfmath.code
+.tex))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/utilities\pgffor.
+code.tex))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tik
+z\tikz.code.tex
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflibr
+aryplothandlers.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodule
+matrix.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tik
+z/libraries\tikzlibrarytopaths.code.tex)))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tools\verbatim.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/environ\environ.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/trimspaces\trimspaces.s
+ty))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/etoolbox\etoolbox.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbraster.cod
+e.tex
+Library (tcolorbox): 'tcbraster.code.tex' version '6.9.0'
+)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbskins.code
+.tex
+Library (tcolorbox): 'tcbskins.code.tex' version '6.9.0'
+
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tikzfill\tikzfill.image
+.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tikzfill\tikzlibraryfil
+l.image.code.tex))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbskinsjigsa
+w.code.tex
+Library (tcolorbox): 'tcbskinsjigsaw.code.tex' version '6.9.0'
+))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbbreakable.
+code.tex
+Library (tcolorbox): 'tcbbreakable.code.tex' version '6.9.0'
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/pdfcol\pdfcol.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/infwarerr\infwarerr.s
+ty)))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbhooks.code
+.tex
+Library (tcolorbox): 'tcbhooks.code.tex' version '6.9.0'
+)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbtheorems.c
+ode.tex
+Library (tcolorbox): 'tcbtheorems.code.tex' version '6.9.0'
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsmath.sty
+For additional information on amsmath, use the `?' option.
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amstext.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsgen.sty))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsbsy.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty)))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbfitting.co
+de.tex
+Library (tcolorbox): 'tcbfitting.code.tex' version '6.9.0'
+)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcblistingsut
+f8.code.tex
+Library (tcolorbox): 'tcblistingsutf8.code.tex' version '6.9.0'
+
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcblistings.c
+ode.tex
+Library (tcolorbox): 'tcblistings.code.tex' version '6.9.0'
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/listings\listings.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/listings\lstpatch.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/listings\lstmisc.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/listings\listings.cfg))
+==> First Aid for listings.sty no longer applied!
+    Expected:
+        2024/09/23 1.10c (Carsten Heinz)
+    but found:
+        2025/11/14 1.11b (Carsten Heinz)
+    so I'm assuming it got fixed.
+
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcblistingsco
+re.code.tex
+Library (tcolorbox): 'tcblistingscore.code.tex' version '6.9.0'
+
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbprocessing
+.code.tex
+Library (tcolorbox): 'tcbprocessing.code.tex' version '6.9.0'
+)))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/listingsutf8\listingsut
+f8.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds
+.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/stringenc\stringenc.s
+ty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pdfescape\pdfescape.s
+ty))))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbexternal.c
+ode.tex
+Library (tcolorbox): 'tcbexternal.code.tex' version '6.9.0'
+)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbmagazine.c
+ode.tex
+Library (tcolorbox): 'tcbmagazine.code.tex' version '6.9.0'
+)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbvignette.c
+ode.tex
+Library (tcolorbox): 'tcbvignette.code.tex' version '6.9.0'
+
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tik
+z/libraries\tikzlibraryfadings.code.tex
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflibr
+aryfadings.code.tex)))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcbposter.cod
+e.tex
+Library (tcolorbox): 'tcbposter.code.tex' version '6.9.0'
+)) (C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/caption\caption.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/caption\caption3.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/caption\ltcaption.sty))
+ (C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/float\float.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/placeins\placeins.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdefine
+keys.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/hycolor\hycolor.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/gettitlestring\gettit
+lestring.sty))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/bigintcalc\bigintcalc
+.sty)))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/rerunfilecheck\rerunfil
+echeck.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/uniquecounter\uniquec
+ounter.sty)))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/chngcntr\chngcntr.sty)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tik
+z/libraries\tikzlibrarypositioning.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries\pgflibr
+aryarrows.meta.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tik
+z/libraries\tikzlibraryfit.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tik
+z/libraries\tikzlibrarybackgrounds.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tik
+z/libraries\tikzlibraryshapes.geometric.code.tex
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries/shapes\
+pgflibraryshapes.geometric.code.tex))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tik
+z/libraries\tikzlibrarycalc.code.tex)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tik
+z/libraries\tikzlibrarydecorations.pathreplacing.code.tex
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/frontendlayer/tik
+z/libraries\tikzlibrarydecorations.code.tex
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/modules\pgfmodule
+decorations.code.tex))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/pgf/libraries/decorat
+ions\pgflibrarydecorations.pathreplacing.code.tex))
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1ptm.fd)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdf
+tex.def) (rapport.aux
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/generic/babel/locale/en\babel
+-english.tex))
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mk
+ii
+[Loading MPS to PDF converter (version 2006.09.02).]
+)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-b
+ase.sty
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/00miktex\epstopdf-sys.c
+fg)) (rapport.out) (rapport.out) (sections/00-liminaires.tex
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ztmcm.fd)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omlztmcm.fd)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omsztmcm.fd)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omxztmcm.fd)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ptm.fd)
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1phv.fd)
+[1{C:/Users/maxib/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/ma
+xib/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}] [2] [3]
+[4] [5] (rapport.lot) [6] (rapport.lof) [7] [8]) [9]
+(sections/01-introduction.tex
+
+Package hyperref Warning: The anchor of a bookmark and its parent's must not
+(hyperref)                be the same. Added a new anchor on input line 11.
+
+[1]
+
+Package hyperref Warning: The anchor of a bookmark and its parent's must not
+(hyperref)                be the same. Added a new anchor on input line 91.
+
+[2] [3]
+
+Package hyperref Warning: The anchor of a bookmark and its parent's must not
+(hyperref)                be the same. Added a new anchor on input line 176.
+
+
+Package hyperref Warning: The anchor of a bookmark and its parent's must not
+(hyperref)                be the same. Added a new anchor on input line 218.
+
+[4]
+
+Package hyperref Warning: The anchor of a bookmark and its parent's must not
+(hyperref)                be the same. Added a new anchor on input line 281.
+
+[5] [6]) (sections/02-chapitre1.tex [7]
+Chapitre 1.
+
+Package hyperref Warning: The anchor of a bookmark and its parent's must not
+(hyperref)                be the same. Added a new anchor on input line 8.
+
+[8] [9] [10] [11] [12] [13] [14] [15]) (sections/03-chapitre2.tex [16]
+Chapitre 2.
+
+Package hyperref Warning: The anchor of a bookmark and its parent's must not
+(hyperref)                be the same. Added a new anchor on input line 8.
+
+[17]
+Underfull \hbox (badness 10000) in paragraph at lines 150--150
+\T1/ptm/m/n/10 Restitution
+
+Underfull \hbox (badness 10000) in paragraph at lines 150--150
+\T1/ptm/m/n/10 Mise en re-la-tion
+
+Underfull \hbox (badness 10000) in paragraph at lines 150--150
+\T1/ptm/m/n/10 Ancrage do-
+
+Underfull \hbox (badness 10000) in paragraph at lines 150--150
+\T1/ptm/m/n/10 cu-men-taire de
+
+Underfull \hbox (badness 10000) in paragraph at lines 150--150
+\T1/ptm/m/n/10 Cloisonnement et
+[18] [19] [20] [21] (figures/scrumban.tex
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ts1phv.fd))
+[22] (C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1pcr.fd)
+Underfull \hbox (badness 10000) in paragraph at lines 418--418
+[]\T1/ptm/m/n/10 Intelligence ar-ti-fi-
+
+Underfull \hbox (badness 10000) in paragraph at lines 418--418
+[]\T1/ptm/m/n/10 Conception et ré-dac-
+[23] [24]) (sections/04-chapitre3.tex [25]
+Chapitre 3.
+
+Package hyperref Warning: The anchor of a bookmark and its parent's must not
+(hyperref)                be the same. Added a new anchor on input line 14.
+
+[26] (figures/organigramme.tex) [27] [28] [29] [30] [31] [32]
+(figures/architecture-generale.tex) [33] (figures/rag.tex) [34] [35]
+(figures/infrastructure-cloud.tex) (figures/devops-actuel.tex) [36] [37]
+Underfull \hbox (badness 1953) in paragraph at lines 649--649
+ []|\T1/ptm/m/n/10 0|
+
+Underfull \hbox (badness 1953) in paragraph at lines 649--649
+ []|\T1/ptm/m/n/10 0|
+
+Underfull \hbox (badness 1953) in paragraph at lines 649--649
+ []|\T1/ptm/m/n/10 0|
+
+Underfull \hbox (badness 1953) in paragraph at lines 649--649
+ []|\T1/ptm/m/n/10 0|
+
+Underfull \hbox (badness 1953) in paragraph at lines 649--649
+ []|\T1/ptm/m/n/10 0|
+
+Underfull \hbox (badness 1117) in paragraph at lines 684--684
+ []|\T1/ptm/m/n/10 90|
+
+Underfull \hbox (badness 1472) in paragraph at lines 684--684
+ []|\T1/ptm/m/n/10 0|
+
+Underfull \hbox (badness 1472) in paragraph at lines 684--684
+ []|\T1/ptm/m/n/10 0|
+
+Underfull \hbox (badness 10000) in paragraph at lines 684--684
+[]|\T1/ptm/m/n/10 Reconstruction pho-to-gram-mé-trique, 6
+
+Underfull \hbox (badness 1117) in paragraph at lines 684--684
+ []|\T1/ptm/m/n/10 ^^V|
+
+Underfull \hbox (badness 1406) in paragraph at lines 728--728
+ []|\T1/ptm/m/n/10 1 133 000|
+
+Underfull \hbox (badness 2042) in paragraph at lines 728--728
+ []|\T1/ptm/m/n/10 162 710|
+
+Underfull \hbox (badness 1406) in paragraph at lines 728--728
+ []|\T1/ptm/m/n/10 1 295 710|
+
+Underfull \hbox (badness 2556) in paragraph at lines 728--728
+ []|\T1/ptm/m/n/10 38 871|
+
+Underfull \hbox (badness 1406) in paragraph at lines 728--728
+ []|\T1/ptm/b/n/10 1 334 581|
+[38] [39] [40] [41] [42] [43]
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ts1ptm.fd)
+[44]) (sections/05-chapitre4.tex [45]
+Chapitre 4.
+
+Package hyperref Warning: The anchor of a bookmark and its parent's must not
+(hyperref)                be the same. Added a new anchor on input line 9.
+
+[46] [47]
+Underfull \hbox (badness 1264) in paragraph at lines 220--220
+[]\T1/ptm/m/n/10 Coût ré-cur-rent d'hé-ber-ge-ment très faible (730
+
+Underfull \hbox (badness 4353) in paragraph at lines 220--220
+[]\T1/ptm/m/n/10 Tissu dense d'ins-ti-tu-tions pa-tri-mo-niales dans
+[48] [49] [50] [51] (figures/devops-cible.tex)
+Underfull \hbox (badness 10000) in paragraph at lines 413--413
+[]|\T1/ptm/m/n/10 Aucun ; fac-tu-ra-tion à la res-source
+[52] [53]
+Underfull \hbox (badness 1048) in paragraph at lines 533--533
+ []|\T1/ptm/m/n/10 8 760|
+
+Underfull \hbox (badness 1048) in paragraph at lines 533--533
+ []|\T1/ptm/m/n/10 9 000|
+
+Underfull \hbox (badness 1048) in paragraph at lines 533--533
+ []|\T1/ptm/m/n/10 6 000|
+[54] [55]) (sections/06-conclusion.tex [56] [57]
+
+Package hyperref Warning: The anchor of a bookmark and its parent's must not
+(hyperref)                be the same. Added a new anchor on input line 68.
+
+[58] [59]) (sections/07-bibliographie.tex [60]
+
+Package hyperref Warning: The anchor of a bookmark and its parent's must not
+(hyperref)                be the same. Added a new anchor on input line 25.
+
+
+Underfull \hbox (badness 1810) in paragraph at lines 64--68
+[]\T1/ptm/m/n/12 Malkov, Y. A., & Ya-shu-nin, D. A. (2018). Ef-fi-cient and ro-
+bust ap-proxi-mate nea-
+
+Underfull \hbox (badness 1910) in paragraph at lines 64--68
+\T1/ptm/m/n/12 rest neigh-bor search using hie-rar-chi-cal na-vi-gable small wo
+rld graphs. \T1/ptm/m/it/12 IEEE
+
+Underfull \hbox (badness 1852) in paragraph at lines 64--68
+\T1/ptm/m/it/12 Tran-sac-tions on Pat-tern Ana-ly-sis and Ma-chine In-tel-li-ge
+nce, 42\T1/ptm/m/n/12 (4), 824--836.
+[61]) (sections/08-annexes.tex [62]
+Underfull \hbox (badness 1205) in paragraph at lines 51--53
+[]\T1/ptm/m/n/12 Existe-t-il, à votre connais-sance, des ÷uvres com-pa-rables a
+ux vôtres conser-vées
+[63] [64] [65] [66]) [67]
+pdfTeX warning (ext4): destination with the same identifier (name{page.IX}) has
+ been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.444 
+       [9] [10] [11] [12] [13] (rapport.aux) )
+(see the transcript file for additional information)<C:/Users/maxib/AppData/Loc
+al/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/maxib/Ap
+pData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb><C:/
+Users/maxib/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrb8a.pfb><C
+:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb>
+<C:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/type1/urw/courier/ucrro8a.p
+fb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/type1/urw/helvetic/uhvb8
+a.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/type1/urw/helvetic/uh
+vbo8a.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/type1/urw/helveti
+c/uhvr8a.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/type1/urw/helv
+etic/uhvro8a.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/type1/urw/
+times/utmb8a.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/type1/urw/
+times/utmbi8a.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/type1/urw
+/times/utmr8a.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/type1/urw
+/times/utmri8a.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/type1/ur
+w/zapfding/uzdr.pfb>
+Output written on rapport.pdf (81 pages, 617248 bytes).
+Transcript written on rapport.log.
+pdflatex: major issue: So far, you have not checked for MiKTeX updates.

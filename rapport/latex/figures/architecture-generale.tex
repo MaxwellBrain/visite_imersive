@@ -1,0 +1,97 @@
+% -----------------------------------------------------------------------------
+%  Figure 3.2 — Architecture générale de la plateforme MUSÉA.
+%  Les bandes sont empilées de la plus éloignée du visiteur (services externes)
+%  à la plus proche (diffusion des fichiers), de sorte que chaque lien ne relie
+%  jamais que deux bandes voisines : aucune flèche ne traverse une couche.
+%  La frontière orange matérialise la règle qui n'a jamais été enfreinte :
+%  aucune clé d'accès ne franchit la limite du navigateur.
+% -----------------------------------------------------------------------------
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+  % ========================= SERVICES EXTERNES ===============================
+  \foreach \x/\nom/\id in {%
+      -5.4/{Collections ouvertes}/e1,
+      -1.8/{Génération de texte}/e2,
+       1.8/{Synthèse vocale}/e3,
+       5.4/{Service de paiement}/e4}
+  {\node[blocext, text width=2.9cm, anchor=north, minimum height=8mm]
+        (\id) at (\x,0) {\nom};}
+
+  \begin{scope}[on background layer]
+    \node[couche, fit=(e1)(e4), draw=keyceorange] (bext) {};
+  \end{scope}
+  \node[titrecouche, anchor=west, text=keyceorange]
+       at ([xshift=6pt]bext.north west) {SERVICES EXTERNES};
+
+  % ========================= COUCHE DE SERVICES ==============================
+  \foreach \x/\nom/\id in {%
+      -4.8/{Base PostgreSQL\\ \textit{sécurité au niveau de la ligne}}/s1,
+       0.0/{Service d'authentification\\ \textit{trois cercles d'identité}}/s2,
+       4.8/{Stockage de fichiers\\ \textit{médias, modèles 3D}}/s3}
+  {\node[bloc, text width=3.5cm, anchor=north, minimum height=11mm]
+        (\id) at (\x,-2.6) {\nom};}
+
+  \node[bloc, text width=13.2cm, anchor=north] (fonc) at (0,-4.2)
+       {\textbf{12 fonctions serveur} \;---\;
+        \texttt{guide-agent} · \texttt{memory-search} · \texttt{freres} ·
+        \texttt{object-ai} · \texttt{campaign-ai} · \texttt{setup-agent} ·
+        \texttt{tts} · \texttt{send-email} · \texttt{payment-create} ·
+        \texttt{payment-webhook} · \texttt{verifier-domaine} ·
+        \texttt{europeana}};
+
+  \begin{scope}[on background layer]
+    \node[couche, fit=(s1)(s3)(fonc), draw=keycemid] (bsrv) {};
+  \end{scope}
+  \node[titrecouche, anchor=west] at ([xshift=6pt]bsrv.north west)
+       {COUCHE DE SERVICES \textnormal{\itshape(seule détentrice des secrets)}};
+
+  \draw[flechecle] (-3.0,-2.35) -- (-3.0,-1.05)
+        node[etiquette, pos=0.5, anchor=west, xshift=3pt, text=keyceorange]
+        {appels signés par les clés d'accès};
+
+  % ========================= FRONTIÈRE DES SECRETS ===========================
+  \draw[draw=keyceorange, line width=1.2pt, dash pattern=on 5pt off 3pt]
+       (-7.3,-6.2) -- (7.3,-6.2);
+  \node[etiquette, text=keyceorange, font=\sffamily\tiny\bfseries]
+       at (1.6,-6.2) {aucune clé d'accès ne franchit cette frontière};
+
+  % ========================= COUCHE CLIENTE ==================================
+  \foreach \x/\nom/\id in {%
+      -6.0/{Site public}/c1,
+      -3.6/{Back-office}/c2,
+      -1.2/{Moteur de panorama WebGL}/c3,
+       1.2/{Visionneuse 3D et réalité augmentée}/c4,
+       3.6/{Moteur de relief 2.5D}/c5,
+       6.0/{Encodeur de codes QR}/c6}
+  {\node[bloc, text width=1.85cm, anchor=north, minimum height=11mm]
+        (\id) at (\x,-6.9) {\nom};}
+
+  \begin{scope}[on background layer]
+    \node[couche, fit=(c1)(c6), draw=keycemid] (bcli) {};
+  \end{scope}
+  \node[titrecouche, anchor=west] at ([xshift=6pt]bcli.north west)
+       {COUCHE CLIENTE \textnormal{\itshape(navigateur du visiteur)}};
+
+  \draw[flechedbl] (-5.2,-6.65) -- (-5.2,-4.95)
+        node[etiquette, pos=0.5, anchor=west, xshift=3pt]
+        {requêtes de données\\ (jeton du visiteur)};
+
+  % ========================= COUCHE DE DIFFUSION =============================
+  \node[bloc, text width=5.2cm, anchor=north, minimum height=10mm] (d1)
+       at (-3.0,-9.6) {Stockage d'objets\\ \textit{privé, chiffré, versionné}};
+  \node[bloc, text width=5.2cm, anchor=north, minimum height=10mm] (d2)
+       at (3.0,-9.6) {Réseau de distribution mondial\\
+                      \textit{cache différencié, repli applicatif}};
+  \draw[fleche] (d1.east) -- (d2.west);
+
+  \begin{scope}[on background layer]
+    \node[couche, fit=(d1)(d2), draw=keycemid] (bdif) {};
+  \end{scope}
+  \node[titrecouche, anchor=west] at ([xshift=6pt]bdif.north west)
+       {COUCHE DE DIFFUSION};
+
+  \draw[fleche] (5.0,-9.35) -- (5.0,-8.35)
+        node[etiquette, pos=0.5, anchor=west, xshift=3pt]
+        {chargement de l'application};
+
+\end{tikzpicture}

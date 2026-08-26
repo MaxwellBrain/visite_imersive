@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: musea
+  labels:
+    app.kubernetes.io/part-of: musea
+    # Applique les règles de sécurité des pods au niveau du NAMESPACE plutôt
+    # qu'objet par objet : un manifeste ajouté plus tard par distraction est
+    # refusé à l'admission s'il demande des privilèges. C'est la ceinture qui
+    # tient quand la bretelle du securityContext est oubliée.
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest

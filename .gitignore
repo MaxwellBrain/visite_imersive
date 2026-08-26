@@ -17,6 +17,7 @@ certs/
 # valeurs sensibles : il n'a rien à faire dans le dépôt (voir le backend S3
 # dans infra/versions.tf).
 infra/.terraform/
+infra-conteneurs/.terraform/
 # NB : infra/.terraform.lock.hcl est au contraire À VERSIONNER — il fige les
 # versions de fournisseurs, exactement comme package-lock.json.
 *.tfstate

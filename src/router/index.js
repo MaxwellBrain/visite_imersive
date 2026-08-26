@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import AdminLayout from '@/layouts/AdminLayout.vue'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { parseHost, urlPubliqueTenant } from '@/services/host'
 
@@ -48,6 +47,9 @@ const routes = [
     }
   },
   { path: '/inscription', name: 'platform-signup', component: () => import('@/views/platform/SignupView.vue') },
+  // Installation de la plateforme : désignation du super-admin. La page se
+  // referme d'elle-même dès qu'un super-admin existe (vérifié en base).
+  { path: '/installation', name: 'platform-setup', component: () => import('@/views/platform/SetupPlatformView.vue') },
   // Documents juridiques de la plateforme — liés par la case à cocher de
   // l'inscription. Publics : ils doivent être lisibles avant de créer un compte.
   { path: '/conditions', name: 'platform-terms', component: () => import('@/views/platform/LegalView.vue') },
@@ -55,6 +57,12 @@ const routes = [
   {
     path: '/site',
     component: () => import('@/layouts/PublicLayout.vue'),
+    // SUR LE DOMAINE DE LA PLATEFORME, `/site` NE DÉSIGNE AUCUNE ORGANISATION.
+    // C'est la vitrine qui y répond : l'endroit où une institution vient créer
+    // son espace. Sur un sous-domaine, en revanche, `/site` EST le site du
+    // locataire — on n'y touche pas. En local non plus, sans quoi le site public
+    // deviendrait intestable.
+    beforeEnter: () => (parseHost().kind === 'platform' ? { name: 'platform-home' } : true),
     children: publicChildren()
   },
   // Site public d'une organisation : /c/<slug>
@@ -65,7 +73,10 @@ const routes = [
   },
   {
     path: '/',
-    component: AdminLayout,
+    // Chargé à la demande, comme PublicLayout. Importé statiquement, il
+    // entraînait la barre latérale, six stores métier et les composants de
+    // l'ERP dans le fichier que télécharge le moindre visiteur du site public.
+    component: () => import('@/layouts/AdminLayout.vue'),
     meta: { requiresStaff: true },
     children: [
       {

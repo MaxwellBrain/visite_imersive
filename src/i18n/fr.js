@@ -149,6 +149,12 @@ export default {
     themeMuseums: 'musées',
     discoverWork: "Découvrir l'œuvre",
     featured: 'Œuvres à la une',
+    // Œuvres en 3D, mises en rotation dès l'accueil.
+    obj3dOver: 'En trois dimensions',
+    obj3dTitle: 'Tournez autour de l’œuvre',
+    obj3dLead: 'Ces pièces sont modélisées : elles tournent d’elles-mêmes, et vous pouvez les faire pivoter du doigt. Ouvrez la fiche pour les poser chez vous en réalité augmentée.',
+    obj3dLoading: 'Chargement du modèle…',
+    obj3dOpen: 'Voir en grand',
     ourMuseums: 'Nos musées',
     workFallback: 'Œuvre du patrimoine',
     bandTitle: "De l'objet au chef, remontez la lignée",
@@ -171,6 +177,39 @@ export default {
     installed: 'Application installée',
     iosHint: "Sur iPhone/iPad : touchez Partager puis « Sur l'écran d'accueil ».",
     manualHint: "Dans le menu de votre navigateur (⋮), choisissez « Installer l'application » ou « Ajouter à l'écran d'accueil ».",
+  },
+  // Installation de la plateforme (/installation) — désignation du super-admin.
+  setup: {
+    checking: 'Vérification de la plateforme…',
+    title: 'Installer la plateforme',
+    lead: 'Désignez l’administrateur de la plateforme. C’est lui qui approuve les organisations, vérifie les domaines et voit tous les locataires.',
+    tabNew: 'Créer un compte',
+    tabExisting: 'Utiliser un compte existant',
+    existingNote: 'Connectez-vous avec un compte déjà créé : il recevra le rôle d’administrateur de la plateforme.',
+    fName: 'Votre nom',
+    fNamePlaceholder: 'Prénom et nom',
+    fEmail: 'Adresse e-mail',
+    fPassword: 'Mot de passe',
+    fPasswordPlaceholder: 'Au moins 6 caractères',
+    fPasswordConfirm: 'Confirmer le mot de passe',
+    fPasswordExisting: 'Mot de passe du compte',
+    create: 'Créer et devenir administrateur',
+    claim: 'Devenir administrateur',
+    onceOnly: 'Cette page ne fonctionne qu’une seule fois. Dès qu’un administrateur est désigné, elle se ferme définitivement — la vérification est faite par la base, pas par le navigateur.',
+    errMismatch: 'Les deux mots de passe ne sont pas identiques.',
+    err_mismatch: 'Les deux mots de passe ne sont pas identiques.',
+    err_incomplet: 'Renseignez une adresse e-mail valide et un mot de passe d’au moins 6 caractères.',
+    err_email_pris: 'Cette adresse a déjà un compte. Passez par « Utiliser un compte existant ».',
+    err_identifiants: 'Adresse ou mot de passe incorrect.',
+    err_deja_configure: 'Un administrateur a déjà été désigné pour cette plateforme.',
+    err_non_authentifie: 'La session n’a pas pu être ouverte. Réessayez.',
+    err_profil_introuvable: 'Aucun profil n’est rattaché à ce compte.',
+    closedTitle: 'Plateforme déjà installée',
+    closedLead: 'Un administrateur a déjà été désigné. Cette page n’a plus d’effet.',
+    goLogin: 'Aller à la connexion',
+    doneTitle: 'C’est fait',
+    doneLead: 'Vous êtes l’administrateur de la plateforme. Les organisations en attente vous attendent sur le tableau de bord.',
+    goDashboard: 'Ouvrir le tableau de bord'
   },
   // Documents juridiques de la plateforme (/conditions et /confidentialite).
   legal: {
@@ -211,6 +250,33 @@ export default {
     }
   },
   platform: {
+    // File de validation du super-admin : approbations et domaines.
+    validation: {
+      title: 'À valider',
+      refresh: 'Actualiser',
+      empty: 'Rien n’attend de décision.',
+      pendingOrgs: 'Organisations à approuver ({n})',
+      pendingDomains: 'Domaines à vérifier ({n})',
+      approve: 'Approuver',
+      reject: 'Refuser',
+      approved: 'Organisation approuvée — son site est en ligne.',
+      rejected: 'Organisation refusée.',
+      confirmApprove: 'Approuver « {nom} » ? Son site public devient immédiatement visible.',
+      confirmReject: 'Refuser « {nom} » ? Son espace restera inaccessible au public.',
+      confirmForce: 'Marquer {domaine} comme vérifié sans preuve DNS ? À ne faire que si vous savez que ce domaine appartient bien à cette organisation.',
+      check: 'Vérifier le DNS',
+      force: 'Forcer',
+      domainForced: 'Domaine marqué vérifié (sans preuve DNS).',
+      domainOk: 'Domaine vérifié : l’enregistrement TXT attendu est en place.',
+      domainKo: 'Domaine non vérifié — l’enregistrement TXT est absent ou différent.',
+      domainHelp: 'La vérification interroge le DNS. Elle ne réussit que si l’organisation a posé l’enregistrement TXT ci-dessous : c’est la preuve qu’elle possède bien ce domaine.',
+      toCreate: 'Enregistrement à créer chez l’hébergeur DNS du domaine :',
+      copy: 'Copier',
+      copied: 'Copié.',
+      found: 'Trouvé à la place :',
+      routing: 'Le domaine pointe actuellement vers :',
+      lastTry: 'Dernier essai :'
+    },
     // Tableau de bord de la PLATEFORME (nexacode.store/dashboard, super-admin).
     dash: {
       title: 'Pilotage de la plateforme',
@@ -247,12 +313,88 @@ export default {
     a4: 'Boutique en ligne', a4d: 'Vendez livres, artisanat et souvenirs ; commande directe par WhatsApp.',
     a5: 'Généalogie des lignées', a5d: 'Publiez les dynasties et reliez chaque œuvre au souverain qui la porte.',
     a6: 'Billetterie avec QR code', a6d: 'Vendez les accès en ligne et scannez les billets à l’entrée.',
+    a7: 'Votre identité, pas la nôtre', a7d: 'Vos couleurs, votre logo, vos visuels : le site est le vôtre, pas un gabarit reconnaissable.',
+    a8: 'Ce que le public regarde', a8d: 'Les œuvres les plus consultées et les questions restées sans réponse, mesurées jour après jour.',
+
+    // L'expérience visiteur — légendes DESCRIPTIVES : ces photos illustrent des
+    // dispositifs immersifs, elles ne sont pas des captures de la plateforme.
+    xpOver: 'L’expérience',
+    xpTitle: 'Ce que vit un visiteur, une fois vos collections en ligne',
+    xpLead: 'La 3D et la réalité augmentée ne sont pas des gadgets : elles rendent visible ce qu’une vitrine ne montre pas — un objet sous tous ses angles, une salle telle qu’elle était, un geste que plus personne ne fait.',
+    xp1: 'L’objet reprend sa place', xp1d: 'Le visiteur lève sa tablette et la salle retrouve ses couleurs, ses tentures, sa vie d’avant.',
+    xp2: 'L’immersion, debout dans la salle', xp2d: 'Un casque, et l’on entre dans un lieu disparu au milieu même de la collection.',
+    xp3: 'La médiation dans la poche', xp3d: 'Chacun explore à son rythme, guidé par les repères posés par le conservateur.',
+    xp4: 'Le patrimoine, autrement', xp4d: 'La technologie n’efface pas l’œuvre : elle la donne à voir à qui ne pourra jamais venir.',
+    xp5: 'Des lieux que l’on croyait perdus', xp5d: 'Ce qui a brûlé, ce qui s’est effondré, ce qui est parti : tout cela peut encore se visiter.',
+
+    // Le problème — dit sans détour, parce que c'est ce que vivent les
+    // institutions et qu'elles se reconnaîtront.
+    probOver: 'Le constat',
+    probTitle: 'Un patrimoine immense, presque invisible en ligne',
+    prob1: 'Un site vitrine ne suffit plus', prob1d: 'Quelques photos et un texte de présentation : le visiteur regarde, puis referme. Rien à explorer, rien à emporter.',
+    prob2: 'Le numérique immersif reste hors de portée', prob2d: 'La 3D, la réalité augmentée, un guide intelligent : chacun de ces chantiers demande des mois et un budget que peu d’institutions ont.',
+    prob3: 'Tout repose sur une compétence rare', prob3d: 'Sans développeur sous la main, la moindre mise à jour attend — et le site vieillit à vue d’œil.',
+    probSolution: 'MUSÉA réunit tout cela en une seule plateforme, prête le jour de votre inscription.',
+
+    // Preuve sociale — tant qu'il n'y a pas de témoignages, on dit la vérité :
+    // la plateforme démarre, et c'est une raison d'en être.
+    proofTitle: 'Vous dirigez un musée, une chefferie, une fondation ?',
+    proofLead: 'La plateforme accueille ses premières institutions. En rejoignant maintenant, vous façonnez ce que deviendra l’outil — et votre site est en ligne cette semaine.',
+    proofCount: 'Déjà {n} organisations en ligne',
+
+    // Questions fréquentes — réponses exactes, vérifiables dans le produit.
+    faqOver: 'Bon à savoir',
+    faqTitle: 'Les questions qu’on nous pose',
+    faqQ1: 'Faut-il des compétences techniques ?',
+    faqR1: 'Non. Vous remplissez des formulaires : un musée, des salles, des œuvres avec leurs photos. Tout se fait depuis votre espace, sans une ligne de code. Un assistant peut même créer votre première structure à partir d’une simple description.',
+    faqQ2: 'Comment obtient-on les modèles 3D de nos œuvres ?',
+    faqR2: 'Deux voies. Si vous avez déjà des modèles, vous les déposez. Sinon, la plateforme guide une prise de vue photo autour de l’objet ; la reconstruction 3D se fait ensuite, hors ligne, à partir de ces images.',
+    faqQ3: 'Peut-on utiliser notre propre nom de domaine ?',
+    faqR3: 'Oui. Votre espace démarre sur une adresse en .nexacode.store, disponible immédiatement. Vous pouvez y brancher votre domaine à vous : il vous suffit de prouver qu’il vous appartient en posant un enregistrement DNS, que la plateforme vérifie.',
+    faqQ4: 'Le guide intelligent peut-il parler de NOS collections ?',
+    faqR4: 'Il ne répond qu’à partir de ce que vous avez publié : vos notices, vos musées, vos parcours. Les questions qu’il n’a pas su traiter vous sont remontées — elles indiquent précisément les notices à enrichir.',
+    faqQ5: 'Sommes-nous engagés sur une durée ?',
+    faqR5: 'Non. Vous pouvez demander la fermeture de votre espace à tout moment ; vos contenus sont alors retirés du site public. Ils restent les vôtres : c’est écrit dans les conditions d’utilisation.',
+
+    // Pied de page
+    footNav: 'Le produit',
+    footLegal: 'Informations légales',
+    footContact: 'Contact',
+    footRights: 'Tous droits réservés.',
     stepsOver: 'En pratique',
     stepsTitle: 'Quatre étapes pour être en ligne',
     s1: 'Créez votre compte', s1d: 'Quelques informations suffisent, aucune carte bancaire.',
     s2: 'Nommez votre espace', s2d: 'Choisissez votre adresse publique, par exemple bandjoun.nexacode.store.',
     s3: 'Ajoutez vos contenus', s3d: 'Musées, salles, œuvres, produits et événements depuis votre back-office.',
     s4: 'Publiez', s4d: 'Après validation, votre site est visible par tous — et vous pouvez brancher votre propre domaine.',
+    // Mémoire réunifiée : les collections ouvertes interrogées pour retrouver
+    // les œuvres dispersées. Formulations volontairement exactes — ces
+    // institutions ne sont pas partenaires, et le dire autrement serait faux.
+    sourcesOver: 'Mémoire réunifiée',
+    sourcesTitle: 'Les collections que nous interrogeons',
+    sourcesLead: 'Une œuvre sortie d’une chefferie dort souvent dans un musée à l’autre bout du monde. MUSÉA interroge les grandes collections ouvertes pour la retrouver et la relier à son lieu d’origine — {n} institutions détentrices identifiées à ce jour.',
+
+    // Bande immersive — le propos de la plateforme, sans emprunter le contenu
+    // d'aucune organisation hébergée.
+    bandOver: 'Un patrimoine vivant',
+    bandTitle: 'Chaque chefferie a une histoire qui n’attend qu’un lieu pour se raconter',
+    bandLead: 'Des masques, des trônes, des tambours d’appel, des lignées transmises de bouche à oreille. MUSÉA donne à ce patrimoine une adresse, une vitrine et des outils — sans qu’il quitte jamais la main de ceux à qui il appartient.',
+    locNewYork: 'New York',
+    locChicago: 'Chicago',
+    locCleveland: 'Cleveland',
+    locLondon: 'Londres',
+    locGermany: 'Allemagne',
+    locEurope: 'Europe',
+    locIntl: 'International',
+    sourcesCaption: 'Ces objets ont été faits pour être portés, dansés, transmis. Les retrouver dans les musées du monde, c’est leur rendre ce lien.',
+    sourcesCount: '{n} institutions',
+    sourcesMany: 'Des milliers d’institutions',
+    sourcesNote: 'Collections publiques interrogées par leurs API ouvertes. Ces institutions ne sont pas partenaires de MUSÉA et n’ont pas de lien contractuel avec la plateforme.',
+    // Bandeau de chiffres — libellés seuls, les nombres viennent de la base.
+    kOrgs: 'Organisations',
+    kMuseums: 'Musées',
+    kRooms: 'Salles',
+    kWorks: 'Œuvres en ligne',
     tenantsOver: 'Ils sont déjà là',
     tenantsTitle: 'Organisations en ligne',
     finalTitle: 'Prêt à ouvrir votre musée numérique ?',
@@ -819,6 +961,7 @@ export default {
     sug1: 'Avez-vous les cases Mousgoum ?',
     sug2: 'Parlez-moi de La Vague Bleue',
     sug3: 'Quels musées puis-je visiter ?',
+    seeHere: 'Voir dans nos salles',
   },
   guideInline: {
     defaultTitle: 'Demandez au guide',
@@ -2114,6 +2257,15 @@ export default {
       domainHint: 'Sans https:// ni www — exemple : chefferie-bandjoun.cm',
       domainPending: "Domaine enregistré. Il sera actif une fois la configuration DNS vérifiée par l'équipe MUSÉA.",
       domainVerified: 'Domaine vérifié et actif.',
+      // Preuve de possession du domaine
+      dnsToCreate: 'Créez cet enregistrement chez l’hébergeur DNS de votre domaine, puis lancez la vérification. C’est ce qui prouve que ce domaine est bien le vôtre :',
+      dnsCopy: 'Copier l’enregistrement',
+      dnsCopied: 'Enregistrement copié.',
+      dnsCheck: 'Vérifier maintenant',
+      dnsOk: 'Domaine vérifié. Votre site répondra à cette adresse dès que le domaine pointera vers la plateforme.',
+      dnsKo: 'Enregistrement introuvable pour l’instant. Une modification DNS peut mettre jusqu’à quelques heures à se propager.',
+      dnsLastTry: 'Dernière vérification :',
+      dnsSaveFirst: 'Enregistrez d’abord ce domaine : l’enregistrement à créer sera affiché ensuite.',
       saved: 'Organisation mise à jour',
       failed: 'Échec de l’enregistrement',
     },

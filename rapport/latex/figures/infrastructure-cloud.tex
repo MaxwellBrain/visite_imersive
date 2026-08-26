@@ -1,0 +1,66 @@
+% -----------------------------------------------------------------------------
+%  Figure 3.4 — Architecture de l'infrastructure d'hébergement en nuage
+%  effectivement déployée. Chemin principal en haut, dérivations en dessous.
+%  Les précisions de chaque lien sont portées par la note, et non par des
+%  étiquettes glissées entre les blocs, où elles ne tiendraient pas.
+% -----------------------------------------------------------------------------
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+  % ===================== CHEMIN PRINCIPAL ====================================
+  \node[blocfort, text width=2.3cm, anchor=north, minimum height=13mm] (vis)
+       at (-6.2,0) {Visiteur\\ \textit{navigateur, téléphone}};
+
+  \node[bloc, text width=2.9cm, anchor=north, minimum height=13mm] (r53)
+       at (-2.7,0) {\textbf{Route 53}\\ zone hébergée\\
+                    enregistrements A, AAAA et joker};
+
+  \node[bloc, text width=3.3cm, anchor=north, minimum height=13mm] (cf)
+       at (1.3,0) {\textbf{CloudFront}\\ réseau de diffusion\\
+                   certificat \textbf{ACM}};
+
+  \node[bloc, text width=2.9cm, anchor=north, minimum height=13mm] (s3)
+       at (5.4,0) {\textbf{Amazon S3}\\ privé, chiffré, versionné};
+
+  \draw[fleche] (vis.east) -- (r53.west);
+  \draw[fleche] (r53.east) -- (cf.west);
+  \draw[fleche] (cf.east) -- (s3.west);
+
+  % ===================== RÉGLAGES ET DÉRIVATIONS =============================
+  \node[bloc, text width=3.4cm, anchor=north, minimum height=13mm] (sup)
+       at (-4.4,-2.5) {\textbf{Supabase}\\ base de données,
+                       authentification, fonctions serveur};
+  \draw[fleche] (vis.south) -- (vis.south |- sup.north)
+        node[etiquette, pos=0.45, anchor=west, xshift=3pt]
+        {interrogé directement par le navigateur};
+
+  \node[blocgris, text width=3.3cm, anchor=north, minimum height=13mm] (regl)
+       at (1.3,-2.5) {repli applicatif sur 403 et 404,\\
+                      durées de cache différenciées,\\
+                      en-têtes de sécurité};
+  \draw[lien, dashed] (cf.south) -- (regl.north);
+
+  \node[blocext, text width=3.0cm, anchor=north, minimum height=13mm] (gpu)
+       at (5.4,-2.5) {\textbf{EC2 à processeur graphique}\\
+                      photogrammétrie, 6 h, arrêtée hors usage};
+  \draw[flechefine, draw=keyceorange] (s3.south) -- (gpu.north)
+        node[etiquette, pos=0.5, anchor=west, xshift=3pt, text=keyceorange]
+        {ponctuel};
+
+  % ===================== ENCADRÉ TERRAFORM ===================================
+  \begin{scope}[on background layer]
+    \node[couche, fit=(r53)(cf)(s3)(regl)(gpu), draw=keycemid] (btf) {};
+  \end{scope}
+  \node[titrecouche, anchor=west] at ([xshift=6pt]btf.north west)
+       {29 RESSOURCES DÉCRITES PAR TERRAFORM \textnormal{\itshape(19 créées à la mise en ligne)}};
+
+  % ===================== NOTE ================================================
+  \node[blocnote, anchor=north west, text width=14.2cm] at (-7.4,-4.9)
+       {Le visiteur atteint le site en HTTPS ; Route 53 résout le nom, y compris
+        le sous-domaine de chaque organisation grâce à l'enregistrement joker ;
+        CloudFront sert le contenu et accède seul au bucket, par contrôle
+        d'accès à l'origine. Aucun serveur ne fonctionne en permanence :
+        l'application est un site statique. C'est ce choix d'architecture, et
+        non une optimisation postérieure, qui ramène le coût récurrent
+        d'hébergement à 730 FCFA par mois.};
+
+\end{tikzpicture}

@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { supabase } from '@/services/supabase'
 import { useAuthStore } from '@/stores/useAuthStore'
-import { sendTenantWelcome } from '@/services/emailApi'
+import { sendTenantWelcome, sendNouvelleOrganisation } from '@/services/emailApi'
 import { urlPubliqueTenant } from '@/services/host'
 import { televerser } from '@/services/stockage'
 import SetupAgentView from '@/views/SetupAgentView.vue'
@@ -241,6 +241,17 @@ async function createOrg() {
       lien: `${espace}/dashboard`,
       adresseSite: espace,
       tenantId: auth.tenantId
+    })
+
+    // Et on prévient la plateforme, dans le même mouvement : sans cela, personne
+    // n'est au courant qu'une organisation attend, et elle peut patienter des
+    // jours pendant que son site reste introuvable.
+    sendNouvelleOrganisation({
+      nomOrganisation: org.nom.trim(),
+      adresseSite: espace,
+      contactEmail: org.contactEmail || account.email,
+      typeOrganisation: org.type,
+      lien: `${window.location.origin}/dashboard`
     })
 
     // L'écran d'attente va jusqu'au bout de ses étapes avant de céder la place :
@@ -648,5 +659,22 @@ async function createOrg() {
 @media (prefers-reduced-motion: reduce) {
   .su-splash__halo { animation: none; }
   .su-splash__boite { animation: none; }
+}
+
+/* ---------- Téléphone ----------
+   Deux défauts mesurés en 375 px de large : le fil d'étapes débordait de 11 px
+   (quatre libellés côte à côte n'y tiennent pas), et les champs héritaient
+   d'une police sous 16 px — en dessous de ce seuil, Safari iOS zoome à la mise
+   au point et décale toute la page, ce qui donne l'impression d'un formulaire
+   cassé. */
+@media (max-width: 640px) {
+  .su-steps { flex-wrap: wrap; gap: 0.4rem 0.9rem; }
+  .su-steps li { flex: 0 0 auto; font-size: 0.72rem; }
+  /* Sur les tout petits écrans, seul le numéro reste : les quatre libellés
+     prendraient trois lignes pour une information déjà donnée par la page. */
+  .su-in { font-size: 16px; min-height: 44px; }
+  .su-ta { min-height: 88px; }
+  .su-btn, .su-back { min-height: 44px; }
+  .su-main { padding-left: 1rem; padding-right: 1rem; }
 }
 </style>

@@ -27,25 +27,79 @@ const json = (b: unknown, s = 200) =>
 const MAX_TOURS = 8        // un modèle plus capable enchaîne davantage d'outils
 const MAX_CREATIONS = 40   // plafond de sécurité par conversation
 
-// Modèles par ordre de capacité AGENTIQUE décroissante. Installer une institution
-// suppose de planifier (musée → salles → œuvres), de respecter les dépendances et
-// d'enchaîner une dizaine d'appels d'outils sans se perdre : c'est exactement là que
-// les petits modèles décrochent. On tente donc le plus fort d'abord.
+// CHOIX DU MODÈLE — par DÉCOUVERTE, non plus par liste figée.
 //
-// La cascade évite de dépendre d'un identifiant unique : si le compte n'a pas accès
-// à un modèle (ou s'il est retiré du catalogue), on passe au suivant au lieu de tomber.
-// GROQ_MODEL_SETUP force un choix précis si besoin.
-const MODELES = [
-  Deno.env.get('GROQ_MODEL_SETUP') || '',
-  // ORDRE ÉTABLI PAR LA MESURE, pas par la taille du modèle :
-  //   kimi-k2      → indisponible sur ce compte (404)
-  //   gpt-oss-120b → quota vite atteint, et surtout réponses VIDES qui bloquent tout
-  //   llama-3.3-70b → a créé musée + 2 salles + œuvre du premier coup, de façon répétée
-  // « Plus gros » n'est pas « meilleur » quand la tâche est de l'exécution outillée.
-  'llama-3.3-70b-versatile',
+// POURQUOI CE CHANGEMENT. Trois identifiants codés en dur sont morts en quelques
+// mois sur ce projet : `llama-3.3-70b-versatile` retiré du catalogue Groq,
+// `gemini-2.0-flash` retiré côté Google, `kimi-k2-instruct` jamais ouvert à ce
+// compte. Une liste figée n'est pas une cascade de secours : c'est une panne à
+// retardement, armée le jour où le fournisseur fait le ménage.
+//
+// On demande donc à Groq ce que le compte peut RÉELLEMENT appeler, puis on ordonne
+// ce catalogue selon nos préférences. Un modèle disparu s'efface de lui-même ; un
+// modèle nouvellement ouvert devient utilisable sans redéploiement.
+//
+// GROQ_MODEL_SETUP reste prioritaire : il force un identifiant précis, même absent
+// du catalogue.
+
+// Familles préférées, de la plus à l'aise en EXÉCUTION OUTILLÉE à la moins.
+// On matche par PRÉFIXE, jamais par identifiant exact : les fournisseurs versionnent
+// leurs noms (`kimi-k2-instruct` devient `kimi-k2-instruct-0905`), et un identifiant
+// exact périme à chaque révision — précisément le piège dont on sort.
+const FAMILLES = [
+  'moonshotai/kimi-k2',
+  'llama-3.3-70b',
   'openai/gpt-oss-120b',
-  'moonshotai/kimi-k2-instruct'
-].filter(Boolean)
+  'llama-3.1-70b',
+  'openai/gpt-oss-20b',
+  'llama-3.1-8b'
+]
+
+// Modèles inaptes à la tâche : transcription, synthèse vocale, modération,
+// plongements. Les laisser entrer ferait échouer un tour d'outils sans raison lisible.
+const INAPTES = /whisper|tts|guard|embed|moderation|vision/i
+
+// Repli si le catalogue est injoignable (panne réseau, endpoint modifié) : mieux
+// vaut une liste courte que rien à tenter.
+const STATIQUE = ['openai/gpt-oss-120b', 'moonshotai/kimi-k2-instruct-0905']
+
+let catalogue: string[] | null = null   // une seule interrogation par démarrage à froid
+
+async function modelesDisponibles(key: string): Promise<string[]> {
+  if (catalogue) return catalogue
+  let ids: string[] = []
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/models', {
+      headers: { Authorization: `Bearer ${key}` }
+    })
+    if (!res.ok) throw new Error(`models ${res.status}`)
+    ids = ((await res.json())?.data || [])
+      .map((m: Record<string, unknown>) => String(m?.id || ''))
+      .filter((id: string) => id && !INAPTES.test(id))
+    console.info('[setup-agent] catalogue Groq :', ids.length, 'modeles retenus')
+  } catch (e) {
+    console.warn('[setup-agent] catalogue injoignable, liste statique :', String(e).slice(0, 120))
+  }
+  catalogue = ids
+  return ids
+}
+
+// Ordonne le catalogue réel selon FAMILLES, puis laisse le reste en dernier recours :
+// un modèle inconnu vaut mieux qu'aucun modèle. Borné à 4 candidats — au-delà, on
+// fait patienter l'utilisateur pour rien.
+function ordonner(dispo: string[]): string[] {
+  const retenus: string[] = []
+  const force = Deno.env.get('GROQ_MODEL_SETUP') || ''
+  if (force) retenus.push(force)
+  const source = dispo.length ? dispo : STATIQUE
+  for (const famille of FAMILLES) {
+    for (const id of source) {
+      if (id.startsWith(famille) && !retenus.includes(id)) retenus.push(id)
+    }
+  }
+  for (const id of source) if (!retenus.includes(id)) retenus.push(id)
+  return retenus.slice(0, 4)
+}
 
 let modeleRetenu = ''   // mémorisé après le premier succès, pour ne pas re-tester à chaque tour
 
@@ -180,7 +234,7 @@ async function groq(messages: unknown[], avecOutils = true) {
   if (!key) throw new Error('no_api_key')
 
   // Un modèle déjà validé pendant cette requête : on ne re-teste pas la cascade.
-  const candidats = modeleRetenu ? [modeleRetenu] : MODELES
+  const candidats = modeleRetenu ? [modeleRetenu] : ordonner(await modelesDisponibles(key))
   let derniereErreur = ''
 
   for (const modele of candidats) {

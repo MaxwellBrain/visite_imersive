@@ -1,0 +1,258 @@
+% =============================================================================
+%  CONCLUSION GÉNÉRALE ET PERSPECTIVES
+% =============================================================================
+\cleardoublepage
+\entete{Conclusion générale}
+\chapter*{CONCLUSION GÉNÉRALE}
+\addcontentsline{toc}{chapter}{CONCLUSION GÉNÉRALE}
+
+Au terme de ce travail, mené du 20 juin au 20 août 2026 au sein du \emph{Think
+Tank} Foudjem de la Fondation Jean Félicien Gacha, il convient de revenir sur le
+chemin parcouru et sur ce qu'il aura permis d'établir.
+
+Le point de départ était un constat simple, formulé par l'institution
+elle-même : la découverte de la Fondation supposait de s'y rendre. Cette
+condition écartait les publics éloignés, la diaspora et les personnes à mobilité
+réduite, et confinait un patrimoine considérable à son emprise géographique. Là
+où une présence numérique existait, elle se réduisait à une vitrine figée :
+photographies plates, notices brèves, objets isolés les uns des autres, aucune
+possibilité d'interroger. La question posée était donc celle de la conception
+d'une plateforme numérique unifiée capable d'offrir une visite en trois
+dimensions, de relier l'institution à un réseau d'établissements pour retrouver
+les œuvres apparentées, et d'assurer une assistance fiable fondée sur les seules
+données de la Fondation.
+
+Pour y répondre, nous avons conduit une recherche interactive de niveau
+intégrateur, selon une approche mixte associant l'analyse documentaire,
+l'observation directe, six entretiens semi-directifs et une enquête par
+questionnaire auprès de quarante-deux visiteurs. La construction du système a
+suivi le processus unifié 2TUP, modélisé en UML, et s'est appuyée sur une
+démarche d'industrialisation continue.
+
+Le travail a abouti à une plateforme opérationnelle, MUSÉA, articulant vingt
+fonctionnalités autour de quatre ensembles : un progiciel de gestion couplé à un
+site public éditable par l'institution ; une visite immersive à 360~degrés
+complétée par la présentation en trois dimensions et la réalité augmentée à
+taille réelle ; un assistant conversationnel ancré sur les documents validés par
+la Fondation ; et un dispositif de rapprochement documentaire avec les
+collections ouvertes du monde. L'ensemble repose sur une architecture cloisonnée
+par la base de données, déployée sur une infrastructure en nuage dont le coût de
+fonctionnement a été mesuré et maîtrisé.
+
+Les quatre hypothèses spécifiques ont été vérifiées et l'hypothèse générale
+corroborée, sous la réserve — explicitement énoncée — que l'institution produise
+le contenu numérique dont le dispositif a besoin pour se déployer pleinement.
+
+Au-delà de l'outil livré, ce travail dégage trois enseignements qui en
+constituent la contribution propre.
+
+\begin{enumerate}
+  \item \textbf{Le décalage de vocabulaire constitue une seconde dispersion des
+        œuvres.} Nous avons établi qu'une recherche menée en français dans les
+        catalogues internationaux ramène du bruit là où la même recherche,
+        reformulée dans le vocabulaire de catalogage de ces institutions,
+        identifie des correspondances précises et vérifiables — le meilleur
+        score passant de 57 à 85 sur 100. Une institution africaine qui
+        interroge ces catalogues dans ses propres termes pourrait conclure à
+        tort que ses œuvres sont sans équivalent connu. La dispersion physique
+        des objets se double ainsi d'une dispersion documentaire, qui est,
+        elle, réversible.
+
+  \item \textbf{Dans une plateforme accueillant plusieurs organisations,
+        l'isolement des données ne peut pas être une propriété du code.} Les
+        deux fuites détectées durant le projet étaient l'une et l'autre
+        d'origine applicative : le programme demandait sincèrement ce qu'il
+        croyait devoir demander. Seule une garantie portée par la base de
+        données elle-même résiste à l'erreur de programmation — et, tout aussi
+        important, au détournement d'un agent automatique par une consigne
+        malveillante.
+
+  \item \textbf{La qualité d'une visite restituée repose sur quatre continuités
+        — spatiale, d'échelle, documentaire et narrative — dont la rupture d'une
+        seule suffit à faire échouer l'ensemble.} Ce modèle, dégagé des
+        résultats, offre une grille de conception transposable à d'autres
+        institutions.
+\end{enumerate}
+
+Sur le plan personnel, ce stage aura été l'occasion de conduire un projet
+complet, de la formulation du besoin jusqu'à la mise en production, dans un
+cadre professionnel réel et sous des contraintes qui ont obligé à écrire
+soi-même ce que l'on aurait ordinairement importé. Cette contrainte, d'abord
+subie, s'est révélée formatrice : elle a imposé de comprendre les mécanismes au
+lieu de les employer.
+
+Il reste que ce travail ne prétend ni à l'exhaustivité ni à la généralisation
+statistique. Conduit auprès d'une institution unique, sur un échantillon de
+convenance et dans un temps contraint, il décrit un dispositif, en mesure le
+comportement et en tire des enseignements dont la transposition demandera
+vérification. C'est précisément l'objet des perspectives qui suivent.
+
+% =============================================================================
+\cleardoublepage
+\entete{Perspectives}
+\chapter*{PERSPECTIVES}
+\addcontentsline{toc}{chapter}{PERSPECTIVES}
+
+Le dispositif construit ouvre un ensemble de prolongements, que nous présentons
+regroupés en cinq axes, du plus immédiat au plus prospectif. Certains d'entre
+eux n'ont pu être menés à terme durant le stage en raison de contraintes de
+temps, de moyens ou d'accès ; nous le signalons explicitement le cas échéant.
+
+\section*{Axe 1 — Consolider ce qui existe}
+\addcontentsline{toc}{section}{Axe 1 — Consolider ce qui existe}
+
+\begin{enumerate}
+  \item \textbf{Comparer les œuvres sur l'image et non sur le texte.} C'est la
+        perspective la plus importante. Les rapprochements documentaires
+        reposent actuellement sur la description écrite des œuvres, faute de
+        processeur graphique et de possibilité d'installer un modèle de vision
+        sur le poste de travail. Le recours à un modèle de plongement visuel
+        permettrait de rapprocher deux objets visuellement proches mais décrits
+        selon des conventions différentes — situation fréquente entre un
+        catalogue africain et un catalogue européen. Cette évolution supprimerait
+        la principale limite de la mémoire réunifiée.
+
+  \item \textbf{Produire les cartes de profondeur en production.} Le moteur de
+        relief a été vérifié sur une carte fabriquée pour l'essai, mais aucune
+        carte n'a encore été produite sur des œuvres réelles : le traitement
+        exige des bibliothèques qui n'ont pu être installées. Une exécution dans
+        un conteneur, telle que prévue par l'intervention proposée, lèverait cet
+        obstacle.
+
+  \item \textbf{Élargir l'angle de parallaxe du relief.} L'illusion est
+        actuellement bornée à vingt degrés, au-delà desquels les zones absentes
+        de la photographie s'étirent. Une passe de reconstitution des zones
+        masquées permettrait d'élargir cet angle.
+
+  \item \textbf{Obtenir les clés d'accès aux quatre collections écartées.}
+        Europeana, le Rijksmuseum, la Smithsonian Institution et les Harvard Art
+        Museums représentent un volume documentaire considérable. Leur
+        intégration est déjà prévue techniquement ; elle ne dépend que d'une
+        démarche administrative.
+
+  \item \textbf{Éprouver la chaîne de rapprochement de bout en bout.} Chaque
+        maillon a été vérifié isolément ; l'enchaînement complet reste à
+        exécuter avec un compte du personnel.
+
+  \item \textbf{Étendre les essais de réalité augmentée.} Le décodage des codes
+        QR par caméra et le démarrage effectif d'une session n'ont pu être
+        éprouvés que sur un nombre restreint d'appareils. Une campagne d'essais
+        sur un parc représentatif s'impose.
+\end{enumerate}
+
+\section*{Axe 2 — Enrichir l'expérience du visiteur}
+\addcontentsline{toc}{section}{Axe 2 — Enrichir l'expérience du visiteur}
+
+\begin{enumerate}
+  \item \textbf{Le mur de la dispersion.} L'écran de fin de parcours existe ;
+        il reste à y animer le globe pour annoncer au visiteur : « les œuvres
+        apparentées à celles que vous venez de voir se trouvent dans tel nombre
+        de pays ». Le geste narratif serait fort : la visite s'achèverait sur la
+        mesure de ce dont l'institution a été séparée.
+
+  \item \textbf{Un guide vocal contextuel.} L'assistant sait déjà où se trouve
+        le visiteur. Il pourrait commenter spontanément la salle où celui-ci
+        vient d'entrer, à la manière d'un guide qui prend la parole sans qu'on
+        l'interroge.
+
+  \item \textbf{Le mode hors connexion.} L'application est déjà installable ; il
+        resterait à mettre en cache les panoramas et les modèles des salles
+        visitées, afin qu'une visite entamée puisse se poursuivre sur une
+        connexion défaillante — situation courante pour une partie du public
+        visé.
+
+  \item \textbf{La reconnaissance d'une œuvre par photographie.} Un visiteur
+        présent sur place pourrait photographier une pièce et obtenir
+        immédiatement sa notice, son récit et ses œuvres apparentées, sans avoir
+        à la chercher dans un catalogue.
+
+  \item \textbf{La médiation ludique à destination des scolaires.} Les
+        mécanismes de parcours à étapes existent déjà dans la base ; ils
+        pourraient soutenir des jeux de piste conçus pour les classes, en
+        présence comme à distance.
+
+  \item \textbf{Les casques de réalité virtuelle.} Écartés à dessein pour des
+        raisons d'accessibilité, ils pourraient être proposés en complément
+        pour un usage sur place ou en médiathèque, l'interface du navigateur les
+        prenant nativement en charge.
+\end{enumerate}
+
+\section*{Axe 3 — Ancrer le dispositif dans la culture locale}
+\addcontentsline{toc}{section}{Axe 3 — Ancrer le dispositif dans la culture locale}
+
+\begin{enumerate}
+  \item \textbf{Le multilinguisme étendu aux langues du territoire.}
+        L'application est aujourd'hui bilingue français-anglais. L'ajout des
+        langues de l'Ouest camerounais — ghomálá', fe'efe'e, medumba —
+        transformerait la portée du projet : il ne s'agirait plus seulement de
+        faire connaître un patrimoine à l'extérieur, mais de le restituer aux
+        communautés qui en sont issues, dans leur langue. La structure
+        d'internationalisation du système le permet sans modification.
+
+  \item \textbf{La collecte des récits oraux.} Le patrimoine immatériel — les
+        récits, les usages, les protocoles associés aux objets — reste peu
+        documenté. Une campagne d'enregistrement auprès des détenteurs de la
+        mémoire, rattachée aux fiches d'œuvres et aux personnages de la
+        généalogie, enrichirait considérablement la base documentaire de
+        l'assistant.
+
+  \item \textbf{L'approfondissement de la généalogie.} L'arbre fonctionne et se
+        parcourt dans les deux sens ; il gagnerait à intégrer les migrations
+        historiques, les alliances entre chefferies et les corpus d'objets
+        rattachés à chaque règne.
+\end{enumerate}
+
+\section*{Axe 4 — Industrialiser et pérenniser}
+\addcontentsline{toc}{section}{Axe 4 — Industrialiser et pérenniser}
+
+\begin{enumerate}
+  \item \textbf{Le passage aux conteneurs orchestrés}, décrit au chapitre~4,
+        constitue le préalable à l'automatisation de l'ingestion documentaire,
+        de la reconstruction photogrammétrique et de l'interrogation programmée
+        des collections.
+
+  \item \textbf{La migration vers Kubernetes} le jour où la plateforme dépassera
+        une dizaine d'institutions ou exigera plusieurs services fonctionnant en
+        permanence. La conteneurisation la rend possible sans réécriture.
+
+  \item \textbf{Le renforcement du suivi de la dépense.} L'étiquetage des
+        ressources par institution permettrait d'attribuer précisément le coût
+        et, à terme, de fonder une tarification équitable de la plateforme.
+
+  \item \textbf{La sauvegarde et la reprise après sinistre.} Les données
+        patrimoniales sont irremplaçables : une politique de sauvegarde
+        externalisée et un exercice de restauration périodique devraient être
+        formalisés.
+
+  \item \textbf{L'évaluation d'impact.} Une mesure de l'audience réelle — origine
+        géographique des visiteurs, durée des parcours, taux d'adhésion,
+        retombées sur la fréquentation physique — permettrait d'objectiver
+        l'apport du dispositif au-delà de sa seule performance technique.
+\end{enumerate}
+
+\section*{Axe 5 — Ouvrir et essaimer}
+\addcontentsline{toc}{section}{Axe 5 — Ouvrir et essaimer}
+
+\begin{enumerate}
+  \item \textbf{L'accueil d'institutions partenaires.} L'ouverture de
+        l'architecture ne sera véritablement établie qu'après avoir été éprouvée
+        par deux ou trois institutions distinctes de la Fondation.
+
+  \item \textbf{L'ouverture des données de la Fondation.} La plateforme
+        interroge aujourd'hui les catalogues du monde ; elle pourrait à son tour
+        exposer les siens selon les mêmes standards, afin que les œuvres de
+        Bangoulap deviennent trouvables depuis l'extérieur. Le mouvement serait
+        alors réciproque, et non plus à sens unique.
+
+  \item \textbf{Le dialogue avec les institutions détentrices.} Les
+        rapprochements validés constituent une matière documentaire nouvelle,
+        susceptible d'alimenter les échanges scientifiques avec les musées
+        conservant des pièces apparentées — voire les discussions relatives à
+        leur circulation.
+
+  \item \textbf{Le modèle économique de la plateforme.} La mutualisation du
+        catalogue mondial fait décroître le coût par institution à mesure que le
+        réseau s'étoffe. Cette propriété mérite d'être instruite comme la base
+        d'un modèle soutenable, permettant à de petites structures d'accéder à
+        un outil qu'elles ne pourraient financer isolément.
+\end{enumerate}

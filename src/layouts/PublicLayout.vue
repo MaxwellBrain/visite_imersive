@@ -8,7 +8,7 @@ import { useAuthStore } from '@/stores/useAuthStore'
 import { usePublicTenantStore } from '@/stores/usePublicTenantStore'
 import { applySiteHead } from '@/composables/useSiteHead'
 import { pubMuseums, joinTenant } from '@/services/publicApi'
-import { canonicalOrigin } from '@/services/host'
+import { canonicalOrigin, parseHost } from '@/services/host'
 import '@/assets/public-site.css' // design system partagé des pages publiques (.ps-*)
 import GuideChat from '@/components/public/GuideChat.vue'
 import VoiceBot from '@/components/public/VoiceBot.vue'
@@ -39,7 +39,17 @@ async function resolveTenant() {
     // Hôte neutre (plateforme, réservé, dev) : repli sur le chemin /c/:slug,
     // sinon le site historique (première organisation approuvée).
     if (route.params.slug) await pubTenant.resolveBySlug(route.params.slug)
-    else await pubTenant.resolveDefault()
+    // AUCUNE ORGANISATION PAR DÉFAUT SUR LE DOMAINE DE LA PLATEFORME.
+    //
+    // `resolveDefault()` charge « la première organisation approuvée ». Sur
+    // nexacode.store/site, cela affichait le site de la Fondation à l'adresse de
+    // la plateforme : une institution présentée là où l'on présente un hébergeur,
+    // et le même contenu servi à deux adresses. Chaque organisation a son
+    // sous-domaine ; la plateforme, elle, n'en héberge aucune en propre.
+    //
+    // On garde ce repli en développement, où les sous-domaines n'existent pas :
+    // sans lui, le site public serait intestable en local.
+    else if (parseHost().kind === 'local') await pubTenant.resolveDefault()
   }
 
   // Organisation introuvable ou non publiée : on vide tout pour ne rien laisser

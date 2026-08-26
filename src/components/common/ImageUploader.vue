@@ -11,14 +11,20 @@ const props = defineProps({
   modelValue: { type: String, default: '' },
   label: { type: String, default: '' },
   height: { type: String, default: '180px' },
-  // Bucket de destination. RENSEIGNÉ → l'image part dans le Storage et le
-  // modèle reçoit une URL. VIDE → ancien comportement, une DATA URL base64.
+  // Bucket de destination : l'image part dans le Storage et le modèle reçoit
+  // une URL. Le défaut vaut « photos » — et c'est le point important.
   //
-  // Cette option existe parce que ce composant sert à une dizaine d'écrans
-  // (musées, secteurs, produits, événements…) dont les tables attendent encore
-  // du base64. Basculer tout le monde d'un coup, sans avoir migré leurs
-  // données, casserait ces écrans. On bascule donc un usage à la fois.
-  bucket: { type: String, default: '' }
+  // Il valait autrefois la chaîne vide, ce qui faisait retomber le composant
+  // sur une DATA URL base64 écrite dans la colonne. La bascule devait se faire
+  // « un usage à la fois » ; elle s'est arrêtée au premier. Onze écrans sur
+  // douze écrivaient donc encore du base64, et `site_settings` de la Fondation
+  // pesait 3 Mo (image_fond 1,7 Mo + login_image 1,1 Mo) — relus À CHAQUE
+  // affichage de page : 9,7 s mesurées le 2026-08-21 pour cette seule requête.
+  //
+  // Rien ne s'y opposait : une colonne `text` accepte une URL aussi bien qu'un
+  // base64, et <img> affiche les deux. Les anciennes valeurs restent donc
+  // lisibles tant qu'elles n'ont pas été migrées.
+  bucket: { type: String, default: 'photos' }
 })
 const effLabel = computed(() => props.label || t('uploader.defaultLabel'))
 const emit = defineEmits(['update:modelValue'])

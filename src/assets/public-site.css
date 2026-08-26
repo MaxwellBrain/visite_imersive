@@ -111,3 +111,108 @@
   display: flex; align-items: center; justify-content: center;
   color: #b9beb8; font-size: 2rem; background: #eef0ed;
 }
+
+/* ============================================================================
+   CONFORT TACTILE — écrans de moins de 640 px
+   ----------------------------------------------------------------------------
+   La structure du site était déjà responsive : mesuré le 2026-08-21, aucune
+   page ne déborde horizontalement en 375 px de large. Ce qui manquait, ce n'est
+   pas la mise en page, c'est la PRISE : 40 cibles cliquables mesuraient moins
+   de 40 px de haut, là où un doigt en demande 44 pour être atteint sans viser.
+
+   On corrige donc la taille des cibles et le plancher typographique, sans
+   toucher aux grilles — elles fonctionnent.
+   ============================================================================ */
+@media (max-width: 640px) {
+  /* 44 px : plus petite cible qu'un pouce atteint de façon fiable (base des
+     recommandations d'accessibilité mobile). */
+  .ps-btn,
+  .ps-btn--sm,
+  .ps-back {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+
+  /* Un appel à l'action seul prend toute la largeur : sur un téléphone tenu
+     d'une main, une cible étroite et centrée se rate. */
+  .ps-hero .ps-btn,
+  .ps-wrap > .ps-btn {
+    width: 100%;
+  }
+
+  /* Les surtitres tombaient à 11,2 px — lisibles à l'œil nu de près, pénibles
+     dès qu'on tient le téléphone à bout de bras. */
+  .ps-over { font-size: 0.75rem; }
+  .ps-tag { font-size: 0.76rem; padding: 0.3rem 0.6rem; }
+
+  /* Marges latérales : 1 rem suffit sur téléphone, 1,5 rem mangeait la largeur
+     utile sur les petits écrans. */
+  .ps-wrap,
+  .ps-wrap--narrow { padding-left: 1rem; padding-right: 1rem; }
+}
+
+/* Cibles propres aux composants du site public. Elles ne passent pas par
+   `.ps-btn` — chacune a sa classe — mais restent des boutons qu'on vise au
+   doigt : sélecteur de langue, favori d'une œuvre, ajout au panier, contact
+   WhatsApp, étoiles du livre d'or, liens du pied de page.
+   `min-height` plutôt que `height` : il l'emporte sur la hauteur fixée par le
+   composant sans avoir à batailler avec la spécificité du style scoped. */
+@media (max-width: 640px) {
+  .lang,
+  .o3d__voir,
+  .work__fav,
+  .pc__wa,
+  .pc__add,
+  .gb-star,
+  .foot__shop,
+  .foot__all,
+  .see {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Celles-ci sont carrées : sans largeur minimale, elles restent des cibles
+     hautes et étroites, aussi difficiles à viser qu'avant. */
+  .work__fav,
+  .gb-star,
+  .lang { min-width: 44px; }
+}
+
+/* Liens du pied de page du site public : ils font 25 à 27 px de haut, empilés
+   les uns sous les autres. Sur un téléphone, deux liens voisins deviennent une
+   seule cible approximative — on les espace au lieu de les agrandir, pour ne
+   pas étirer la colonne sur trois écrans. */
+@media (max-width: 640px) {
+  .foot .foot__cols a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding-block: 0.1rem;
+  }
+}
+
+/* Dernier filet : les boutons et champs NATIFS des pages intérieures (filtres
+   du catalogue, recherche, tris). Ils n'ont ni classe du design system ni
+   classe PrimeVue — les nommer un par un aurait demandé de tous les retrouver,
+   et le prochain écran ajouté serait repassé sous le seuil.
+   Les cases à cocher et boutons radio sont exclus : leur taille est celle du
+   contrôle natif, l'agrandir les déforme sans rien gagner. */
+@media (max-width: 640px) {
+  button:not(.p-button),
+  input:not([type='checkbox']):not([type='radio']):not([type='file']),
+  select,
+  textarea {
+    min-height: 44px;
+  }
+
+  /* 16 px : en dessous, Safari iOS zoome à la mise au point et décale la page.
+     C'est le défaut qui donne l'impression d'un formulaire cassé. */
+  input:not([type='checkbox']):not([type='radio']),
+  select,
+  textarea { font-size: 16px; }
+}

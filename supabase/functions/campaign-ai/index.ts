@@ -39,7 +39,7 @@ async function callGroq(system: string, user: string): Promise<string | null> {
   // Accepte GROQ_API_KEY (correct) ou GROK_API_KEY (faute de frappe historique du secret).
   const key = Deno.env.get('GROQ_API_KEY') || Deno.env.get('GROK_API_KEY')
   if (!key) return null
-  const model = Deno.env.get('GROQ_MODEL') || 'llama-3.3-70b-versatile'
+  const model = Deno.env.get('GROQ_MODEL') || 'openai/gpt-oss-120b'
   const ctrl = new AbortController()
   const timer = setTimeout(() => ctrl.abort(), 12000)
   try {

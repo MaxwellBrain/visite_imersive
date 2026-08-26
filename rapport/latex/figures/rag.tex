@@ -1,0 +1,78 @@
+% -----------------------------------------------------------------------------
+%  Figure 3.3 — Architecture de l'assistant conversationnel à ancrage
+%  documentaire (RAG). Rangée du haut : la chaîne d'ingestion, exécutée hors
+%  ligne. Rangée du bas : la chaîne d'interrogation, exécutée à chaque question.
+%  Les deux se rejoignent sur l'index vectoriel.
+% -----------------------------------------------------------------------------
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+  % ===================== CHAÎNE D'INGESTION (hors ligne) =====================
+  \foreach \x/\nom/\id in {%
+      -5.9/{Base des notices\\ \textit{œuvres, salles, musées, personnages, FAQ}}/a1,
+      -2.95/{Dépôt documentaire\\ \textbf{Amazon S3}\\ \textit{source de vérité}}/a2,
+       0.0/{Découpage en fragments homogènes}/a3,
+       2.95/{Normalisation \textbf{en anglais} puis plongement \texttt{gte-small}}/a4,
+       5.9/{\textbf{Index vectoriel HNSW}\\ \texttt{pgvector}, dim.~384\\ \textit{distance cosinus}}/a5}
+  {\node[bloc, text width=2.25cm, anchor=north, minimum height=16mm]
+        (\id) at (\x,0) {\nom};}
+
+  \foreach \a/\b in {a1/a2, a2/a3, a3/a4, a4/a5}
+    {\draw[fleche] (\a.east) -- (\b.west);}
+
+  \begin{scope}[on background layer]
+    \node[couche, fit=(a1)(a5), draw=keycemid] (bing) {};
+  \end{scope}
+  \node[titrecouche, anchor=west] at ([xshift=6pt]bing.north west)
+       {CHAÎNE D'INGESTION \textnormal{\itshape(hors ligne)}};
+
+  % ===================== CHAÎNE D'INTERROGATION (en ligne) ===================
+  \foreach \x/\nom/\id in {%
+      -5.9/{\textbf{Visiteur}\\ question en français ou en anglais}/b1,
+      -2.95/{Fonction serveur\\ \texttt{guide-agent}\\ \textit{garde-fous}}/b2,
+       0.0/{Vectorisation de la question}/b3,
+       2.95/{Recherche des $k$ plus proches voisins}/b4,
+       5.9/{Composition de l'instruction\\ \textit{consigne d'ancrage}}/b5}
+  {\node[bloc, text width=2.25cm, anchor=north, minimum height=16mm]
+        (\id) at (\x,-4.2) {\nom};}
+
+  \foreach \a/\b in {b1/b2, b2/b3, b3/b4, b4/b5}
+    {\draw[fleche] (\a.east) -- (\b.west);}
+
+  % le lien qui relie les deux chaînes : la recherche interroge l'index
+  \draw[flechedbl] (b4.north) -- (a5.south -| b4.north) -- (a5.south);
+
+  \begin{scope}[on background layer]
+    \node[couche, fit=(b1)(b5), draw=keycemid] (bint) {};
+  \end{scope}
+  \node[titrecouche, anchor=west] at ([xshift=6pt]bint.north west)
+       {CHAÎNE D'INTERROGATION \textnormal{\itshape(en ligne, à chaque question)}};
+
+  % ===================== GÉNÉRATION ET RETOUR ================================
+  \node[blocfort, text width=2.8cm, anchor=north, minimum height=12mm] (llm)
+       at (2.95,-6.9) {Modèle de langue\\ \textit{génération contrôlée}};
+  \node[bloc, text width=3.2cm, anchor=north, minimum height=12mm] (rep)
+       at (-1.3,-6.9) {\textbf{Réponse sourcée}\\ institution et numéro
+                       d'inventaire cités};
+
+  \draw[fleche] (b5.south) -- ++(0,-0.5) -| (llm.north);
+  \draw[fleche] (llm.west) -- (rep.east);
+  \draw[fleche] (rep.west) -| (b1.south);
+
+  % ===================== BRANCHES SECONDAIRES ================================
+  \node[blocext, text width=2.6cm, anchor=north, minimum height=10mm] (coll)
+       at (6.0,-6.9) {Collections ouvertes\\ \textit{branche facultative}};
+  \draw[flechefine, draw=keyceorange] (llm.east) -- (coll.west);
+
+  \node[blocgris, text width=3.0cm, anchor=north, minimum height=10mm] (jour)
+       at (-5.6,-6.9) {Journalisation anonyme\\ \textit{questions sans réponse}};
+  \draw[flechefine] (b2.south) -- ++(0,-0.85) -| (jour.north);
+
+  % ===================== NOTE SUR LES CLÉS ===================================
+  \node[blocnote, anchor=north west, text width=13.6cm] at (-7.0,-8.6)
+       {La clé d'accès au modèle de langue ne quitte jamais la fonction
+        serveur : le navigateur du visiteur ne dialogue qu'avec
+        \texttt{guide-agent}. Le modèle ne peut énoncer aucun fait absent des
+        fragments qui lui sont fournis, et il est explicitement autorisé à
+        déclarer qu'aucune conclusion n'est possible.};
+
+\end{tikzpicture}

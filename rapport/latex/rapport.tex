@@ -1,0 +1,445 @@
+% =============================================================================
+%  RAPPORT DE FIN D'ÉTUDES — LICENCE 3
+%  Institut Supérieur KEYCE Informatique & Intelligence Artificielle
+%
+%  Mise en forme conforme au « Guide de rédaction scientifique KEYCE v3.0 » :
+%    · A4, marge gauche 3 cm, autres marges 2,5 cm
+%    · Times New Roman 12 pt, interligne 1,5, paragraphes justifiés
+%    · numérotation des pages en bas à droite
+%    · liminaires en chiffres romains, corps en chiffres arabes
+%    · titre AU-DESSUS des tableaux, AU-DESSOUS des figures (norme APA)
+%    · numérotation Tableau/Figure = <chapitre>.<ordre>
+%
+%  Compilation :  pdflatex rapport  (× 3, pour les tables des matières)
+% =============================================================================
+\documentclass[12pt,a4paper,oneside]{report}
+
+% ------------------------------------------------------------------ encodage
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{mathptmx}          % Times New Roman (clone Nimbus Roman)
+\usepackage[scaled=0.92]{helvet}
+\usepackage{courier}
+
+% ---------------------------------------------------------------- géométrie
+\usepackage[a4paper,left=3cm,right=2.5cm,top=2.5cm,bottom=2.5cm,
+            headheight=26pt,footskip=0.85cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing                       % interligne 1,5
+\setlength{\parindent}{1.25cm}        % tabulation de première ligne (comme le BTS)
+\setlength{\parskip}{0.12em}          % la tabulation suffit à marquer le paragraphe
+
+% ------------------------------------------------------------------ couleurs
+% Palette relevée sur le rapport BTS (thème Office) :
+%   accent1 = 5B9BD5 (bleu)   accent2 = ED7D31 (orange)   dk2 = 44546A
+\usepackage[table,dvipsnames]{xcolor}
+\definecolor{keyceblue}{HTML}{1F4D78}   % bleu foncé — texte des titres
+\definecolor{keycemid}{HTML}{2E74B5}    % bleu moyen — titres de sous-chapitre
+\definecolor{keyceaccent}{HTML}{5B9BD5} % bleu du thème — contour des cadres
+\definecolor{keycelight}{HTML}{DEEAF6}  % bleu très clair — fond des cadres et tableaux
+\definecolor{keyceorange}{HTML}{ED7D31} % orange du thème — filets et cartouche
+\definecolor{keycetete}{HTML}{5B9BD5}   % bleu des en-têtes de tableau (BTS)
+\definecolor{keycetotal}{HTML}{F2F2F2}  % gris des lignes de total (BTS)
+\definecolor{keycegold}{HTML}{C9A227}   % or — conservé, non utilisé
+\definecolor{keycegrey}{HTML}{44546A}
+\definecolor{keycesoft}{HTML}{F4F6FA}
+
+% -------------------------------------------------------------------- divers
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{ragged2e}
+\usepackage{enumitem}
+\usepackage{amssymb}
+\usepackage{pifont}
+\usepackage{fancyhdr}
+\usepackage{etoc}
+\usepackage{titlesec}
+\usepackage[most]{tcolorbox}
+\usepackage[labelfont=bf,textfont=it,font=small,justification=centering]{caption}
+\usepackage{float}
+% Les tableaux et figures flottent (htbp) plutôt que d'être cloués sur place :
+% cela évite les grands blancs en bas de page devant un tableau qui ne tient pas.
+% « placeins » les empêche toutefois de sortir de leur section.
+\usepackage[section]{placeins}
+\renewcommand{\topfraction}{0.90}
+\renewcommand{\bottomfraction}{0.80}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.70}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{5}
+\PassOptionsToPackage{hyphens}{url}
+\usepackage[hidelinks,bookmarks=true,bookmarksnumbered=true]{hyperref}
+\urlstyle{same}
+% Absorbe les débordements de quelques points dus à la justification française
+% (mots longs, insécables autour des deux-points et des guillemets).
+\setlength{\emergencystretch}{2.5em}
+\hyphenpenalty=100
+\tolerance=2000
+\hypersetup{
+  pdftitle={Conception et réalisation d'une plateforme de visite immersive},
+  pdfauthor={DASSI KAMGANG Max Brian},
+  pdfsubject={Rapport de fin d'études — Licence 3 en Génie Informatique},
+  pdfkeywords={visite immersive, réalité augmentée, RAG, DevOps, patrimoine}
+}
+
+% ================================ NUMÉROTATION DES TABLEAUX ET DES FIGURES ===
+% Le guide KEYCE impose « Tableau 3.4 » = quatrième tableau du chapitre 3.
+% Pas de tabulation de première ligne à l'intérieur des tableaux ni des
+% encadrés : l'indentation n'a de sens que dans le fil du texte.
+\usepackage{etoolbox}
+\AtBeginEnvironment{tabular}{\setlength{\parindent}{0pt}}
+\AtBeginEnvironment{tabularx}{\setlength{\parindent}{0pt}}
+\AtBeginEnvironment{longtable}{\setlength{\parindent}{0pt}}
+\AtBeginEnvironment{minipage}{\setlength{\parindent}{0pt}}
+\AtBeginEnvironment{center}{\setlength{\parindent}{0pt}}
+
+\usepackage{chngcntr}
+\counterwithin{table}{chapter}
+\counterwithin{figure}{chapter}
+% Babel/french réinstalle ses propres noms au \begin{document} : il faut donc
+% passer par \addto\captionsfrench, sinon « Tableau » redevient « Table ».
+\addto\captionsfrench{%
+  \renewcommand{\tablename}{Tableau}%
+  \renewcommand{\figurename}{Figure}%
+  \renewcommand{\listtablename}{LISTE DES TABLEAUX}%
+  \renewcommand{\listfigurename}{LISTE DES FIGURES}%
+  \renewcommand{\contentsname}{TABLE DES MATIÈRES}%
+  \renewcommand{\bibname}{RÉFÉRENCES BIBLIOGRAPHIQUES}%
+  \renewcommand{\appendixname}{Annexe}%
+}
+
+% Séparateur « Tableau 3.1 : » plutôt que « Tableau 3.1 – »
+\captionsetup[table]{name=Tableau,labelsep=colon,textfont={it,small},
+                     labelfont={bf,small,up},font={normalcolor},
+                     justification=raggedright,singlelinecheck=false}
+\captionsetup[figure]{name=Figure,labelsep=colon,textfont={it,small},
+                      labelfont={bf,small,up},font={normalcolor}}
+
+% ================================================== EN-TÊTES ET PIEDS DE PAGE
+% Reprise fidèle du rapport BTS :
+%   · en-tête  : thème du rapport en italique + filet orange
+%   · pied     : DEUX filets orange, la mention « Rédigé et présenté par … »
+%                et le numéro de page dans un carré orange, à droite.
+
+\newcommand{\themerapport}{Mise en place d'un système de visite immersive des
+musées : cas de la Fondation Jean Félicien Gacha}
+\newcommand{\auteurrapport}{DASSI KAMGANG MAX-BRIAN}
+
+% Conservé pour compatibilité : les fichiers de section appellent \entete{…}.
+\newcommand{\nouvelentete}{}
+\newcommand{\entete}[1]{\renewcommand{\nouvelentete}{#1}}
+
+% En-tête : le thème du rapport, puis DEUX filets orange — un fin (1 pt) au-dessus
+% d'un épais (3 pt), séparés de 4 pt. Mesures relevées dans le BTS
+% (v:line strokeweight 1pt à y=2,9pt et 3pt à y=6,9pt).
+\newcommand{\enteteregles}{%
+  \vskip2.9pt{\color{keyceorange}\hrule height 1pt}%
+  \vskip3pt{\color{keyceorange}\hrule height 3pt}}
+
+% Pied de page : LES MÊMES DEUX FILETS que l'en-tête (fin 1 pt au-dessus d'un
+% épais 3 pt), la mention « Rédigé et présenté par … » et le numéro de page dans
+% un cartouche orange à droite (rectangle de 1,32 × 0,89 cm dans le BTS).
+% Reproduction du pied de page du BTS : UN filet orange de 1,5 pt, la mention en
+% Calibri (donc sans empattement) et le numéro de page en 14 pt blanc dans un
+% cartouche orange de 1,32 cm accroché sous le filet, à droite.
+\newcommand{\piedbts}{%
+  \parbox[t]{\textwidth}{%
+    \setlength{\parindent}{0pt}%
+    \setstretch{1}%
+    {\color{keyceorange}\hrule height 1.5pt}\nointerlineskip
+    \vskip5pt
+    \makebox[\textwidth][s]{%
+      \sffamily\fontsize{11}{13}\selectfont
+      Rédigé et présenté par \textbf{\auteurrapport}%
+      \hfill
+      \raisebox{-5pt}[0pt][0pt]{%
+        \colorbox{keyceorange}{%
+          \makebox[1.32cm][c]{\rule[-6pt]{0pt}{20pt}%
+          \color{white}\bfseries\fontsize{14}{16}\selectfont\thepage}}}%
+    }%
+  }}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\footnotesize\itshape\color{keycegrey}\themerapport}
+\fancyfoot[C]{\piedbts}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\headrule}{\enteteregles}
+
+% Les pages d'ouverture de chapitre portent le même pied, sans en-tête.
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyfoot[C]{\piedbts}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\headrule}{}}
+
+% ================================================== TITRES (CHAPITRES, ETC.)
+% Les grands titres sont CENTRÉS dans un rectangle à coins arrondis, comme dans
+% le rapport BTS (forme « flowChartAlternateProcess » de Word, contour accent1,
+% fond en teinte claire du même bleu).
+\newcommand{\cadretitre}[1]{%
+  \begin{center}
+  \begin{tcolorbox}[
+      enhanced, nobeforeafter,
+      colback=keycelight, colframe=keyceaccent,
+      boxrule=1.1pt, arc=7pt,
+      width=0.90\textwidth,
+      % Hauteur PLANCHER et non hauteur fixe. Le plancher de 1,15 cm garantit que
+      % tous les cadres d'une seule ligne (RÉSUMÉ, DÉDICACE, titres courts) aient
+      % exactement la même taille ; au-delà, le cadre GRANDIT avec le titre au lieu
+      % de le laisser déborder, ce qui se produisait sur les chapitres 3 et 4.
+      height from=1.15cm to 4.2cm,
+      left=8pt, right=8pt, top=4pt, bottom=4pt,
+      halign=center, valign=center]
+    {\normalfont\bfseries\fontsize{14}{17}\selectfont\color{keyceblue}%
+     % Interligne resserré et coupure de mots interdite : un titre long tient
+     % alors sur deux lignes propres, sans césure du type « FÉLI-CIEN ».
+     \setstretch{1.02}%
+     \hyphenpenalty=10000\exhyphenpenalty=10000
+     \MakeUppercase{#1}\par}
+  \end{tcolorbox}
+  \end{center}}
+
+% Chapitre numéroté : « CHAPITRE n : TITRE » dans le cadre.
+\newcommand{\cadrechapitre}[1]{\cadretitre{\chaptertitlename~\thechapter{} : #1}}
+
+\titleformat{\chapter}[display]{\normalfont}{}{0pt}{\cadrechapitre}
+\titlespacing*{\chapter}{0pt}{-34pt}{18pt}
+
+% Chapitre non numéroté (liminaires, conclusion, annexes…) : cadre seul.
+\titleformat{name=\chapter,numberless}[display]{\normalfont}{}{0pt}{\cadretitre}
+
+% Niveaux inférieurs, conformes au guide KEYCE :
+%   sous-chapitre  : gras, minuscules, 13 pt
+%   section (n.3)  : gras italique, minuscules, 12 pt
+%   sous-section   : italique, minuscules, 12 pt
+\titleformat{\section}
+  {\normalfont\bfseries\fontsize{13}{15.6}\selectfont\color{keycemid}\raggedright}
+  {\thesection}{0.7em}{}
+\titleformat{\subsection}
+  {\normalfont\bfseries\itshape\normalsize\color{keyceblue}\raggedright}
+  {\thesubsection}{0.7em}{}
+\titleformat{\subsubsection}
+  {\normalfont\itshape\normalsize\color{keycegrey}\raggedright}
+  {\thesubsubsection}{0.6em}{}
+\titleformat{\paragraph}[runin]
+  {\normalfont\normalsize\itshape}{\theparagraph}{0.6em}{}
+% Numérotation limitée à trois chiffres (1.1.1). Au-delà, les titres restent
+% hiérarchisés visuellement mais ne sont plus numérotés : une numérotation à
+% quatre niveaux (1.1.2.1) surcharge la lecture.
+\setcounter{secnumdepth}{2}
+
+\titlespacing*{\section}{0pt}{11pt}{3pt}
+\titlespacing*{\subsection}{0pt}{8pt}{2pt}
+\titlespacing*{\subsubsection}{0pt}{7pt}{1pt}
+
+% ============================================================ LISTES À PUCES
+\setlist[itemize,1]{label=\textcolor{keycemid}{\ding{110}},leftmargin=1.4em,
+                    itemsep=1pt,topsep=2pt,parsep=0pt,partopsep=0pt}
+\setlist[itemize,2]{label=\textcolor{keyceorange}{\textbullet},leftmargin=1.2em,
+                    itemsep=1pt,topsep=1pt,parsep=0pt}
+\setlist[enumerate,1]{leftmargin=1.6em,itemsep=1pt,topsep=2pt,parsep=0pt,
+                      partopsep=0pt}
+
+% ==================================================== OUTILS DE PRÉSENTATION
+
+% --- Page-séparateur de partie ----------------------------------------------
+\newcommand{\partieseparateur}[3]{%
+  \cleardoublepage
+  \thispagestyle{empty}
+  \setlength{\parindent}{0pt}%
+  \vspace*{\fill}
+  {\color{keyceblue}\rule{\textwidth}{3pt}}\par\vspace{6pt}
+  {\raggedright\sffamily\bfseries\Large\color{keyceorange}#1\par}
+  \vspace{10pt}
+  {\raggedright\sffamily\bfseries\huge\color{keyceblue}\MakeUppercase{#2}\par}
+  \vspace{6pt}
+  {\color{keyceblue}\rule{\textwidth}{3pt}}\par
+  \vspace{20pt}
+  {\justifying\itshape\color{keycegrey}#3\par}
+  \vspace*{\fill}
+  \cleardoublepage}
+
+% ============================================================ SCHÉMAS (TikZ) ==
+% Les schémas du rapport sont DESSINÉS en TikZ plutôt qu'importés sous forme
+% d'images : ils partagent ainsi la palette, la typographie et l'épaisseur de
+% trait du reste du document, restent vectoriels à l'impression et se corrigent
+% dans le fichier source. Chaque schéma vit dans « figures/ » et s'insère par
+% \input{figures/nom}.
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds,shapes.geometric,calc,
+                decorations.pathreplacing}
+
+% Vocabulaire graphique commun aux sept schémas : un même bloc désigne partout
+% la même nature d'objet, ce qui permet de lire un schéma après en avoir lu un
+% autre sans réapprendre la convention.
+\tikzset{
+  % --- blocs ---------------------------------------------------------------
+  bloc/.style      = {rounded corners=3pt, draw=keyceaccent, line width=0.7pt,
+                      fill=keycelight, text=keyceblue, align=center,
+                      font=\sffamily\scriptsize, inner sep=4pt},
+  blocfort/.style  = {bloc, fill=keycemid, draw=keyceblue, text=white,
+                      font=\sffamily\scriptsize\bfseries},
+  blocext/.style   = {bloc, fill=keycesoft, draw=keyceorange, text=keycegrey},
+  blocgris/.style  = {bloc, fill=keycetotal, draw=keycegrey, text=keycegrey},
+  blocnote/.style  = {rounded corners=2pt, draw=none, fill=none,
+                      text=keycegrey, align=left,
+                      font=\sffamily\tiny\itshape, inner sep=2pt},
+  % --- conteneurs ----------------------------------------------------------
+  couche/.style    = {rounded corners=5pt, draw=keycegrey, dashed,
+                      line width=0.6pt, inner sep=7pt},
+  titrecouche/.style = {font=\sffamily\scriptsize\bfseries, text=keycegrey,
+                        inner sep=2pt, fill=white},
+  % --- liens ---------------------------------------------------------------
+  fleche/.style    = {-{Stealth[length=4.5pt,width=3.2pt]}, draw=keycegrey,
+                      line width=0.65pt},
+  flechedbl/.style = {{Stealth[length=4.5pt,width=3.2pt]}-%
+                      {Stealth[length=4.5pt,width=3.2pt]},
+                      draw=keycegrey, line width=0.65pt},
+  flechefine/.style = {fleche, dashed, draw=keycegrey!70},
+  flechecle/.style = {fleche, draw=keyceorange, line width=0.8pt},
+  lien/.style      = {draw=keycegrey, line width=0.65pt},
+  % « align » est indispensable : sans lui, un \\ dans une étiquette provoque
+  % l'erreur « Not allowed in LR mode ».
+  etiquette/.style = {font=\sffamily\tiny\itshape, text=keycegrey,
+                      fill=white, inner sep=1.5pt, align=center},
+}
+% Les schémas sont composés à interligne simple : l'interligne 1,5 du corps du
+% texte disloquerait les blocs de deux ou trois lignes.
+\AtBeginEnvironment{tikzpicture}{\setstretch{1}%
+  % Pas de cesure dans les blocs : « per-sonnages » ou « do-cumentaire »
+  % au milieu d'un schema se lisent mal.
+  \hyphenpenalty=10000\exhyphenpenalty=10000 }
+
+% --- Insertion d'un schéma ---------------------------------------------------
+% Filet de sécurité : un schéma légèrement plus large que la justification est
+% ramené à la largeur du texte plutôt que de déborder dans la marge. Les schémas
+% dessinés à la bonne taille, eux, ne sont pas touchés : l'échelle du dessin et
+% donc la taille des caractères restent identiques d'un schéma à l'autre.
+\newsavebox{\boiteschema}
+\newcommand{\schema}[1]{%
+  \sbox{\boiteschema}{\input{figures/#1}}%
+  \ifdim\wd\boiteschema>\textwidth
+    \resizebox{\textwidth}{!}{\usebox{\boiteschema}}%
+  \else
+    \usebox{\boiteschema}%
+  \fi}
+
+% --- Emplacement réservé à un schéma à insérer -------------------------------
+% Usage : \aplacer{hauteur}{consigne de dessin}
+% Ne subsiste que pour les captures d'écran qui restent à prendre.
+\newcommand{\aplacer}[2]{%
+  \begin{center}
+  \setlength{\fboxsep}{10pt}%
+  \fcolorbox{keycemid}{keycesoft}{%
+    \begin{minipage}[c][#1][c]{0.90\textwidth}
+      \centering
+      {\sffamily\bfseries\color{keycemid}\ding{50}\ \ EMPLACEMENT RÉSERVÉ AU SCHÉMA}\\[6pt]
+      {\footnotesize\itshape\color{keycegrey}\justifying #2\par}
+    \end{minipage}}
+  \end{center}}
+
+% --- Emplacement réservé à une capture d'écran ou à une photographie ---------
+\newcommand{\acapturer}[2]{%
+  \begin{center}
+  \setlength{\fboxsep}{10pt}%
+  \fcolorbox{keyceorange}{keycesoft}{%
+    \begin{minipage}[c][#1][c]{0.90\textwidth}
+      \centering
+      {\sffamily\bfseries\color{keyceorange}\ding{51}\ \ EMPLACEMENT RÉSERVÉ À LA CAPTURE}\\[6pt]
+      {\footnotesize\itshape\color{keycegrey}\justifying #2\par}
+    \end{minipage}}
+  \end{center}}
+
+% --- Source d'un tableau ou d'une figure (norme APA) -------------------------
+\newcommand{\source}[1]{%
+  \par\vspace{2pt}
+  {\footnotesize\itshape\color{keycegrey}\textit{Source} : #1\par}
+  \vspace{4pt}}
+
+% --- Encadré « à retenir » ---------------------------------------------------
+\newcommand{\encadre}[2]{%
+  \begin{center}
+  \setlength{\fboxsep}{9pt}%
+  \fcolorbox{keyceorange}{keycesoft}{%
+    \begin{minipage}{0.93\textwidth}
+      {\sffamily\bfseries\color{keyceblue}#1}\par\vspace{4pt}
+      {\small\justifying #2\par}
+    \end{minipage}}
+  \end{center}
+  \vspace{6pt}}
+
+% --- Tableaux : quadrillage complet, à l'image du style « Grille du tableau »
+%     de Word employé dans le rapport BTS (traits noirs 0,5 pt sur tous les
+%     bords et à l'intérieur, première ligne bleue à texte blanc).
+\newcommand{\thead}[1]{\textbf{\color{white}#1}}
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\Centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\RaggedLeft\arraybackslash}p{#1}}
+\renewcommand{\arraystretch}{1.08}
+\setlength{\arrayrulewidth}{0.5pt}
+\setlength{\tabcolsep}{4pt}
+\arrayrulecolor{black}
+% Les tableaux sont composés en corps réduit et à interligne simple : sur 27
+% tableaux, cela représente plusieurs pages économisées sans perte de lisibilité.
+\AtBeginEnvironment{tabularx}{\setstretch{1}\footnotesize}
+\AtBeginEnvironment{longtable}{\setstretch{1}\footnotesize}
+
+% --- Introduction / conclusion de chapitre -----------------------------------
+\newcommand{\introchap}{\section*{Introduction}
+  \addcontentsline{toc}{section}{\protect\numberline{}Introduction}}
+\newcommand{\conclchap}{\section*{Conclusion}
+  \addcontentsline{toc}{section}{\protect\numberline{}Conclusion}}
+
+% --- Justification globale ---------------------------------------------------
+\justifying
+
+% =============================================================================
+\begin{document}
+
+% ------------------------------------------------- LIMINAIRES (chiffres romains)
+\pagenumbering{Roman}
+\input{sections/00-liminaires}
+% Mémorise le dernier folio romain : la table des matières finale reprendra la
+% série là où les liminaires l'ont laissée, comme le veut le guide.
+\newcounter{derniereliminaire}
+\setcounter{derniereliminaire}{\value{page}}
+
+% ------------------------------------------------------ CORPS (chiffres arabes)
+\cleardoublepage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% Le guide KEYCE structure le travail de licence en QUATRE CHAPITRES, sans
+% regroupement en parties : contrairement au rapport de BTS, il n'y a donc pas
+% de page « Première partie » avant le chapitre 1.
+\input{sections/01-introduction}
+\input{sections/02-chapitre1}
+\input{sections/03-chapitre2}
+\input{sections/04-chapitre3}
+\input{sections/05-chapitre4}
+
+\input{sections/06-conclusion}
+\input{sections/07-bibliographie}
+\input{sections/08-annexes}
+
+% ------------------------------------------------------- TABLE DES MATIÈRES
+% Le guide place la table des matières parmi les pages numérotées en chiffres
+% romains : elle ne compte donc pas dans la pagination du corps.
+\cleardoublepage
+\pagenumbering{Roman}
+\setcounter{page}{\value{derniereliminaire}}
+\entete{Table des matières}
+\etocsettocdepth{subsubsection}
+\etocclasstocstyle
+\etocstandardlines
+\tableofcontents
+
+\end{document}

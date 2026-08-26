@@ -118,7 +118,18 @@ const CIBLES = [
   { table: 'campaigns',     champs: [{ champ: 'image', bucket: 'photos', defaut: 'jpg' }] },
   { table: 'personnages',   champs: [{ champ: 'photo', bucket: 'photos', defaut: 'jpg' }] },
   { table: 'tenants',       champs: [{ champ: 'logo',  bucket: 'photos', defaut: 'png' }] },
-  { table: 'site_settings', champs: [{ champ: 'logo',  bucket: 'photos', defaut: 'png' }] }
+  // site_settings est la table la plus coûteuse du projet : elle est relue à
+  // CHAQUE affichage de page. Seul `logo` était migré, alors que le poids était
+  // ailleurs — image_fond 1,7 Mo et login_image 1,1 Mo. Résultat mesuré le
+  // 2026-08-21 : 9,7 s pour cette seule requête sur le site de la Fondation.
+  // Les six colonnes d'images y passent donc, sans exception.
+  { table: 'site_settings', champs: [
+      { champ: 'logo',        bucket: 'photos', defaut: 'png' },
+      { champ: 'favicon',     bucket: 'photos', defaut: 'png' },
+      { champ: 'image_fond',  bucket: 'photos', defaut: 'jpg' },
+      { champ: 'hero_image',  bucket: 'photos', defaut: 'jpg' },
+      { champ: 'login_image', bucket: 'photos', defaut: 'jpg' },
+      { champ: 'seo_image',   bucket: 'photos', defaut: 'jpg' } ] }
 ]
 
 const EXT_PAR_MIME = {

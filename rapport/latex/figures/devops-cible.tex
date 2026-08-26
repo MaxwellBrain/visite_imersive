@@ -1,0 +1,82 @@
+% -----------------------------------------------------------------------------
+%  Figure 4.1 — Chaîne DevOps cible : de la modification du code à la production
+%  par conteneurs. Rangée 1 : construction. Rangée 2 : déploiement en deux
+%  environnements. Rangée 3 : briques de support et tâches planifiées.
+% -----------------------------------------------------------------------------
+\begin{tikzpicture}[x=1cm, y=1cm]
+
+  % ===================== RANGÉE 1 — CONSTRUCTION =============================
+  \node[blocfort, text width=2.0cm, anchor=north, minimum height=14mm] (dev)
+       at (-6.2,0) {Développeur\\ \texttt{git push}};
+
+  \node[bloc, text width=2.0cm, anchor=north, minimum height=14mm] (git)
+       at (-3.7,0) {\textbf{Dépôt GitHub}};
+
+  \node[bloc, text width=3.1cm, anchor=north, minimum height=14mm] (ci)
+       at (-0.5,0) {\textbf{GitHub Actions}\\ compilation, contrôles,
+                    analyse des dépendances, \texttt{terraform validate}};
+
+  \node[bloc, text width=2.7cm, anchor=north, minimum height=14mm] (img)
+       at (2.9,0) {\textbf{Image Docker}\\ étape 1 : Node\\ étape 2 : Nginx};
+
+  \node[bloc, text width=2.4cm, anchor=north, minimum height=14mm] (ecr)
+       at (5.9,0) {\textbf{Amazon ECR}\\ analyse de vulnérabilités};
+
+  \foreach \a/\b in {dev/git, git/ci, ci/img, img/ecr}
+    {\draw[fleche] (\a.east) -- (\b.west);}
+
+  % ===================== RANGÉE 2 — DÉPLOIEMENT ==============================
+  \node[bloc, text width=2.4cm, anchor=north, minimum height=14mm] (oidc)
+       at (-6.1,-3.0) {Déploiement par \textbf{jeton OIDC}\\ de courte durée};
+
+  \node[bloc, text width=2.6cm, anchor=north, minimum height=14mm] (pre)
+       at (-3.1,-3.0) {\textbf{ECS Fargate}\\ \textit{pré-production}};
+
+  \node[bloc, text width=2.6cm, anchor=north, minimum height=14mm] (prod)
+       at (0.3,-3.0) {\textbf{ECS Fargate}\\ \textit{production}\\
+                      remplacement progressif};
+
+  \node[bloc, text width=2.8cm, anchor=north, minimum height=14mm] (front)
+       at (3.7,-3.0) {\textbf{ALB} $\rightarrow$ \textbf{CloudFront}
+                      $\rightarrow$ \textbf{Route 53}};
+
+  \node[blocfort, text width=1.7cm, anchor=north, minimum height=14mm] (visi)
+       at (6.3,-3.0) {Visiteur};
+
+  \draw[fleche] (ecr.south) -- ++(0,-0.6) -| (oidc.north);
+  \draw[fleche] (oidc.east) -- (pre.west);
+  \draw[fleche] (pre.east) -- (prod.west)
+        node[etiquette, pos=0.5, anchor=south, yshift=1pt] {après\\ validation};
+  \draw[fleche] (prod.east) -- (front.west);
+  \draw[fleche] (front.east) -- (visi.west);
+
+  % --- vérification a posteriori et retour arrière ---------------------------
+  \node[blocgris, text width=4.0cm, anchor=north, minimum height=10mm] (rb)
+       at (0.3,-5.3) {Vérification a posteriori du service en ligne : en cas
+                      d'échec, \textbf{retour automatique} à la version
+                      précédente};
+  \draw[fleche, draw=keyceorange] (prod.south) -- (rb.north);
+  \draw[fleche, draw=keyceorange] (rb.west) -| (oidc.south);
+
+  % --- voie d'évolution ------------------------------------------------------
+  \node[blocext, text width=2.5cm, anchor=north, minimum height=10mm] (eks)
+       at (5.3,-5.3) {\textbf{Amazon EKS}\\ \textit{montée en charge}};
+  \draw[flechefine, draw=keyceorange] (front.south) -- ++(0,-0.55) -| (eks.north);
+
+  % ===================== RANGÉE 3 — SUPPORT ==================================
+  \foreach \x/\nom/\id in {%
+      -5.4/{\textbf{CloudWatch}\\ journaux, métriques, alarmes}/su1,
+      -1.8/{\textbf{Cost Explorer}\\ suivi FinOps de la dépense}/su2,
+       1.8/{\textbf{Terraform}\\ description de toutes les ressources}/su3,
+       5.4/{\textbf{Tâches planifiées}\\ ingestion vers l'index vectoriel,
+            reconstruction photogrammétrique}/su4}
+  {\node[blocgris, text width=2.8cm, anchor=north, minimum height=13mm]
+        (\id) at (\x,-8.0) {\nom};}
+
+  \begin{scope}[on background layer]
+    \node[couche, fit=(su1)(su4), draw=keycegrey] (bsup) {};
+  \end{scope}
+  \node[titrecouche, anchor=west] at ([xshift=6pt]bsup.north west)
+       {BRIQUES DE SUPPORT, TRANSVERSALES À TOUTE LA CHAÎNE};
+
+\end{tikzpicture}

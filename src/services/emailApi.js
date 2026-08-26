@@ -70,6 +70,23 @@ export function sendTenantWelcome({ to, nomOrganisation, lien, adresseSite, tena
   })
 }
 
+// ALERTE AU SUPER-ADMIN — une organisation vient de s'inscrire et attend une
+// décision. Aucun destinataire n'est passé : l'adresse de l'administrateur de la
+// plateforme n'a pas à circuler dans le navigateur, la fonction de bord la
+// résout depuis le secret SUPER_ADMIN_EMAIL.
+// `tenantId` est VOLONTAIREMENT absent, et ce n'est pas un oubli : le journal
+// `email_log` se lit avec `can_manage_tenant(tenant_id)`. Rattacher cette alerte
+// à l'organisation qui vient de s'inscrire aurait laissé SON personnel y lire
+// l'adresse du super-admin. Sans tenant, la ligne n'est lisible que par lui.
+export function sendNouvelleOrganisation({ nomOrganisation, adresseSite, contactEmail, typeOrganisation, lien }) {
+  return send({
+    type: 'nouvelle_organisation',
+    to: null,
+    nomOrganisation, adresseSite, contactEmail, typeOrganisation, lien,
+    marque: 'MUSÉA', couleur: '#0e6f5c'
+  })
+}
+
 // Notification d'approbation : le site public de l'organisation est en ligne.
 export function sendTenantApproved({ to, nomOrganisation, tenantId, lien }) {
   if (!to) return Promise.resolve(false)

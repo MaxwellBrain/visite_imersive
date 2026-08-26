@@ -58,7 +58,7 @@ async function rediger(system: string, user: string, maxTokens = 900): Promise<
 async function callGroq(system: string, user: string, maxTokens = 900): Promise<string | null> {
   const key = Deno.env.get('GROQ_API_KEY') || Deno.env.get('GROK_API_KEY')
   if (!key) return null
-  const model = Deno.env.get('GROQ_MODEL') || 'llama-3.3-70b-versatile'
+  const model = Deno.env.get('GROQ_MODEL') || 'openai/gpt-oss-120b'
   const ctrl = new AbortController()
   const timer = setTimeout(() => ctrl.abort(), 20000)
   try {
@@ -169,7 +169,12 @@ Deno.serve(async (req) => {
       sortie = await rediger(SYSTEM_DESCRIPTION, user, 900)
     } catch (e) {
       console.error('[object-ai/description]', String(e))
-      return json({ ok: false, error: 'llm_error' })
+      // On remonte la CAUSE, pas seulement « llm_error ».
+      // Un code d'erreur opaque oblige à fouiller les journaux du serveur pour
+      // comprendre une panne que le message d'origine expliquait déjà.
+      // Le détail ne contient que le statut HTTP et le corps de la réponse du
+      // fournisseur : aucune clé n'y figure.
+      return json({ ok: false, error: 'llm_error', detail: String(e).slice(0, 400) })
     }
     if (!sortie) return json({ ok: false, error: 'no_api_key' })
     const raw = sortie.texte
@@ -202,7 +207,12 @@ Deno.serve(async (req) => {
       sortie = await rediger(SYSTEM_SEO, user, 400)
     } catch (e) {
       console.error('[object-ai/seo]', String(e))
-      return json({ ok: false, error: 'llm_error' })
+      // On remonte la CAUSE, pas seulement « llm_error ».
+      // Un code d'erreur opaque oblige à fouiller les journaux du serveur pour
+      // comprendre une panne que le message d'origine expliquait déjà.
+      // Le détail ne contient que le statut HTTP et le corps de la réponse du
+      // fournisseur : aucune clé n'y figure.
+      return json({ ok: false, error: 'llm_error', detail: String(e).slice(0, 400) })
     }
     if (!sortie) return json({ ok: false, error: 'no_api_key' })
     const raw = sortie.texte
@@ -241,7 +251,12 @@ Deno.serve(async (req) => {
       sortie = await rediger(SYSTEM_ANNONCE, user, 400)
     } catch (e) {
       console.error('[object-ai/annonce]', String(e))
-      return json({ ok: false, error: 'llm_error' })
+      // On remonte la CAUSE, pas seulement « llm_error ».
+      // Un code d'erreur opaque oblige à fouiller les journaux du serveur pour
+      // comprendre une panne que le message d'origine expliquait déjà.
+      // Le détail ne contient que le statut HTTP et le corps de la réponse du
+      // fournisseur : aucune clé n'y figure.
+      return json({ ok: false, error: 'llm_error', detail: String(e).slice(0, 400) })
     }
     if (!sortie) return json({ ok: false, error: 'no_api_key' })
 
