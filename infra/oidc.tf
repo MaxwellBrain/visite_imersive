@@ -23,9 +23,24 @@ resource "aws_iam_openid_connect_provider" "github" {
 
   url            = "https://token.actions.githubusercontent.com"
   client_id_list = ["sts.amazonaws.com"]
-  # Empreinte de l'autorité de certification de GitHub. AWS ne la vérifie plus
-  # depuis 2023 pour les fournisseurs qu'il connaît, mais le champ reste exigé.
-  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
+  # Empreintes de l'autorité de certification de GitHub.
+  #
+  # ⚠️ Ne PAS croire que ce champ est décoratif. La documentation dit qu'AWS ne
+  # vérifie plus l'empreinte pour les fournisseurs qu'il connaît — dans les
+  # faits, une empreinte PRÉSENTE ET FAUSSE fait échouer l'assomption avec un
+  # « Not authorized to perform sts:AssumeRoleWithWebIdentity », message qui
+  # oriente vers la politique de confiance alors que le problème est ici.
+  # Constaté le 2026-08-27 : les deux rôles refusaient, pour cette seule raison.
+  #
+  # La première est l'ancienne CA, la seconde celle réellement présentée par
+  # token.actions.githubusercontent.com au 2026-08-27. On garde les deux : une
+  # rotation de certificat côté GitHub ne doit pas couper le déploiement.
+  # Pour relever l'empreinte du jour :
+  #   echo | openssl s_client -servername token.actions.githubusercontent.com   #     -connect token.actions.githubusercontent.com:443 -showcerts 2>/dev/null   #     | awk '/BEGIN CERT/,/END CERT/' | openssl x509 -fingerprint -sha1 -noout
+  thumbprint_list = [
+    "6938fd4d98bab03faadb97b34396831e3780aea1",
+    "227203b5317f3818cab5b5ce596132bf36748c0e",
+  ]
 }
 
 data "aws_iam_openid_connect_provider" "github_existant" {
