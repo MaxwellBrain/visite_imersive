@@ -189,6 +189,44 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Controle AVANT l'authentification. Sans lui, un secret absent produit
+      # « Could not load credentials from any providers » ou un refus OIDC :
+      # deux messages qui ne disent rien de la cause reelle, et qu'on passe des
+      # heures a attribuer a AWS alors que le probleme est dans GitHub.
+      - name: Verifier le secret de deploiement
+        env:
+          ROLE: ${{ secrets.AWS_ROLE_ARN_CONTENEURS }}
+        run: |
+          if [ -z "${ROLE:-}" ]; then
+            echo "::error::Le secret AWS_ROLE_ARN_CONTENEURS est VIDE dans ce job."
+            echo ""
+            echo "Deux causes, par ordre de frequence :"
+            echo ""
+            echo "1. Le secret a ete cree dans un ENVIRONNEMENT"
+            echo "   (Settings > Environments > conteneurs > Secrets)."
+            echo "   Un secret d'environnement n'est visible QUE par un job qui"
+            echo "   declare 'environment:'. Ce job-ci n'en declare pas, donc il"
+            echo "   ne le voit pas. Le recreer au niveau du DEPOT :"
+            echo "   Settings > Secrets and variables > Actions > onglet Secrets."
+            echo ""
+            echo "2. Le nom ne correspond pas. Il doit etre exactement :"
+            echo "   AWS_ROLE_ARN_CONTENEURS"
+            echo "   (et non AWS_ROLE_ARN, qui appartient au workflow deploy.yml)."
+            exit 1
+          fi
+
+          # On ne montre jamais la valeur : seulement sa forme.
+          case "$ROLE" in
+            arn:aws:iam::*:role/*)
+              echo "Secret present, forme d'ARN correcte." ;;
+            *)
+              echo "::error::AWS_ROLE_ARN_CONTENEURS ne ressemble pas a un ARN de role IAM."
+              echo "Attendu, exactement, sans espace ni retour a la ligne :"
+              echo "  arn:aws:iam::492562025058:role/musea-conteneurs-production-deploiement"
+              echo "Obtenu : une chaine de ${#ROLE} caracteres commencant par « ${ROLE%%:*} »."
+              exit 1 ;;
+          esac
+
       # Aucune cle AWS n'est stockee : GitHub presente un jeton OIDC de courte
       # duree, AWS le verifie et rend des identifiants temporaires. Le role est
       # verrouille sur CE depot (voir infra-conteneurs/oidc.tf).
@@ -197,6 +235,13 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_CONTENEURS }}
           aws-region: ${{ vars.AWS_REGION || 'eu-west-3' }}
+          # Audience explicite : c'est la valeur attendue par la condition
+          # « :aud » de la politique de confiance. C'est deja le defaut de
+          # l'action, mais l'ecrire evite d'avoir a le supposer un jour de panne.
+          audience: sts.amazonaws.com
+          # Nom de session : c'est ce qui apparait dans CloudTrail. Sans lui,
+          # toutes les executions se ressemblent.
+          role-session-name: musea-conteneur-${{ github.run_id }}
 
       - name: Se connecter a ECR
         id: ecr
@@ -385,6 +430,8 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_CONTENEURS }}
           aws-region: ${{ vars.AWS_REGION || 'eu-west-3' }}
+          audience: sts.amazonaws.com
+          role-session-name: musea-conteneur-${{ github.run_id }}
 
       # On deploie par EMPREINTE, pas par etiquette. Une etiquette peut etre
       # repointee ; une empreinte designe un contenu et un seul. C'est ce qui
@@ -490,6 +537,8 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_CONTENEURS }}
           aws-region: ${{ vars.AWS_REGION || 'eu-west-3' }}
+          audience: sts.amazonaws.com
+          role-session-name: musea-conteneur-${{ github.run_id }}
 
       # Appartenir au compte AWS ne donne AUCUN droit dans Kubernetes : les deux
       # systemes d'autorisation sont distincts. C'est l'entree d'acces EKS
