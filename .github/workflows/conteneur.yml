@@ -133,8 +133,13 @@ jobs:
 
           docker rm -f musea-auth
 
+      # v0.36.0 et non v0.28.0 : cette derniere appelait `setup-trivy@v0.2.1`
+      # par TAG, et ce tag a ete supprime en amont — l'action est devenue
+      # irreparable, elle echouait au « Set up job » avant tout telechargement.
+      # Les versions recentes epinglent leur dependance par SHA, qui ne peut pas
+      # disparaitre. C'est la raison de fond de monter, pas la nouveaute.
       - name: Analyser les vulnerabilites
-        uses: aquasecurity/trivy-action@v0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: musea:verification
           format: table
@@ -146,7 +151,7 @@ jobs:
           ignore-unfixed: true
 
       - name: Produire la nomenclature logicielle (SBOM)
-        uses: aquasecurity/trivy-action@v0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: musea:verification
           format: cyclonedx
