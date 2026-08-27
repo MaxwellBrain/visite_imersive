@@ -66,6 +66,7 @@ data "aws_iam_policy_document" "confiance_github" {
     principals {
       type        = "Federated"
       identifiers = [local.github_oidc_arn]
+    
     }
 
     condition {
