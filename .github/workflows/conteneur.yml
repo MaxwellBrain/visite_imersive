@@ -1,28 +1,4 @@
 name: Conteneur
-
-# ============================================================================
-# Chaîne conteneur : construire → vérifier → publier → déployer
-# ----------------------------------------------------------------------------
-# Ce workflow est INDÉPENDANT de ci.yml et deploy.yml. Ceux-ci continuent de
-# publier le site statique sur S3 + CloudFront, exactement comme avant. Rien
-# ici ne les touche, ne les remplace, ni ne partage leurs secrets.
-#
-# Ce qui déclenche quoi :
-#
-#   Pull request     → `verifier` seul. On construit l'image et on l'INTERROGE
-#                      réellement : repli SPA, types MIME, sonde de santé. Rien
-#                      n'est publié, aucun accès AWS n'est demandé.
-#   Push sur main    → publication de l'image (étiquettes `main-<sha>` et
-#                      `latest`), puis déploiement.
-#   Étiquette v1.2.3 → publication d'une VERSION (`v1.2.3`, `1.2`, `1`), puis
-#                      déploiement. C'est le geste qui fait une release.
-#
-# INTERRUPTEUR : tant que la variable de dépôt CONTENEUR_DEPLOY_ENABLED n'est
-# pas posée à « true », rien n'est publié ni déployé. Sans ce garde-fou, chaque
-# push afficherait un échec rouge sans rapport avec le code — et l'on finit par
-# ne plus regarder les échecs du tout.
-# ============================================================================
-
 on:
   push:
     branches: [main]
@@ -158,7 +134,7 @@ jobs:
           docker rm -f musea-auth
 
       - name: Analyser les vulnerabilites
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: musea:verification
           format: table
@@ -170,7 +146,7 @@ jobs:
           ignore-unfixed: true
 
       - name: Produire la nomenclature logicielle (SBOM)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: musea:verification
           format: cyclonedx

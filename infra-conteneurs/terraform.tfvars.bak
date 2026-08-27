@@ -1,0 +1,42 @@
+# ============================================================================
+# Portée VOLONTAIREMENT RESTREINTE : SES seulement.
+# ----------------------------------------------------------------------------
+# La demande était « active SES », pas « déploie la plateforme conteneurisée ».
+# `activer_ecs = false` évite le répartiteur de charge et les tâches Fargate,
+# c'est-à-dire la quasi-totalité du coût (~32 €/mois). Ce qui est créé ici est
+# gratuit ou quasi : VPC et sous-réseaux (0 €), registre ECR vide (0 €), sujet
+# SNS (0 €), secret Secrets Manager (~0,40 $/mois), identité SES (0 €).
+#
+# Passer `activer_ecs = true` monte la plateforme web plus tard, sans rien
+# reconstruire de ce qui existe déjà.
+# ============================================================================
+
+zone_domaine   = "nexacode.store"
+hosted_zone_id = "" # recherche par nom : survit à une recréation de la zone
+
+sous_domaine = "conteneurs" # inutilisé tant qu'activer_ecs = false
+
+environnement = "production"
+region        = "eu-west-3"
+
+nom_image       = "musea"
+depot_dockerhub = ""
+
+# ── Plateforme web : ÉTEINTE ────────────────────────────────────────────────
+activer_ecs = false
+activer_eks = false
+
+# ── SES : c'est l'objet de cet apply ────────────────────────────────────────
+activer_ses                = true
+sous_domaine_notifications = "notif" # ⇒ identité notif.nexacode.store
+
+# Les Edge Functions Supabase tournent hors d'AWS : elles ne peuvent pas
+# endosser de rôle et n'ont que ce recours. La clé secrète atterrit dans
+# terraform.tfstate — lequel est ignoré par git (voir .gitignore).
+creer_utilisateur_ses = true
+
+# ── Déploiement continu : pas encore branché ────────────────────────────────
+depot_github                  = ""
+creer_fournisseur_oidc_github = false
+
+email_alertes = ""
