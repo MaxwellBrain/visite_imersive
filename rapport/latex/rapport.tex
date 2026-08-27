@@ -121,6 +121,38 @@
 \captionsetup[figure]{name=Figure,labelsep=colon,textfont={it,small},
                       labelfont={bf,small,up},font={normalcolor}}
 
+% ============================== SOMMAIRE ET TABLE DES MATIÈRES : LES POINTS ==
+% La classe « report » prive les lignes de chapitre de points de conduite : le
+% titre reste à gauche, le numéro de page à droite, et rien entre les deux. Le
+% sommaire devenait illisible dès que les titres étaient de longueurs
+% inégales. On redéfinit donc \l@chapter pour :
+%   · tirer des points du titre jusqu'au numéro de page ;
+%   · préfixer « CHAPITRE n : » sur les chapitres numérotés, comme dans le
+%     corps du document — les liminaires, non numérotés, gardent leur titre seul.
+\makeatletter
+\renewcommand*\l@chapter[2]{%
+  \ifnum \c@tocdepth >\m@ne
+    \addpenalty{-\@highpenalty}%
+    \vskip 1.0em \@plus\p@
+    \setlength\@tempdima{1.6em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode \bfseries \color{keyceblue}%
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      % « \numberline{3} » devient « CHAPITRE 3 : »
+      \renewcommand*\numberline[1]{\hb@xt@\@tempdima{\hss}CHAPITRE~##1~: }%
+      % Un blanc rigide avant les points : sans lui, un titre long colle au
+      % numero de page et la ligne se retrouve sans points de conduite.
+      #1\nobreak\hskip 1.2em\nobreak
+      \leaders\hbox{$\m@th\mkern\@dotsep mu\hbox{.}\mkern\@dotsep mu$}\hfill
+      \nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+      \penalty\@highpenalty
+    \endgroup
+  \fi}
+\makeatother
+
 % ================================================== EN-TÊTES ET PIEDS DE PAGE
 % Reprise fidèle du rapport BTS :
 %   · en-tête  : thème du rapport en italique + filet orange

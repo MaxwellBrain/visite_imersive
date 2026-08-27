@@ -49,7 +49,6 @@ TikZ de `figures/` et s'insère par `\schema{nom}` :
 | `figures/organigramme.tex` | 3.1 | Organigramme de la Fondation |
 | `figures/architecture-generale.tex` | 3.2 | Les quatre couches de la plateforme |
 | `figures/rag.tex` | 3.3 | L'assistant à ancrage documentaire |
-| `figures/infrastructure-cloud.tex` | 3.4 | L'hébergement en nuage |
 | `figures/devops-actuel.tex` | 3.5 | La chaîne CI/CD en service |
 | `figures/devops-cible.tex` | 4.1 | La chaîne DevOps cible |
 
@@ -72,6 +71,35 @@ dans le préambule de `rapport.tex` (`\tikzset`) :
 
 Pour modifier un schéma, éditer son fichier et recompiler ; `\schema` réduit
 automatiquement à la largeur du texte un dessin qui déborderait.
+
+### Les figures 3.4 et 3.5 font exception
+
+Ces deux-là ne sont pas dessinées en TikZ : ce sont des **schémas draw.io**,
+exportés en PDF vectoriel par la chaîne décrite dans
+`rapport/schemas/export/LISEZ-MOI.md`.
+
+| Figure | Source draw.io | PDF produit |
+|---|---|---|
+| 3.4 — Architecture cloud | `schemas/architecture-cloud-musea.drawio` | `figures/architecture-cloud-musea.pdf` |
+| 3.5 — Chaîne de déploiement | `schemas/deploiement-musea.drawio`, produit par `schemas/generer-deploiement.py` | `figures/deploiement-musea.pdf` |
+
+Il est posé sur une **page portrait ordinaire**, comme toutes les autres
+figures, à la largeur de la justification. Le dessin fait 52 cm de large : pour
+qu'il reste lisible une fois ramené à 15,5 cm, les libellés sont grossis de
+11 px à 20 px **avant** l'export, ce qui les amène à environ 5,9 pt sur le
+papier. La géométrie du schéma n'est pas touchée.
+
+Le PDF étant vectoriel, un lecteur à l'écran peut zoomer sans perte. Si les
+libellés vous paraissent encore trop petits à l'impression, deux leviers
+existent : découper le schéma en deux figures (le chemin de la requête d'un
+côté, le VPC de l'autre), ou laisser la figure déborder légèrement dans les
+marges avec `\makebox[\textwidth][c]{\includegraphics[width=1.15\textwidth]{…}}`
+— au prix, pour ce second, d'un écart au gabarit du guide.
+
+Pour le regénérer après une modification du `.drawio`, suivre
+`rapport/schemas/export/LISEZ-MOI.md`. Le dessin TikZ précédent reste dans
+`figures/infrastructure-cloud.tex` : il n'est plus appelé, mais il suffirait de
+remettre `\schema{infrastructure-cloud}` pour y revenir.
 
 **Il reste quatre emplacements `\acapturer`** — des captures d'écran et des
 pièces qui ne peuvent pas être dessinées et que vous devez fournir :
@@ -320,3 +348,175 @@ d'accueil du périmètre d'application.
   « département de réflexion et de recherche ».
 - La version précédente du chapitre est conservée dans
   `sauvegardes/04-chapitre3-avant-refonte.tex`.
+
+### 8. Dédicace et schéma cloud (août 2026)
+
+**Dédicace.** Elle est désormais adressée à **la Famille KAMGANG** et posée dans
+un cadre à double filet, centré sur la page, dans la palette du rapport
+(`sections/00-liminaires.tex`). Le texte de reconnaissance qui suivait est
+conservé sous un filet de séparation.
+
+**Figure 3.4.** Le dessin TikZ de l'hébergement en nuage a été remplacé par
+votre schéma draw.io, exporté en PDF vectoriel **en couleur** et posé sur une
+page portrait ordinaire.
+Trois paragraphes d'explication le précèdent dans le texte : ils donnent la clé
+de lecture du schéma, à savoir que **les tuiles en pleine couleur sont en
+service** et que **les tuiles grisées sont décrites en Terraform mais non
+appliquées** — soit exactement l'écart entre les 29 ressources décrites et les
+19 créées, et l'objet de l'intervention proposée au chapitre 4.
+
+**Encadreur.** Le nom est corrigé partout : **M. Adrien GHOMSI**.
+
+### 9. Le piège des couleurs à l'export draw.io
+
+Le premier export sortait **toutes les tuiles AWS en noir**. La cause mérite
+d'être connue si vous refaites l'opération : draw.io écrit chaque couleur deux
+fois, en attribut SVG (`stop-color="#C7131F"`) et dans un style CSS employant la
+fonction récente `light-dark(rgb(199,19,31), rgb(255,154,165))`. Le style
+l'emporte sur l'attribut ; aucun convertisseur SVG ne comprend `light-dark()` ;
+la couleur retombe donc sur le noir par défaut.
+
+`finaliser.py` résout désormais ces 159 occurrences sur la valeur du thème
+clair, et aplatit en plus les dégradés des tuiles, que MuPDF ne suivait pas. Le
+code couleur AWS est rendu fidèlement : violet réseau, vert stockage, orange
+calcul, rouge sécurité, rose gestion.
+
+### 10. Découpage en cinq fascicules
+
+```bash
+python rapport/latex/decouper.py
+```
+
+Écrit cinq PDF dans `rapport/latex/parties/`, sans numérotation dans les noms :
+
+| Fichier | Pages | Contenu |
+|---|---|---|
+| `dedicace-a-chapitre-1.pdf` | 1 à 25 | Dédicace, remerciements, sigles, résumé, abstract, listes, sommaire, introduction générale, chapitre 1 |
+| `chapitre-2.pdf` | 26 à 34 | Chapitre 2 — Méthodologie de l'étude |
+| `chapitre-3.pdf` | 35 à 55 | Chapitre 3 — Site de l'étude, données et résultats |
+| `chapitre-4.pdf` | 56 à 66 | Chapitre 4 — Diagnostic et intervention proposée |
+| `reste-du-rapport.pdf` | 67 à 82 | Conclusion générale, perspectives, références, annexes, table des matières |
+
+**Les bornes ne sont pas écrites en dur.** Le script relit le PDF, y cherche les
+pages qui s'ouvrent sur « CHAPITRE n : » et sur « CONCLUSION GÉNÉRALE », et en
+déduit les coupures : il reste juste après n'importe quelle recompilation qui
+déplacerait la pagination. Il vérifie en outre qu'aucune page n'est perdue ni
+dupliquée, et le dit.
+
+Chaque fascicule garde la pagination d'origine : le chapitre 3 commence page 26
+en chiffres arabes, dans le fascicule comme dans le rapport complet. C'est
+voulu — les renvois du texte et les annotations de votre encadreur portent sur
+les mêmes numéros de page que le rapport entier.
+
+### 11. Sommaire : les points de conduite
+
+La classe `report` prive les lignes de chapitre de points de conduite. Le
+sommaire affichait donc le titre à gauche, le numéro de page à droite, et rien
+entre les deux — difficile à suivre dès que les titres sont de longueurs
+inégales. `\l@chapter` est redéfini dans le préambule de `rapport.tex` pour :
+
+- tirer des points du titre jusqu'au numéro de page, sommaire **et** table des
+  matières finale ;
+- préfixer **« CHAPITRE n : »** sur les chapitres numérotés, comme dans le corps
+  du document ; les liminaires, non numérotés, gardent leur titre seul ;
+- ménager un blanc rigide de 1,2 em avant les points, sans quoi un titre long
+  vient coller au numéro de page.
+
+Le titre du chapitre 3 est le seul assez long pour occuper toute la ligne : il
+n'a donc qu'un blanc, sans points. C'est le comportement normal d'une table des
+matières, pas un défaut de réglage.
+
+### 12. Dédicace
+
+Réduite à ce que vous avez demandé : « Je dédie ce rapport à : » puis
+**la Famille KAMGANG**, dans le cadre. Les parenthèses de votre note n'ont pas
+été composées — elles délimitaient le nom, elles ne font pas partie du texte.
+
+### 13. Le schéma de déploiement (figure 3.5)
+
+Le dessin TikZ de la chaîne CI/CD a été remplacé par un schéma draw.io au même
+vocabulaire graphique que l'architecture cloud : icônes AWS officielles, code
+couleur AWS, logo GitHub embarqué.
+
+**Il a été conçu pour respirer**, et c'est ce qui gouverne tous ses réglages :
+
+- onze objets seulement, deux bandes, **370 px entre deux étapes voisines** ;
+- les détails sont rejetés sur les **étiquettes des flèches** et sur deux notes,
+  jamais dans des boîtes supplémentaires ;
+- les tailles de police y sont **définitives** (28 px), et non multipliées à
+  l'export comme pour l'architecture cloud. C'est la seule façon de dimensionner
+  les boîtes et de calibrer les étiquettes en connaissance de cause : une
+  étiquette de flèche ne doit pas dépasser 22 caractères, sans quoi elle déborde
+  sur les blocs voisins. Le facteur de `construire_page.py` vaut donc **1,0**
+  pour ce diagramme, contre 1,8 pour l'autre ;
+- la liaison entre les deux bandes **sort par la droite** du bloc GitHub
+  Actions. Une sortie par le bas ferait descendre le trait au travers du libellé
+  du bloc, qui est justement posé dessous.
+
+Pour le modifier : éditer `schemas/generer-deploiement.py`, le relancer, puis
+suivre `schemas/export/LISEZ-MOI.md`. Le dessin TikZ précédent reste dans
+`figures/devops-actuel.tex`, inutilisé.
+
+### 14. Le routage des liaisons dans les deux schémas draw.io
+
+Les deux schémas ont d'abord été dessinés avec des liaisons **en ligne droite**.
+Résultat : chaque trait un peu long partait en diagonale et traversait ce qu'il
+rencontrait — cadres, libellés, icônes. Un schéma d'architecture devient alors
+illisible.
+
+Les deux générateurs appliquent maintenant une règle unique, écrite en tête de
+chaque fichier : **aucune liaison en ligne droite entre deux blocs éloignés**.
+Tout est à angle droit, et passe par des couloirs laissés volontairement vides
+dans la géométrie. Pour `architecture-cloud-musea` :
+
+| Couloir | Emplacement |
+|---|---|
+| C1 | `x = 770..840` — entre la zone de disponibilité A et la zone B |
+| C2 | `y = 530..565` — dans chaque zone, entre sous-réseau public et privé |
+| C3 | `y = 760..800` — dans le VPC, sous les zones de disponibilité |
+| C4 | `y = 215..300` — dans la région, au-dessus du VPC |
+| C5 | `x = 260..290` — dans la région, à gauche du VPC |
+
+Trois règles complémentaires, apprises en corrigeant :
+
+1. **Les sorties et entrées de bloc sont imposées**, jamais laissées au routeur.
+   Un libellé draw.io est posé *sous* sa tuile : sortir par le bas fait
+   descendre le trait au travers de son propre libellé. D'où les
+   `exitX/exitY` et `entryX/entryY` explicites partout.
+2. **Un cadre ne se franchit que perpendiculairement à son bord.** Une entrée
+   franche se lit comme « ce trait entre dans cette zone » ; une entrée en biais
+   se lit comme une rature.
+3. **Un lien qu'on ne peut pas router proprement ne se dessine pas.** Les deux
+   liaisons « répartiteur de charge → tâches » ont été supprimées : toute
+   descente depuis le répartiteur traversait d'abord son propre libellé, puis
+   celui du sous-réseau visé, tous deux calés en haut à gauche de leur cadre.
+   Deux traits pointillés entre ressources estompées ne valaient pas ce prix ;
+   la note du bas du schéma l'énonce désormais en toutes lettres.
+
+Le plan d'adressage interne du VPC (sous-réseau privé → passerelle NAT →
+passerelle Internet) suit la même logique : six liaisons de plus entre
+ressources estompées, pour un gain nul. Il est écrit dans la note.
+
+### 15. Deux points à savoir défendre sur le schéma cloud
+
+**La passerelle NAT est bien dans le sous-réseau PUBLIC.** C'est contre-intuitif
+et un juré peut poser la question. Une passerelle NAT publique doit être placée
+dans un sous-réseau public : c'est de là qu'elle atteint la passerelle Internet,
+grâce à son adresse IP élastique. Les tâches du sous-réseau privé y envoient
+leur trafic sortant par leur table de routage. Placée dans le sous-réseau privé,
+elle n'aurait elle-même aucune route vers l'extérieur et ne servirait à rien.
+
+(La passerelle NAT *privée*, elle, se place bien dans un sous-réseau privé —
+mais elle sert à joindre un autre VPC ou un réseau sur site, jamais Internet.
+Ce n'est pas le cas d'usage ici.)
+
+La note du schéma le dit maintenant explicitement : « par la passerelle NAT
+placée dans le sous-réseau **PUBLIC** de leur zone ».
+
+**Les deux registres sont alimentés en parallèle, pas en série.** La chaîne
+pousse la même image vers Docker Hub **et** vers Amazon ECR, simultanément.
+L'ancien tracé enchaînait GitHub Actions → Docker Hub → Amazon ECR sur une
+verticale, ce qui se lisait comme une séquence : l'image serait passée par
+Docker Hub avant d'atteindre ECR. C'était faux. Les deux liaisons partent
+désormais d'une **souche commune** et divergent visiblement, et la note du
+schéma l'écrit.

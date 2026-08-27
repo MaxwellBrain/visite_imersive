@@ -1,0 +1,42 @@
+# Copier en terraform.tfvars puis adapter.
+# terraform.tfvars est ignoré par git : il décrit VOTRE compte.
+
+# Zone Route 53 EXISTANTE et déjà déléguée chez le registrar.
+# Terraform ne la crée pas : il s'y greffe et n'y ajoute que ses propres
+# enregistrements. Le reste de la zone n'est pas touché.
+zone_domain = "nexacode.store"
+
+# Sous-domaine du site à l'intérieur de cette zone.
+#   "musea" ⇒ site sur musea.nexacode.store
+#             organisations sur bandjoun.musea.nexacode.store
+#   ""      ⇒ le site occupe la racine de la zone (déplacerait ce qui y répond déjà)
+subdomain = ""
+
+# À renseigner uniquement si plusieurs zones portent le même nom dans le compte
+# et que la recherche par nom devient ambiguë. Ex. "Z04024483OZXQYBYW978O".
+# Laisser VIDE de préférence : la recherche par nom survit à une recréation de
+# la zone (dont l identifiant change), et echoue des le plan si elle manque.
+hosted_zone_id = ""
+
+environment = "production"
+region      = "eu-west-3"
+
+# Dépôt autorisé à déployer, au format « proprietaire/depot ».
+# C'est cette valeur qui verrouille le rôle IAM : laissée vide, aucun rôle de
+# déploiement n'est créé (l'infrastructure se monte quand même).
+# Nécessite la politique IAMFullAccess sur l'utilisateur Terraform.
+github_repository = ""
+
+# false si votre compte AWS déploie DÉJÀ depuis GitHub : le fournisseur OIDC
+# est unique par compte, le recréer échouerait.
+create_github_oidc_provider = true
+
+# true tant qu'on monte et démonte l'infrastructure : autorise `terraform
+# destroy` à vider le bucket. À repasser à false une fois en production.
+force_destroy = true
+
+# PriceClass_100 : Europe + Amérique du Nord, le meilleur rapport coût/couverture.
+# PriceClass_All : ajoute l'Afrique, l'Asie et l'Amérique du Sud — pertinent si
+# le public visé est majoritairement au Cameroun.
+price_class = "PriceClass_100"
+github_repository = "MaxwellBrain/visite_imersive"

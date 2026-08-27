@@ -475,7 +475,7 @@ cinq temps.
 
 \begin{figure}[htbp]
 \centering
-\schema{rag}
+\includegraphics[width=\textwidth]{figures/rag-musea.pdf}
 \caption{Architecture de l'assistant conversationnel à ancrage documentaire (RAG)}
 \label{fig:rag}
 \source{Élaboré par nos soins.}
@@ -545,9 +545,38 @@ profonde est demandée, faute de quoi les codes QR de réalité augmentée
 échoueraient, et les \textbf{durées de cache différenciées} selon la famille de
 fichiers, sans quoi le site resterait figé sur une version périmée.
 
+La figure~\ref{fig:cloud} restitue l'ensemble de cette infrastructure telle
+qu'elle est décrite dans le code Terraform du projet. Elle se lit sur deux
+plans, que la teinte des tuiles distingue.
+
+\textbf{Ce qui est en service} figure en pleine couleur, et l'on y suit deux
+chemins. Le premier est celui d'une requête de visiteur : le navigateur
+interroge \emph{Route 53}, qui résout aussi bien le domaine principal que le
+sous-domaine de chaque institution ; \emph{CloudFront} sert alors le contenu,
+sous le certificat délivré par \emph{ACM}, et il est le seul à pouvoir lire le
+compartiment \emph{Amazon S3}. Le second est celui de la livraison : le
+développeur dépose sa modification, \emph{GitHub Actions} construit l'image et
+la dépose sur \emph{Docker Hub} et sur \emph{Amazon ECR}, en se présentant à
+\emph{IAM} avec un jeton de courte durée plutôt qu'avec une clé permanente. À
+ces deux chemins s'ajoutent les services de support : \emph{Secrets Manager}
+pour les secrets, \emph{SES} pour les envois de courrier, \emph{CloudWatch} et
+\emph{SNS} pour la surveillance et l'alerte. Hors du nuage AWS, \emph{Supabase}
+porte la base de données, l'authentification et les fonctions serveur.
+
+\textbf{Ce qui est décrit mais non appliqué} figure en grisé : le réseau privé
+virtuel et ses deux zones de disponibilité, la passerelle Internet, le
+répartiteur de charge, les passerelles de traduction d'adresses et les
+exécutions conteneurisées \emph{ECS Fargate} et \emph{EKS}. Ces ressources
+constituent très exactement l'écart entre les 29 ressources décrites dans le
+code et les 19 réellement créées à la mise en ligne : elles sont écrites,
+validées, mais délibérément non appliquées, parce qu'un site statique n'en a pas
+besoin et qu'elles coûteraient sans rien servir. Elles sont l'objet de
+l'intervention proposée au chapitre~\ref{chap:diagnostic}. Ce schéma dit donc
+deux choses à la fois : l'état déployé, et la trajectoire déjà écrite.
+
 \begin{figure}[htbp]
 \centering
-\schema{infrastructure-cloud}
+\includegraphics[width=\textwidth]{figures/architecture-cloud-musea.pdf}
 \caption{Architecture de l'infrastructure d'hébergement en nuage}
 \label{fig:cloud}
 \source{Élaboré par nos soins d'après la description Terraform du projet.}
@@ -573,9 +602,19 @@ permanente : un jeton de courte durée est présenté à chaque exécution, et l
 rôle correspondant est restreint au dépôt de code concerné, à ce seul espace de
 stockage et à cette seule distribution.
 
+La figure~\ref{fig:devops-actuel} met ces deux enchaînements en regard. La
+bande supérieure est celle qui se déclenche à chaque dépôt de modification :
+elle s'arrête net, sans rien publier, dès qu'un contrôle échoue. La bande
+inférieure n'est atteinte que si tous les contrôles passent, et seulement
+depuis la branche principale : le jeton de courte durée est alors présenté, la
+publication a lieu, le cache est purgé, puis le site est vérifié \emph{en
+ligne}. C'est cette dernière flèche qui distingue la chaîne d'une simple
+automatisation de copie : elle interroge ce que le visiteur reçoit
+effectivement, et non ce que la chaîne croit avoir déposé.
+
 \begin{figure}[htbp]
 \centering
-\schema{devops-actuel}
+\includegraphics[width=\textwidth]{figures/deploiement-musea.pdf}
 \caption{Chaîne d'intégration et de déploiement continus en service}
 \label{fig:devops-actuel}
 \source{Élaboré par nos soins d'après les fichiers de description des chaînes du projet.}

@@ -9,10 +9,10 @@
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {3.1}{\ignorespaces Organigramme de la Fondation Jean Félicien Gacha}}{27}{figure.caption.29}%
 \contentsline {figure}{\numberline {3.2}{\ignorespaces Architecture générale de la plateforme MUSÉA}}{33}{figure.caption.40}%
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Architecture de l'assistant conversationnel à ancrage documentaire (RAG)}}{34}{figure.caption.42}%
-\contentsline {figure}{\numberline {3.4}{\ignorespaces Architecture de l'infrastructure d'hébergement en nuage}}{36}{figure.caption.46}%
-\contentsline {figure}{\numberline {3.5}{\ignorespaces Chaîne d'intégration et de déploiement continus en service}}{37}{figure.caption.48}%
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Relevé de la dépense mensuelle d'infrastructure par service}}{39}{figure.caption.56}%
-\contentsline {figure}{\numberline {3.7}{\ignorespaces Site public : le parcours de visite immersive}}{41}{figure.caption.62}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Architecture de l'assistant conversationnel à ancrage documentaire (RAG)}}{35}{figure.caption.42}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Architecture de l'infrastructure d'hébergement en nuage}}{37}{figure.caption.46}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Chaîne d'intégration et de déploiement continus en service}}{38}{figure.caption.48}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Relevé de la dépense mensuelle d'infrastructure par service}}{40}{figure.caption.56}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Site public : le parcours de visite immersive}}{42}{figure.caption.62}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Chaîne DevOps cible : de la modification du code à la production par conteneurs}}{52}{figure.caption.82}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Chaîne DevOps cible : de la modification du code à la production par conteneurs}}{53}{figure.caption.82}%

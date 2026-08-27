@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.8.21)  24 AUG 2026 15:57
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.8.21)  27 AUG 2026 07:49
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1208,12 +1208,12 @@ ions\pgflibrarydecorations.pathreplacing.code.tex))
 \boiteschema=\box143
 Package french3.ldf Info: Setting StandardItemizeEnv=true for
 (french3.ldf)             compatibility with enumitem package,
-(french3.ldf)             reported on input line 405.
+(french3.ldf)             reported on input line 437.
 Package french3.ldf Info: Setting StandardEnumerateEnv=true for
 (french3.ldf)             compatibility with enumitem package,
-(french3.ldf)             reported on input line 405.
-LaTeX Font Info:    Trying to load font information for T1+ptm on input line 40
-5.
+(french3.ldf)             reported on input line 437.
+LaTeX Font Info:    Trying to load font information for T1+ptm on input line 43
+7.
 
 (C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1ptm.fd
 File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
@@ -1233,25 +1233,25 @@ Package babel Info: Importing data for english
 )
 \openout1 = `rapport.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 405.
-LaTeX Font Info:    ... okay on input line 405.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 405.
-LaTeX Font Info:    ... okay on input line 405.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 405.
-LaTeX Font Info:    ... okay on input line 405.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 405.
-LaTeX Font Info:    ... okay on input line 405.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 405.
-LaTeX Font Info:    ... okay on input line 405.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 405.
-LaTeX Font Info:    ... okay on input line 405.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 405.
-LaTeX Font Info:    ... okay on input line 405.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 405.
-LaTeX Font Info:    ... okay on input line 405.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 405.
-LaTeX Font Info:    ... okay on input line 405.
-LaTeX Info: Redefining \degres on input line 405.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 437.
+LaTeX Font Info:    ... okay on input line 437.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 437.
+LaTeX Font Info:    ... okay on input line 437.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 437.
+LaTeX Font Info:    ... okay on input line 437.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 437.
+LaTeX Font Info:    ... okay on input line 437.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 437.
+LaTeX Font Info:    ... okay on input line 437.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 437.
+LaTeX Font Info:    ... okay on input line 437.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 437.
+LaTeX Font Info:    ... okay on input line 437.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 437.
+LaTeX Font Info:    ... okay on input line 437.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 437.
+LaTeX Font Info:    ... okay on input line 437.
+LaTeX Info: Redefining \degres on input line 437.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -1319,62 +1319,26 @@ Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: float package is loaded.
 Package caption Info: hyperref package is loaded.
 Package caption Info: End \AtBeginDocument code.
-Package hyperref Info: Link coloring OFF on input line 405.
+Package hyperref Info: Link coloring OFF on input line 437.
  (rapport.out) (rapport.out)
 \@outlinefile=\write4
 \openout4 = `rapport.out'.
 
  (sections/00-liminaires.tex
-LaTeX Font Info:    Trying to load font information for OT1+ztmcm on input line
- 20.
-
-(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ztmcm.fd
-File: ot1ztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OT1/ztmcm.
-)
-LaTeX Font Info:    Trying to load font information for OML+ztmcm on input line
- 20.
-
-(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omlztmcm.fd
-File: omlztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OML/ztmcm.
-)
-LaTeX Font Info:    Trying to load font information for OMS+ztmcm on input line
- 20.
-
-(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omsztmcm.fd
-File: omsztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMS/ztmcm.
-)
-LaTeX Font Info:    Trying to load font information for OMX+ztmcm on input line
- 20.
-
-(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omxztmcm.fd
-File: omxztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMX/ztmcm.
-)
-LaTeX Font Info:    Trying to load font information for OT1+ptm on input line 2
-0.
-
-(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ptm.fd
-File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
-)
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 20.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 20.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 20.
-LaTeX Font Info:    Trying to load font information for T1+phv on input line 25
+LaTeX Font Info:    Trying to load font information for T1+phv on input line 30
 .
 
 (C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1phv.fd
 File: t1phv.fd 2020/03/25 scalable font definitions for T1/phv.
 )
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 11.03998pt on input line 25.
+(Font)              scaled to size 11.03998pt on input line 30.
 LaTeX Font Info:    Font shape `T1/phv/m/n' will be
-(Font)              scaled to size 10.11998pt on input line 25.
+(Font)              scaled to size 10.11998pt on input line 30.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 10.11998pt on input line 25.
+(Font)              scaled to size 10.11998pt on input line 30.
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 12.87997pt on input line 25.
+(Font)              scaled to size 12.87997pt on input line 30.
 
 [1
 
@@ -1393,11 +1357,49 @@ b/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}] [2
 ] [5
 
 
-] (rapport.lot)
+] (rapport.lot
+LaTeX Font Info:    Trying to load font information for OT1+ztmcm on input line
+ 7.
+
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ztmcm.fd
+File: ot1ztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OT1/ztmcm.
+)
+LaTeX Font Info:    Trying to load font information for OML+ztmcm on input line
+ 7.
+
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omlztmcm.fd
+File: omlztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OML/ztmcm.
+)
+LaTeX Font Info:    Trying to load font information for OMS+ztmcm on input line
+ 7.
+
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omsztmcm.fd
+File: omsztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMS/ztmcm.
+)
+LaTeX Font Info:    Trying to load font information for OMX+ztmcm on input line
+ 7.
+
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omxztmcm.fd
+File: omxztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMX/ztmcm.
+)
+LaTeX Font Info:    Trying to load font information for OT1+ptm on input line 7
+.
+
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ptm.fd
+File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
+)
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 7.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 7.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 7.
+)
 \tf@lot=\write5
 \openout5 = `rapport.lot'.
 
- [6
+
+[6
 
 
 ] (rapport.lof)
@@ -1416,8 +1418,7 @@ b/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}] [2
 
 ])
 \c@derniereliminaire=\count396
- [9]
-(sections/01-introduction.tex
+ [9] (sections/01-introduction.tex
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
 (hyperref)                be the same. Added a new anchor on input line 11.
@@ -1540,100 +1541,122 @@ LaTeX Font Info:    Font shape `T1/phv/m/it' in size <8> not available
 (Font)              Font shape `T1/phv/m/sl' tried instead on input line 32.
 LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
 (Font)              scaled to size 7.35999pt on input line 32.
-) [33] (figures/rag.tex
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 36.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <5> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 36.
-LaTeX Font Info:    Font shape `T1/pcr/m/it' in size <6> not available
-(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 74.
-) [34] [35]
-(figures/infrastructure-cloud.tex) (figures/devops-actuel.tex) [36] [37]
-Underfull \hbox (badness 1953) in paragraph at lines 649--649
+) [33]
+
+pdfTeX warning: pdflatex.exe (file ./figures/rag-musea.pdf): PDF inclusion: fou
+nd PDF version <1.7>, but at most version <1.5> allowed
+<figures/rag-musea.pdf, id=835, 1392.20125pt x 1406.25375pt>
+File: figures/rag-musea.pdf Graphic file (type pdf)
+<use figures/rag-musea.pdf>
+Package pdftex.def Info: figures/rag-musea.pdf  used on input line 478.
+(pdftex.def)             Requested size: 441.01773pt x 445.46136pt.
+[34] [35 <./figures/rag-musea.pdf>]
+
+pdfTeX warning: pdflatex.exe (file ./figures/architecture-cloud-musea.pdf): PDF
+ inclusion: found PDF version <1.7>, but at most version <1.5> allowed
+<figures/architecture-cloud-musea.pdf, id=866, 1516.66624pt x 1112.155pt>
+File: figures/architecture-cloud-musea.pdf Graphic file (type pdf)
+<use figures/architecture-cloud-musea.pdf>
+Package pdftex.def Info: figures/architecture-cloud-musea.pdf  used on input li
+ne 579.
+(pdftex.def)             Requested size: 441.01773pt x 323.38217pt.
+[36]
+
+pdfTeX warning: pdflatex.exe (file ./figures/deploiement-musea.pdf): PDF inclus
+ion: found PDF version <1.7>, but at most version <1.5> allowed
+<figures/deploiement-musea.pdf, id=873, 1499.6025pt x 946.53625pt>
+File: figures/deploiement-musea.pdf Graphic file (type pdf)
+<use figures/deploiement-musea.pdf>
+Package pdftex.def Info: figures/deploiement-musea.pdf  used on input line 617.
+
+(pdftex.def)             Requested size: 441.01773pt x 278.35919pt.
+[37 <./figures/architecture-cloud-musea.pdf>] [38 <./figures/deploiement-musea.
+pdf>]
+Underfull \hbox (badness 1953) in paragraph at lines 688--688
  []|\T1/ptm/m/n/10 0|
  []
 
 
-Underfull \hbox (badness 1953) in paragraph at lines 649--649
+Underfull \hbox (badness 1953) in paragraph at lines 688--688
  []|\T1/ptm/m/n/10 0|
  []
 
 
-Underfull \hbox (badness 1953) in paragraph at lines 649--649
+Underfull \hbox (badness 1953) in paragraph at lines 688--688
  []|\T1/ptm/m/n/10 0|
  []
 
 
-Underfull \hbox (badness 1953) in paragraph at lines 649--649
+Underfull \hbox (badness 1953) in paragraph at lines 688--688
  []|\T1/ptm/m/n/10 0|
  []
 
 
-Underfull \hbox (badness 1953) in paragraph at lines 649--649
+Underfull \hbox (badness 1953) in paragraph at lines 688--688
  []|\T1/ptm/m/n/10 0|
  []
 
 
-Underfull \hbox (badness 1117) in paragraph at lines 684--684
+Underfull \hbox (badness 1117) in paragraph at lines 723--723
  []|\T1/ptm/m/n/10 90|
  []
 
 
-Underfull \hbox (badness 1472) in paragraph at lines 684--684
+Underfull \hbox (badness 1472) in paragraph at lines 723--723
  []|\T1/ptm/m/n/10 0|
  []
 
 
-Underfull \hbox (badness 1472) in paragraph at lines 684--684
+Underfull \hbox (badness 1472) in paragraph at lines 723--723
  []|\T1/ptm/m/n/10 0|
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 684--684
+Underfull \hbox (badness 10000) in paragraph at lines 723--723
 []|\T1/ptm/m/n/10 Reconstruction pho-to-gram-mé-trique, 6
  []
 
 
-Underfull \hbox (badness 1117) in paragraph at lines 684--684
+Underfull \hbox (badness 1117) in paragraph at lines 723--723
  []|\T1/ptm/m/n/10 ^^V|
  []
 
-
-Underfull \hbox (badness 1406) in paragraph at lines 728--728
+[39]
+Underfull \hbox (badness 1406) in paragraph at lines 767--767
  []|\T1/ptm/m/n/10 1 133 000|
  []
 
 
-Underfull \hbox (badness 2042) in paragraph at lines 728--728
+Underfull \hbox (badness 2042) in paragraph at lines 767--767
  []|\T1/ptm/m/n/10 162 710|
  []
 
 
-Underfull \hbox (badness 1406) in paragraph at lines 728--728
+Underfull \hbox (badness 1406) in paragraph at lines 767--767
  []|\T1/ptm/m/n/10 1 295 710|
  []
 
 
-Underfull \hbox (badness 2556) in paragraph at lines 728--728
+Underfull \hbox (badness 2556) in paragraph at lines 767--767
  []|\T1/ptm/m/n/10 38 871|
  []
 
 
-Underfull \hbox (badness 1406) in paragraph at lines 728--728
+Underfull \hbox (badness 1406) in paragraph at lines 767--767
  []|\T1/ptm/b/n/10 1 334 581|
  []
 
-[38] [39] [40] [41] [42] [43]
+[40] [41] [42] [43] [44]
 (C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ts1ptm.fd)
-[44]) (sections/05-chapitre4.tex [45]
+[45]) (sections/05-chapitre4.tex [46]
 Chapitre 4.
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
 (hyperref)                be the same. Added a new anchor on input line 9.
 
-[46
+[47
 
-] [47]
+] [48]
 Underfull \hbox (badness 1264) in paragraph at lines 220--220
 []\T1/ptm/m/n/10 Coût ré-cur-rent d'hé-ber-ge-ment très faible (730
  []
@@ -1643,12 +1666,17 @@ Underfull \hbox (badness 4353) in paragraph at lines 220--220
 []\T1/ptm/m/n/10 Tissu dense d'ins-ti-tu-tions pa-tri-mo-niales dans
  []
 
-[48] [49] [50] [51] (figures/devops-cible.tex)
+[49] [50] [51] [52] (figures/devops-cible.tex
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 40.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <5> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 40.
+)
 Underfull \hbox (badness 10000) in paragraph at lines 413--413
 []|\T1/ptm/m/n/10 Aucun ; fac-tu-ra-tion à la res-source
  []
 
-[52] [53]
+[53] [54]
 Underfull \hbox (badness 1048) in paragraph at lines 533--533
  []|\T1/ptm/m/n/10 8 760|
  []
@@ -1663,7 +1691,7 @@ Underfull \hbox (badness 1048) in paragraph at lines 533--533
  []|\T1/ptm/m/n/10 6 000|
  []
 
-[54] [55]) (sections/06-conclusion.tex [56] [57
+[55] [56]) (sections/06-conclusion.tex [57] [58
 
 
 ]
@@ -1671,10 +1699,10 @@ Underfull \hbox (badness 1048) in paragraph at lines 533--533
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
 (hyperref)                be the same. Added a new anchor on input line 68.
 
-[58
+[59
 
 
-] [59]) (sections/07-bibliographie.tex [60]
+] [60]) (sections/07-bibliographie.tex [61]
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
 (hyperref)                be the same. Added a new anchor on input line 25.
@@ -1697,27 +1725,27 @@ Underfull \hbox (badness 1852) in paragraph at lines 64--68
 nce, 42\T1/ptm/m/n/12 (4), 824--836.
  []
 
-[61
+[62
 
 
-]) (sections/08-annexes.tex [62]
+]) (sections/08-annexes.tex [63]
 Underfull \hbox (badness 1205) in paragraph at lines 51--53
 []\T1/ptm/m/n/12 Existe-t-il, à votre connais-sance, des ÷uvres com-pa-rables a
 ux vôtres conser-vées
  []
 
-[63
-
-
-] [64
+[64
 
 
 ] [65
 
+
 ] [66
 
+] [67
 
-]) [67
+
+]) [68
 
 
 ]
@@ -1725,7 +1753,7 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.IX}) has
  been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.444 
+l.476 
        [9
 
 
@@ -1738,11 +1766,11 @@ Package rerunfilecheck Info: File `rapport.out' has not changed.
 (rerunfilecheck)             Checksum: 0E38EBF60D7B0E9312651716C53AD6BC;29471.
  ) 
 Here is how much of TeX's memory you used:
- 36671 strings out of 467871
- 739109 string characters out of 5418376
- 1212553 words of memory out of 5000000
- 64469 multiletter control sequences out of 15000+600000
- 751279 words of font info for 188 fonts, out of 8000000 for 9000
+ 36423 strings out of 467871
+ 735625 string characters out of 5418376
+ 1212612 words of memory out of 5000000
+ 64233 multiletter control sequences out of 15000+600000
+ 749769 words of font info for 184 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  102i,17n,109p,660b,1064s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/
@@ -1750,19 +1778,18 @@ cmsy10.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/type1/public/ams
 fonts/symbols/msam10.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/ty
 pe1/urw/courier/ucrb8a.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/
 type1/urw/courier/ucrr8a.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/font
-s/type1/urw/courier/ucrro8a.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/f
-onts/type1/urw/helvetic/uhvb8a.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTe
-X/fonts/type1/urw/helvetic/uhvbo8a.pfb><C:/Users/maxib/AppData/Local/Programs/M
-iKTeX/fonts/type1/urw/helvetic/uhvr8a.pfb><C:/Users/maxib/AppData/Local/Program
-s/MiKTeX/fonts/type1/urw/helvetic/uhvro8a.pfb><C:/Users/maxib/AppData/Local/Pro
-grams/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/maxib/AppData/Local/Pro
-grams/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/maxib/AppData/Local/Pr
-ograms/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/maxib/AppData/Local/Pr
-ograms/MiKTeX/fonts/type1/urw/times/utmri8a.pfb><C:/Users/maxib/AppData/Local/P
-rograms/MiKTeX/fonts/type1/urw/zapfding/uzdr.pfb>
-Output written on rapport.pdf (81 pages, 617248 bytes).
+s/type1/urw/helvetic/uhvb8a.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/f
+onts/type1/urw/helvetic/uhvbo8a.pfb><C:/Users/maxib/AppData/Local/Programs/MiKT
+eX/fonts/type1/urw/helvetic/uhvr8a.pfb><C:/Users/maxib/AppData/Local/Programs/M
+iKTeX/fonts/type1/urw/helvetic/uhvro8a.pfb><C:/Users/maxib/AppData/Local/Progra
+ms/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/maxib/AppData/Local/Progra
+ms/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><C:/Users/maxib/AppData/Local/Progr
+ams/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/maxib/AppData/Local/Progr
+ams/MiKTeX/fonts/type1/urw/times/utmri8a.pfb><C:/Users/maxib/AppData/Local/Prog
+rams/MiKTeX/fonts/type1/urw/zapfding/uzdr.pfb>
+Output written on rapport.pdf (82 pages, 867968 bytes).
 PDF statistics:
- 1436 PDF objects out of 1440 (max. 8388607)
- 374 named destinations out of 1000 (max. 500000)
- 1077 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1485 PDF objects out of 1728 (max. 8388607)
+ 375 named destinations out of 1000 (max. 500000)
+ 1092 words of extra memory for PDF output out of 10000 (max. 10000000)
 
