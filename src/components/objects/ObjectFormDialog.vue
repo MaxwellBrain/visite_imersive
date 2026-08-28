@@ -61,6 +61,7 @@ const form = reactive({
   model3dIosName: '',
   arPlacement: 'floor',
   arEchelle: 1,
+  arSeulement: false,
   published: false,
   chefId: null,
   chefRelation: 'possédé par',
@@ -110,6 +111,7 @@ function reset() {
   form.model3dIosName = obj?.model3dIosName ?? ''
   form.arPlacement = obj?.arPlacement ?? 'floor'
   form.arEchelle = obj?.arEchelle ?? 1
+  form.arSeulement = obj?.arSeulement ?? false
   form.published = obj?.published ?? false
   form.seo = {
     title: obj?.seo?.title ?? '',
@@ -323,6 +325,7 @@ async function save() {
     model3dIosName: form.model3dIosName,
     arPlacement: form.arPlacement,
     arEchelle: form.arEchelle,
+    arSeulement: form.arSeulement,
     published: form.published,
     seo: { ...form.seo, keywords: [...form.seo.keywords] }
   }
@@ -563,6 +566,16 @@ async function save() {
               <small>{{ $t('admin.objects.arIosHint') }}</small>
             </div>
 
+            <!-- Une architecture ne se manipule pas : voir le commentaire de
+                 la migration 20260828_ar_seulement.sql. -->
+            <div class="vi-field ar-seul">
+              <div class="ar-seul__ligne">
+                <ToggleSwitch v-model="form.arSeulement" input-id="ar-seul" />
+                <label for="ar-seul">{{ $t('admin.objects.arOnly') }}</label>
+              </div>
+              <small>{{ $t('admin.objects.arOnlyHint') }}</small>
+            </div>
+
             <div class="vi-row">
               <div class="vi-field">
                 <label>{{ $t('admin.objects.arPlacement') }}</label>
@@ -642,6 +655,8 @@ async function save() {
 </template>
 
 <style scoped>
+.ar-seul__ligne { display: flex; align-items: center; gap: .6rem; }
+.ar-seul__ligne label { margin: 0; cursor: pointer; }
 .ar-set { border: 1px solid var(--p-content-border-color); border-radius: 10px; padding: 0.9rem 1.1rem 1.1rem; margin-top: 1.2rem; }
 .ar-set legend { padding: 0 0.5rem; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.4rem; }
 .ar-set legend i { color: var(--gold, #cda24e); }

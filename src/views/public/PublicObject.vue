@@ -38,6 +38,12 @@ const rarity = ref(null)
 const loading = ref(true)
 const viewer = reactive({ visible: false })
 
+// Certaines pieces n'ont de sens qu'a leur taille reelle : une case obus
+// mousgoum se traverse, elle ne se fait pas tourner dans un cadre. Le
+// conservateur le declare par objet (voir 20260828_ar_seulement.sql).
+const arSeulement = computed(() => object.value?.ar_seulement === true)
+
+
 async function load() {
   loading.value = true
   object.value = await pubObject(Number(route.params.id))
@@ -103,7 +109,12 @@ const suggestions = computed(() =>
         <div class="obj__media ps-card">
           <img v-if="object.photo" :src="object.photo" :alt="object.nom" />
           <div v-else class="ps-ph"><i class="pi pi-box" /></div>
-          <span v-if="object.a_3d" class="ps-tag ps-tag--primary badge3d"><i class="pi pi-box" /> 3D · AR</span>
+          <!-- Annoncer « 3D » sur une pièce qui n'offre que la RA serait une
+               promesse non tenue : la pastille suit ce que la fiche propose. -->
+          <span v-if="object.a_3d" class="ps-tag ps-tag--primary badge3d">
+            <i :class="arSeulement ? 'pi pi-mobile' : 'pi pi-box'" />
+            {{ arSeulement ? $t('ar.badgeArOnly') : '3D · AR' }}
+          </span>
         </div>
 
         <div class="obj__info">
@@ -122,16 +133,21 @@ const suggestions = computed(() =>
           <div class="obj__actions">
             <template v-if="unlocked">
               <router-link :to="to(`/ar/${object.id}`)" class="ps-btn">
-                <i class="pi pi-mobile" /> {{ $t('ar.cta') }}
+                <i class="pi pi-mobile" /> {{ arSeulement ? $t('ar.ctaArOnly') : $t('ar.cta') }}
               </router-link>
-              <button v-if="object.a_3d" class="ps-btn ps-btn--line" @click="ouvrirVisionneuse">
+              <!-- Pas de visionneuse 3D quand l'objet est une architecture :
+                   la faire pivoter dans un cadre dit le contraire de ce que la
+                   pièce raconte. Voir 20260828_ar_seulement.sql. -->
+              <button v-if="object.a_3d && !arSeulement" class="ps-btn ps-btn--line" @click="ouvrirVisionneuse">
                 <i class="pi pi-box" /> {{ $t('object.view3d') }}
               </button>
             </template>
             <div v-else class="locked">
               <i class="pi pi-lock" />
               <div>
-                <strong>{{ $t('object.lockedTitle') }}</strong>
+                <!-- Ne pas promettre de la 3D sur une piece qui n'offre que la
+                     RA : le visiteur paierait pour une fonction absente. -->
+                <strong>{{ arSeulement ? $t('object.lockedTitleArOnly') : $t('object.lockedTitle') }}</strong>
                 <span>{{ $t('object.lockedText') }}</span>
               </div>
               <router-link :to="to('/panier')" class="ps-btn ps-btn--sm">{{ $t('object.choosePass') }}</router-link>

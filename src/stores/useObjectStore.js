@@ -20,6 +20,8 @@ const fromRow = (r) => ({
   model3dIosName: r.model3d_ios_name || '',
   arPlacement: r.ar_placement || 'floor',
   arEchelle: r.ar_echelle == null ? 1 : Number(r.ar_echelle),
+  // Réalité augmentée SEULE (migration 20260828_ar_seulement.sql)
+  arSeulement: r.ar_seulement === true,
   published: r.published,
   publishedAt: r.published_at,
   seo: r.seo || { title: '', description: '', slug: '', keywords: [] },
@@ -38,6 +40,7 @@ const toRow = (o) => ({
   model3d_ios_name: o.model3dIosName ?? null,
   ar_placement: o.arPlacement || 'floor',
   ar_echelle: o.arEchelle == null || o.arEchelle === '' ? 1 : Number(o.arEchelle),
+  ar_seulement: !!o.arSeulement,
   published: o.published ?? false,
   seo: o.seo ?? {}
 })
@@ -47,7 +50,7 @@ const toRow = (o) => ({
 // l'écriture entière. Plutôt que de bloquer l'enregistrement d'un objet — ce
 // qui rendrait l'ERP inutilisable pour un motif sans rapport — on réessaie une
 // fois sans ces colonnes, et on ne les renvoie plus jusqu'au rechargement.
-const AR_COLONNES = ['model3d_ios', 'model3d_ios_name', 'ar_placement', 'ar_echelle']
+const AR_COLONNES = ['model3d_ios', 'model3d_ios_name', 'ar_placement', 'ar_echelle', 'ar_seulement']
 let arColonnesPresentes = true
 
 const sansAr = (row) => {
@@ -89,7 +92,7 @@ export const useObjectStore = defineStore('objects', () => {
   // par `chargerMedias()`.
   const COLONNES_LISTE =
     'id, sector_id, nom, nom_commun, description, published, published_at, seo, created_at,' +
-    ' photo_thumb, model3d_name, model3d_ios_name, ar_placement, ar_echelle'
+    ' photo_thumb, model3d_name, model3d_ios_name, ar_placement, ar_echelle, ar_seulement'
 
   async function load() {
     loading.value = true

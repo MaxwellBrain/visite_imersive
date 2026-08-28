@@ -18,6 +18,9 @@ const publicChildren = (suffix = '') => [
   { path: 'visite/:id', name: `pub-tour${suffix}`, component: () => import('@/views/public/PublicTour.vue') },
   // Cible du QR affiché sur l'ordinateur ; « demo » ouvre la pièce générée.
   { path: 'ar/:id', name: `pub-ar${suffix}`, component: () => import('@/views/public/PublicAr.vue') },
+  // Guide Spectral : la case entière, grandeur nature, avec son guide.
+  // `?audio=1` bascule en mode audio-seul (accessibilité, appareil sans WebXR).
+  { path: 'spectral/:id', name: `pub-spectral${suffix}`, component: () => import('@/views/public/PublicSpectral.vue') },
   { path: 'genealogie', name: `pub-genealogy${suffix}`, component: () => import('@/views/public/PublicGenealogy.vue') },
   { path: 'personnages/:id', name: `pub-personnage${suffix}`, component: () => import('@/views/public/PublicPersonnage.vue') },
   { path: 'panier', name: `pub-cart${suffix}`, component: () => import('@/views/public/PublicCart.vue') },

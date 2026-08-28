@@ -5,17 +5,36 @@ import { demoModelUrl, demoModelInfo } from '@/services/glb'
 import { qrSvg } from '@/services/qrcode'
 import { chargerModelViewer } from '@/services/modelViewer'
 import { useTts } from '@/services/tts'
+import ObjectGuideRobot from '@/components/objects/ObjectGuideRobot.vue'
 
 // RÉALITÉ AUGMENTÉE — « Retour au pays ».
 //
 // La thèse du projet en dix secondes : on pointe le sol de la cour de la
-// chefferie et l'objet exilé réapparaît, à sa taille réelle. D'où deux partis pris :
+// chefferie et l'objet exilé réapparaît.
 //
-//   1. ar-scale="fixed" — l'objet garde ses dimensions réelles. Le mode « auto »
-//      laisserait le visiteur l'agrandir, et le propos tomberait à plat.
-//   2. Sur ordinateur, la RA est indisponible : au lieu d'un bouton grisé, on
-//      affiche un QR. Le jury scanne, l'objet apparaît dans la salle. C'est
-//      précisément le scénario d'une soutenance assistée par ordinateur.
+// COMMENT LA RA FONCTIONNE ICI — le point que l'on comprend de travers une fois
+// sur deux : ce n'est PAS le navigateur qui fait la réalité augmentée. Il ne
+// fait que passer la main au système :
+//
+//   Android → intent vers SCENE VIEWER, l'application de Google adossée à
+//             ARCore. C'est elle qui allume la caméra, détecte les plans et
+//             pose l'objet. Elle télécharge le .glb elle-même, par son URL.
+//   iOS     → le .usdz est remis à QUICK LOOK. Sans ce fichier, rien.
+//   WebXR   → la seule voie qui s'exécute vraiment dans le navigateur, et la
+//             moins fiable sur mobile.
+//
+// Trois conséquences : il faut DEUX fichiers (glb + usdz), le modèle doit être
+// servi publiquement avec le bon type MIME puisqu'une AUTRE application vient
+// le chercher, et le QR n'est pas un marqueur — le placement se fait par
+// détection de plan, le QR n'est qu'un lien.
+//
+// L'ÉCHELLE. On laisse `ar-scale` en mode automatique, comme le projet de
+// référence. « fixed » plaçait l'objet à sa taille réelle : intellectuellement
+// juste, mais une case de six mètres posée dans une pièce devient un mur de
+// texture, et le visiteur conclut que rien ne s'est affiché.
+//
+// Sur ordinateur, la RA est indisponible : au lieu d'un bouton grisé, on
+// affiche un QR. Le jury scanne, l'objet apparaît dans la salle.
 
 const props = defineProps({
   objet: { type: Object, default: null },
@@ -23,6 +42,12 @@ const props = defineProps({
   variante: { type: String, default: 'tabouret' },
   // Adresse à encoder dans le QR ; par défaut la page RA autonome de cet objet.
   lienMobile: { type: String, default: '' },
+  // RÉALITÉ AUGMENTÉE SEULE. Le modèle reste chargé — il le faut pour lancer la
+  // RA — mais on retire tout ce qui invite à le manipuler : rotation
+  // automatique, contrôles de caméra, mention de la hauteur. Une case de six
+  // mètres qu'on fait tourner dans un cadre devient un bibelot, et c'est
+  // exactement le contresens que ce mode évite.
+  arSeul: { type: Boolean, default: false },
   compact: { type: Boolean, default: false }
 })
 const emit = defineEmits(['close'])
@@ -31,6 +56,15 @@ const { t } = useI18n()
 const { speaking: ttsSpeaking, speak: ttsSpeak, stop: ttsStop } = useTts()
 
 const mv = ref(null)
+const robot = ref(null)
+
+// Le robot se réveille au premier geste sur la pièce. `camera-change` ne se
+// déclenche que si la caméra est manipulable — donc pas en mode « RA seule »,
+// où le clic reste le seul signal. On garde les deux : ils couvrent chacun un
+// cas que l'autre laisse passer.
+function surGeste(e) {
+  if (!e || e?.detail?.source === 'user-interaction') robot.value?.reveiller()
+}
 const arPossible = ref(null) // null = on ne sait pas encore
 const charge = ref(false)
 const statut = ref('')
@@ -132,9 +166,82 @@ function onArStatus(e) {
   statut.value = e?.detail?.status || ''
 }
 
-function lancerAr() {
-  try { mv.value?.activateAR() } catch { erreur.value = t('ar.launchFailed') }
+// LANCEMENT — trois niveaux, du plus propre au plus brutal.
+//
+// `activateAR()` suffit dans le cas nominal. Mais sur un Android capricieux —
+// version de Chrome ancienne, Services Google Play pour la RA en cours de mise
+// à jour, WebView intégrée à une autre application — il échoue en silence, et
+// le visiteur reste devant un bouton qui ne fait rien.
+//
+// D'où les deux recours. Le clic direct dans le `shadowRoot` contourne un
+// model-viewer mal initialisé. L'`intent://` contourne model-viewer TOUT COURT
+// et s'adresse à Scene Viewer, l'application de Google, en lui passant l'URL du
+// modèle ; `S.browser_fallback_url` ramène le visiteur ici si l'application
+// manque. Sur iPhone, on ouvre simplement le .usdz : c'est Quick Look qui prend.
+async function lancerAr() {
+  const el = mv.value
+  erreur.value = ''
+  try {
+    if (el && typeof el.activateAR === 'function') { await el.activateAR(); return }
+    // Le bouton projeté d'ABORD. Comme cette vue en fournit un (`slot="ar-button"`),
+    // model-viewer n'en crée pas dans son `shadowRoot` : n'y chercher que là,
+    // comme le fait le projet de référence, ne trouve jamais rien. On garde
+    // quand même la recherche interne, pour le jour où le slot disparaîtra.
+    const bouton =
+      el?.querySelector('[slot="ar-button"]') ||
+      el?.shadowRoot?.querySelector('[slot="ar-button"], button[part="default-ar-button"]')
+    if (bouton) { bouton.click(); return }
+    throw new Error('activateAR indisponible')
+  } catch {
+    if (surIos.value && srcIos.value) { window.location.href = srcIos.value; return }
+    if (/Android/.test(navigator.userAgent) && src.value) {
+      const retour = encodeURIComponent(window.location.href)
+      // ABSOLUE, impérativement. Le modèle est référencé en chemin relatif —
+      // c'est ce qui le garde sur l'origine de la page, donc hors CORS, quel
+      // que soit le sous-domaine du locataire. Mais Scene Viewer est une
+      // application Android distincte : elle n'a aucune page contre laquelle
+      // résoudre « /modeles/… » et n'irait nulle part. On résout ici.
+      const fichier = new URL(src.value, window.location.href).href
+      window.location.href =
+        `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(fichier)}` +
+        `&mode=ar_preferred#Intent;scheme=https;` +
+        `package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;` +
+        `S.browser_fallback_url=${retour};end;`
+      return
+    }
+    erreur.value = t('ar.launchFailed')
+  }
 }
+
+// ---------------------------------------------------------------------------
+// Panneau de préparation — trois étapes avant d'ouvrir la caméra
+// ---------------------------------------------------------------------------
+// Le bouton n'ouvre pas la caméra : il explique d'abord. Deux raisons, et la
+// seconde compte plus que la première.
+//
+//  1. Un visiteur qui ignore qu'il doit BALAYER LE SOL pointe son téléphone
+//     vers un mur, ne voit rien apparaître, et conclut que c'est cassé. La
+//     détection de plan demande deux ou trois secondes de mouvement : c'est la
+//     seule chose qu'il faut lui dire, et personne ne la devine.
+//  2. Le diagnostic ne peut se dire QUE là. Sur un iPhone sans .usdz, la RA est
+//     impossible ; le panneau le nomme, au lieu d'un bouton qui ne répond pas.
+const guide = ref(false)
+function ouvrirGuide() { erreur.value = ''; guide.value = true }
+function fermerGuide() { guide.value = false }
+function lancerDepuisGuide() {
+  // On referme AVANT de lancer : le geste du visiteur est encore valide, et
+  // model-viewer n'aime pas s'ouvrir sous une superposition.
+  guide.value = false
+  lancerAr()
+}
+
+// Ce qui empêchera la RA, su AVANT d'appuyer.
+const empechementAr = computed(() => {
+  if (nonSecurise.value) return 'https'
+  if (!surMobile.value) return 'ordinateur'
+  if (surIos.value && !srcIos.value) return 'ios'
+  return ''
+})
 
 function raconter() {
   if (ttsSpeaking.value) { ttsStop(); return }
@@ -160,12 +267,22 @@ watch(() => props.objet?.id, () => { charge.value = false; dimensions.value = nu
 <template>
   <div class="arv" :class="{ 'arv--compact': compact }">
     <div class="arv__stage">
+      <!-- RÉGLAGES RA — alignés sur le projet de référence.
+           · ar-modes : WebXR d'abord, puis Scene Viewer (l'application Google,
+             adossée à ARCore), puis Quick Look. Sur Android c'est Scene Viewer
+             qui fait le travail dès que WebXR n'est pas disponible.
+           · PAS de `ar-scale="fixed"` : à taille réelle, une case de six mètres
+             posée dans une pièce est un mur de texture, et le visiteur croit que
+             rien ne s'est affiché. En mode automatique, Scene Viewer la pose à
+             une taille exploitable et la rend redimensionnable.
+           · PAS de `xr-environment` : il ne concerne que WebXR et ajoute une
+             surface d'échec pour rien. -->
       <model-viewer
         ref="mv"
         :src="src"
         :alt="titre"
-        camera-controls
-        auto-rotate
+        :camera-controls="arSeul ? undefined : true"
+        :auto-rotate="arSeul ? undefined : true"
         auto-rotate-delay="2500"
         rotation-per-second="14deg"
         :ios-src="srcIos || undefined"
@@ -173,7 +290,6 @@ watch(() => props.objet?.id, () => { charge.value = false; dimensions.value = nu
         :scale="echelleAttr"
         ar
         ar-modes="webxr scene-viewer quick-look"
-        ar-scale="fixed"
         loading="eager"
         reveal="auto"
         shadow-intensity="1.4"
@@ -182,6 +298,8 @@ watch(() => props.objet?.id, () => { charge.value = false; dimensions.value = nu
         environment-image="neutral"
         touch-action="pan-y"
         class="arv__mv"
+        @click="robot?.reveiller()"
+        @camera-change="surGeste"
         @load="onLoad"
         @error="onError"
         @ar-status="onArStatus"
@@ -206,10 +324,17 @@ watch(() => props.objet?.id, () => { charge.value = false; dimensions.value = nu
         </div>
       </model-viewer>
 
-      <span v-if="hauteurCm" class="arv__scale">
+      <span v-if="hauteurCm && !arSeul" class="arv__scale">
         <i class="pi pi-arrows-v" /> {{ $t('ar.realHeight', { n: hauteurCm }) }}
       </span>
       <span v-if="demo" class="arv__demo"><i class="pi pi-info-circle" /> {{ $t('ar.demoModel') }}</span>
+      <ObjectGuideRobot
+        ref="robot"
+        :objet="titre"
+        :museum-id="objet?.sectors?.museum_id ?? null"
+        :sector-id="objet?.sector_id ?? null"
+      />
+
       <button v-if="compact" class="arv__x" :aria-label="$t('common.close')" @click="emit('close')">
         <i class="pi pi-times" />
       </button>
@@ -218,16 +343,28 @@ watch(() => props.objet?.id, () => { charge.value = false; dimensions.value = nu
     <div class="arv__side">
       <span class="arv__over">{{ $t('ar.over') }}</span>
       <h2>{{ titre }}</h2>
-      <p class="arv__lead">{{ $t('ar.lead') }}</p>
+      <p class="arv__lead">{{ arSeul ? $t('ar.leadArOnly') : $t('ar.lead') }}</p>
 
       <!-- Chemin d'accès à la RA : soit on la lance, soit on passe au téléphone -->
-      <div v-if="arPossible === true" class="arv__go">
-        <button class="ps-btn" @click="lancerAr"><i class="pi pi-mobile" /> {{ $t('ar.launch') }}</button>
+      <!-- Le bouton reste offert même quand l'appareil ne suivra pas : c'est le
+           panneau qui explique. Le masquer rendait le diagnostic inatteignable. -->
+      <!-- Le bouton LANCE, il n'explique plus d'abord — comme dans le projet de
+           référence. Un écran intercalé entre le geste du visiteur et la caméra
+           coûte un tap, et surtout fait perdre l'activation par geste que
+           certains Android exigent pour ouvrir Scene Viewer. Le conseil de
+           balayage reste, en dessous, et le détail derrière un lien. -->
+      <div v-if="arPossible === true || surMobile" class="arv__go">
+        <button class="ps-btn" @click="lancerAr">
+          <i class="pi pi-mobile" /> {{ $t('ar.launch') }}
+        </button>
         <small>{{ $t('ar.launchHint') }}</small>
+        <button class="arv__aide" type="button" @click="ouvrirGuide">
+          <i class="pi pi-question-circle" /> {{ $t('ar.guideTitre') }}
+        </button>
       </div>
 
       <!-- Sur ordinateur : on passe la main au téléphone par un QR. -->
-      <div v-else-if="arPossible === false && !surMobile" class="arv__qr">
+      <div v-else-if="!surMobile" class="arv__qr">
         <div class="arv__qrimg" v-html="qr" />
         <div class="arv__qrtxt">
           <strong>{{ $t('ar.qrTitle') }}</strong>
@@ -266,10 +403,68 @@ watch(() => props.objet?.id, () => { charge.value = false; dimensions.value = nu
 
       <slot />
     </div>
+
+    <!-- ===================== Panneau de préparation ===================== -->
+    <div v-if="guide" class="arg" role="dialog" aria-modal="true">
+      <div class="arg__carte">
+        <button class="arg__x" :aria-label="$t('common.close')" @click="fermerGuide">
+          <i class="pi pi-times" />
+        </button>
+        <h3>{{ $t('ar.guideTitre') }}</h3>
+
+        <p v-if="empechementAr" class="arg__alerte">
+          <i class="pi pi-exclamation-triangle" />
+          <span>{{ $t(`ar.guideEmpeche.${empechementAr}`) }}</span>
+        </p>
+
+        <template v-else>
+          <ol class="arg__etapes">
+            <li>
+              <span>1</span>
+              <div><strong>{{ $t('ar.guide1') }}</strong><small>{{ $t('ar.guide1Sous') }}</small></div>
+            </li>
+            <li>
+              <span>2</span>
+              <div><strong>{{ $t('ar.guide2') }}</strong><small>{{ $t('ar.guide2Sous') }}</small></div>
+            </li>
+            <li>
+              <span>3</span>
+              <div><strong>{{ $t('ar.guide3') }}</strong><small>{{ $t('ar.guide3Sous') }}</small></div>
+            </li>
+          </ol>
+          <button class="ps-btn arg__go" @click="lancerDepuisGuide">
+            <i class="pi pi-video" /> {{ $t('ar.guideLancer') }}
+          </button>
+        </template>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
+/* ---- Panneau de préparation -------------------------------------------- */
+.arg { position: fixed; inset: 0; z-index: 60; display: flex;
+  align-items: center; justify-content: center; padding: 1rem;
+  background: rgba(0, 0, 0, .55); backdrop-filter: blur(3px); }
+.arg__carte { position: relative; width: 100%; max-width: 23rem;
+  padding: 1.4rem 1.25rem 1.25rem; border-radius: 1rem; background: #fff; color: #14181a;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .3); }
+.arg__carte h3 { margin: 0 0 1rem; font-size: 1.12rem; }
+.arg__x { position: absolute; top: .6rem; right: .6rem; width: 2rem; height: 2rem;
+  border: 0; border-radius: 50%; background: rgba(0, 0, 0, .06); cursor: pointer; }
+.arg__etapes { list-style: none; margin: 0 0 1.1rem; padding: 0;
+  display: flex; flex-direction: column; gap: .55rem; }
+.arg__etapes li { display: flex; gap: .75rem; align-items: flex-start;
+  padding: .7rem .8rem; border-radius: .6rem; background: rgba(0, 0, 0, .04); }
+.arg__etapes span { flex: 0 0 1.9rem; height: 1.9rem; display: grid; place-items: center;
+  border-radius: 50%; background: rgba(11, 107, 75, .14); color: #0b6b4b; font-weight: 700; }
+.arg__etapes strong { display: block; font-size: .95rem; }
+.arg__etapes small { color: rgba(0, 0, 0, .6); line-height: 1.4; }
+.arg__alerte { display: flex; gap: .6rem; align-items: flex-start; margin: 0 0 1rem;
+  padding: .8rem .9rem; border-radius: .6rem;
+  background: rgba(179, 38, 30, .08); color: #8c1d18; line-height: 1.45; }
+.arg__go { width: 100%; justify-content: center; }
+
 .arv { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 1.6rem; align-items: stretch; }
 @media (max-width: 900px) { .arv { grid-template-columns: 1fr; } }
 
@@ -326,6 +521,14 @@ watch(() => props.objet?.id, () => { charge.value = false; dimensions.value = nu
 .arv__go { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-start; margin-bottom: 1.1rem; }
 .arv__go small { color: #7c817b; font-size: 0.8rem; }
 .arv__checking { color: #7c817b; font-size: 0.86rem; display: flex; align-items: center; gap: 0.45rem; }
+
+/* Lien d'aide secondaire : discret, il ne doit pas concurrencer le bouton. */
+.arv__aide {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  margin-top: 0.5rem; padding: 0; border: 0; background: none; cursor: pointer;
+  font-size: 0.78rem; color: #7c817b; text-decoration: underline;
+}
+.arv__aide:hover { color: var(--site-primary, #0e6f5c); }
 
 .arv__qr { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.1rem; }
 .arv__qrimg { flex: 0 0 auto; line-height: 0; border: 1px solid #e8e9e6; border-radius: 10px; padding: 6px; background: #fff; }

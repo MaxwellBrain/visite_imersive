@@ -1,8 +1,9 @@
 <script setup>
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Dialog from 'primevue/dialog'
 import Message from 'primevue/message'
 import { chargerModelViewer } from '@/services/modelViewer'
+import ObjectGuideRobot from './ObjectGuideRobot.vue'
 
 // VISUALISEUR 3D — et la distinction que tout le monde rate ici.
 //
@@ -26,7 +27,12 @@ const props = defineProps({
   visible: { type: Boolean, default: false },
   src: { type: String, default: '' },        // .glb — le seul format affichable
   iosSrc: { type: String, default: '' },     // .usdz — Quick Look uniquement
-  title: { type: String, default: '' }
+  title: { type: String, default: '' },
+  // Périmètre transmis au guide : il répond sur le corpus de CE musée, pas sur
+  // l'ensemble du locataire. Facultatifs — sans eux, le guide reste pertinent
+  // mais cherche plus large.
+  museumId: { type: [String, Number], default: null },
+  sectorId: { type: [String, Number], default: null }
 })
 defineEmits(['update:visible'])
 
@@ -47,6 +53,30 @@ const usdzSeul = computed(() => !props.src && !!props.iosSrc)
 watch(() => props.visible, (ouvert) => {
   if (ouvert && props.src) chargerModelViewer().catch(() => {})
 }, { immediate: true })
+
+// ─── Convocation du guide ───────────────────────────────────────────────
+//
+// Le robot n'apparaît qu'au premier geste réel sur l'objet : un clic dessus, ou
+// une rotation faite à la main. C'est ce qui le distingue d'une bulle d'aide
+// permanente, qu'on cesse de voir au bout de deux écrans.
+//
+// PIÈGE, et c'est tout l'enjeu ici : `auto-rotate` émet `camera-change` en
+// continu, plusieurs fois par seconde, sans que personne n'ait touché à rien.
+// Se contenter d'écouter l'événement ferait surgir le robot tout seul, aussitôt
+// le dialogue ouvert — exactement ce qu'on cherche à éviter. `detail.source`
+// distingue le geste du visiteur (`user-interaction`) du reste.
+
+const robot = ref(null)
+
+function surRotation(e) {
+  if (e?.detail?.source === 'user-interaction') robot.value?.reveiller()
+}
+
+// Le dialogue se referme : le guide aussi, et il se tait. Sans cela, la voix
+// continuerait de parler d'un objet qui n'est plus à l'écran.
+watch(() => props.visible, (ouvert) => {
+  if (!ouvert) robot.value?.fermer()
+})
 </script>
 
 <template>
@@ -60,22 +90,35 @@ watch(() => props.visible, (ouvert) => {
     <div class="viewer3d">
       <!-- Cas nominal : un GLB à afficher. `ios-src` bascule Quick Look sur iPhone. -->
       <template v-if="src">
-        <model-viewer
-          :src="src"
-          :ios-src="iosSrc || undefined"
-          camera-controls
-          auto-rotate
-          ar
-          ar-modes="webxr scene-viewer quick-look"
-          ar-scale="auto"
-          shadow-intensity="1"
-          touch-action="pan-y"
-          style="width: 100%; height: 440px; background: #f0ece4; border-radius: 12px"
-        >
-          <button slot="ar-button" class="viewer3d__ar">
-            <i class="pi pi-mobile" /> {{ $t('viewer3d.arButton') }}
-          </button>
-        </model-viewer>
+        <!-- `position: relative` : le robot se place en absolu DANS le cadre du
+             modèle, pas dans celui du dialogue. -->
+        <div class="viewer3d__scene">
+          <model-viewer
+            :src="src"
+            :ios-src="iosSrc || undefined"
+            camera-controls
+            auto-rotate
+            ar
+            ar-modes="webxr scene-viewer quick-look"
+            ar-scale="auto"
+            shadow-intensity="1"
+            touch-action="pan-y"
+            style="width: 100%; height: 440px; background: #f0ece4; border-radius: 12px"
+            @click="robot?.reveiller()"
+            @camera-change="surRotation"
+          >
+            <button slot="ar-button" class="viewer3d__ar">
+              <i class="pi pi-mobile" /> {{ $t('viewer3d.arButton') }}
+            </button>
+          </model-viewer>
+
+          <ObjectGuideRobot
+            ref="robot"
+            :objet="title"
+            :museum-id="museumId"
+            :sector-id="sectorId"
+          />
+        </div>
         <p class="viewer3d__hint">
           <i class="pi pi-sync" /> {{ $t('viewer3d.hint') }}
         </p>
@@ -111,6 +154,8 @@ watch(() => props.visible, (ouvert) => {
 </template>
 
 <style scoped>
+.viewer3d__scene { position: relative; }
+
 .viewer3d__ar {
   position: absolute;
   bottom: 14px;

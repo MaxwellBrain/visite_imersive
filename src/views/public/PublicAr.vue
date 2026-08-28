@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import ArViewer from '@/components/immersive/ArViewer.vue'
-import { pubObject, pubObjectChefs } from '@/services/publicApi'
+import { pubObject, pubObjectChefs, pubObjectModels } from '@/services/publicApi'
 import { useSiteLink } from '@/composables/useSiteLink'
 import { DEMO_VARIANTS } from '@/services/glb'
 
@@ -34,9 +34,19 @@ async function load() {
   objet.value = null
   chefs.value = []
   if (!estDemo.value) {
-    objet.value = await pubObject(Number(route.params.id))
-    if (objet.value) {
-      const r = await pubObjectChefs(objet.value.id)
+    const fiche = await pubObject(Number(route.params.id))
+    if (fiche) {
+      // LE MAILLAGE N'EST PAS DANS LA FICHE. `pubObject` s'appuie sur
+      // COLONNES_LISTE, d'où `model3d` est volontairement absent : le renvoyer
+      // sur chaque liste transportait des méga-octets pour afficher une
+      // vignette. Mais CETTE page-ci existe pour montrer le modèle — sans cet
+      // appel, `ArViewer` ne voyait aucun maillage et servait la pièce de
+      // démonstration, quand bien même le conservateur avait importé la sienne.
+      const [medias, r] = await Promise.all([
+        pubObjectModels(fiche.id),
+        pubObjectChefs(fiche.id)
+      ])
+      objet.value = { ...fiche, ...medias }
       chefs.value = r.map((x) => x.personnages)
     }
   }
@@ -61,7 +71,7 @@ function chefLabel(p) {
       <p v-if="loading" class="ps-muted">{{ $t('common.loading') }}</p>
 
       <template v-else>
-        <ArViewer :objet="objet" :variante="variante">
+        <ArViewer :objet="objet" :variante="variante" :ar-seul="objet?.ar_seulement === true">
           <!-- Le fil ne s'arrête pas à l'objet : il remonte au chef, puis à la lignée. -->
           <div v-if="chefs.length" class="arp__thread">
             <span class="arp__lead"><i class="pi pi-sitemap" /> {{ $t('tour.threadLead') }}</span>

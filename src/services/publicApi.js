@@ -75,7 +75,7 @@ export function viderCachePublic() { cache.clear() }
 const COLONNES_LISTE =
   'id, sector_id, nom, nom_commun, description, photo, photo_thumb,' +
   ' published, published_at, seo, created_at, a_3d,' +
-  ' model3d_name, model3d_ios_name, ar_placement, ar_echelle,' +
+  ' model3d_name, model3d_ios_name, ar_placement, ar_echelle, ar_seulement,' +
   ' depth_map_url, amplitude_relief'
 
 // Mémorisées : appelées depuis cinq vues, elles étaient refaites à chaque
