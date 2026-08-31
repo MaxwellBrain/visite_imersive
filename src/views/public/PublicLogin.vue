@@ -28,6 +28,9 @@ const { to } = useSiteLink()
 const mode = ref('login')      // login | signup | code
 const email = ref('')
 const password = ref('')
+// L'oeil du champ. Ici il compte double : cet ecran sert AUSSI a l'inscription
+// d'un visiteur, sur un telephone, souvent debout dans un musee.
+const voirMdp = ref(false)
 const fullName = ref('')
 const code = ref('')
 const codeEnvoye = ref(false)
@@ -139,12 +142,12 @@ async function google() {
 
         <!-- Connexion par code e-mail -->
         <form v-if="mode === 'code'" @submit.prevent="codeEnvoye ? verifierCode() : envoyerCode()">
-          <label class="vi-req sl__lbl">{{ $t('siteLogin.email') }}</label>
-          <input v-model="email" class="sl__in" type="email" autocomplete="username"
+          <label class="vi-req sl__lbl" for="sl-email">{{ $t('siteLogin.email') }}</label>
+          <input id="sl-email" v-model="email" class="sl__in" type="email" autocomplete="username"
                  placeholder="vous@exemple.com" :disabled="codeEnvoye" />
           <template v-if="codeEnvoye">
-            <label class="vi-req sl__lbl">{{ $t('siteLogin.code') }}</label>
-            <input v-model="code" class="sl__in" inputmode="numeric" autocomplete="one-time-code"
+            <label class="vi-req sl__lbl" for="sl-code">{{ $t('siteLogin.code') }}</label>
+            <input id="sl-code" v-model="code" class="sl__in" inputmode="numeric" autocomplete="one-time-code"
                    placeholder="123456" maxlength="8" />
           </template>
           <button class="ps-btn sl__btn" :disabled="loading">
@@ -159,17 +162,25 @@ async function google() {
         <!-- Connexion / création de compte visiteur -->
         <form v-else @submit.prevent="submit">
           <template v-if="mode === 'signup'">
-            <label class="sl__lbl">{{ $t('siteLogin.fullName') }}</label>
-            <input v-model="fullName" class="sl__in" type="text" autocomplete="name"
+            <label class="sl__lbl" for="sl-fullName">{{ $t('siteLogin.fullName') }}</label>
+            <input id="sl-fullName" v-model="fullName" class="sl__in" type="text" autocomplete="name"
                    :placeholder="$t('siteLogin.fullNamePlaceholder')" />
           </template>
 
-          <label class="vi-req sl__lbl">{{ $t('siteLogin.email') }}</label>
-          <input v-model="email" class="sl__in" type="email" autocomplete="username" placeholder="vous@exemple.com" />
+          <label class="vi-req sl__lbl" for="sl-email">{{ $t('siteLogin.email') }}</label>
+          <input id="sl-email" v-model="email" class="sl__in" type="email" autocomplete="username" placeholder="vous@exemple.com" />
 
-          <label class="vi-req sl__lbl">{{ $t('siteLogin.password') }}</label>
-          <input v-model="password" class="sl__in" type="password"
-                 :autocomplete="mode === 'signup' ? 'new-password' : 'current-password'" placeholder="••••••••" />
+          <label class="vi-req sl__lbl" for="sl-mdp">{{ $t('siteLogin.password') }}</label>
+          <span class="vi-mdp">
+            <input id="sl-mdp" v-model="password" class="sl__in"
+                   :type="voirMdp ? 'text' : 'password'"
+                   :autocomplete="mode === 'signup' ? 'new-password' : 'current-password'" placeholder="••••••••" />
+          <button type="button" class="vi-mdp__oeil"
+                  :aria-label="voirMdp ? $t('common.hidePassword') : $t('common.showPassword')"
+                  :aria-pressed="voirMdp" @click="voirMdp = !voirMdp">
+            <i :class="voirMdp ? 'pi pi-eye-slash' : 'pi pi-eye'" />
+          </button>
+          </span>
 
           <button class="ps-btn sl__btn" :disabled="loading">
             <i :class="loading ? 'pi pi-spin pi-spinner' : (mode === 'signup' ? 'pi pi-user-plus' : 'pi pi-sign-in')" />

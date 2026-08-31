@@ -115,7 +115,7 @@ function partager() {
               <input
                 v-model="saisies[courante.stepId]"
                 type="text"
-                :placeholder="$t('quest.answerPlaceholder')"
+                :aria-label="$t('quest.answerPlaceholder')" :placeholder="$t('quest.answerPlaceholder')"
                 @keydown.enter="repondre(courante)"
               />
               <button class="ps-btn" :disabled="busy === courante.stepId" @click="repondre(courante)">

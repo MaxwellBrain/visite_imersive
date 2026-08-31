@@ -8,10 +8,12 @@
 //      Comme le Cabinet de comparaison de l'ERP, mais offert au visiteur.
 //   4. LLM : reformule, instruit, présente même une œuvre absente du site avec sa
 //      description. Grounding strict sur les FAITS PROPRES à la collection locale.
-//   LLM primaire : Gemini (GEMINI_API_KEY) → fallback Groq (GROQ_API_KEY/GROK_API_KEY)
-//   → fallback déterministe chaleureux (jamais d'erreur visible, jamais un « désolé »
-//   sec). La clé API n'est JAMAIS exposée au frontend. verify_jwt=false (guide public,
-//   lecture seule, sans effet de bord).
+//   LLM primaire : GROQ (GROQ_API_KEY/GROK_API_KEY) → repli Gemini (GEMINI_API_KEY)
+//   → repli déterministe chaleureux (jamais d'erreur visible, jamais un « désolé »
+//   sec). L'ordre s'inverse avec le secret `LLM_PRIMAIRE=gemini` ; il est ainsi
+//   parce que le palier gratuit Gemini plafonne à 20 requêtes PAR JOUR (voir le
+//   commentaire dans le gestionnaire). La clé API n'est JAMAIS exposée au
+//   frontend. verify_jwt=false (guide public, lecture seule, sans effet de bord).
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 
 const cors = {
@@ -453,28 +455,81 @@ async function withTimeout(p: Promise<Response>, ms: number, ctrl: AbortControll
   try { return await p } finally { clearTimeout(t) }
 }
 
+// CE QUI COUPAIT TOUTES LES RÉPONSES — mesuré le 2026-08-29.
+//
+// Sur `gemini-3.6-flash`, le RAISONNEMENT du modèle est facturé sur le même
+// budget que la réponse. Avec `maxOutputTokens: 800`, la réflexion consommait
+// presque tout et le texte visible était tranché en pleine phrase — y compris
+// sur un simple « bonjour » (440 caractères, coupés à « uelle merveille des
+// cultures »). Rien ne le signalait : `finishReason` n'était pas lu, et une
+// réponse tronquée ressemble à une réponse. Le bug touchait les quatre écrans
+// qui appellent ce guide, depuis des mois.
+//
+// TROIS CORRECTIFS.
+//
+//  1. ON COUPE LE RAISONNEMENT (`thinkingBudget: 0`). Un guide qui reformule un
+//     contexte qu'on lui fournit n'a rien à déduire : la réflexion ne lui
+//     apporte rien et coûte deux fois — le budget ET la latence. Or ce guide
+//     parle à voix haute, où chaque seconde d'attente s'entend. Le champ
+//     n'existe que sur les modèles récents : refusé (400), on rejoue SANS lui
+//     plutôt que de priver le guide de son moteur principal.
+//  2. LE PLAFOND PASSE À 4096, pour qu'un modèle qui réfléchit malgré tout ait
+//     la place de finir sa phrase.
+//  3. ON LIT `finishReason`. Une réponse tronquée est désormais un ÉCHEC —
+//     donc renvoyée à Groq — au lieu d'être servie coupée au visiteur. C'est le
+//     correctif qui compte le plus : sans lui, les deux autres ne font que
+//     rendre le bug plus rare, et un bug rare est un bug qu'on ne trouve plus.
+// MESURÉ APRÈS COUP, dans les journaux : `gemini-3.6-flash` REFUSE
+// `thinkingConfig` (400). La reprise sans lui fonctionne, mais elle coûtait un
+// aller-retour perdu À CHAQUE APPEL — sur une clé plafonnée à vingt requêtes
+// par jour, c'est le genre de détail qui vide le quota deux fois plus vite. On
+// retient donc le refus pour l'instance : on n'essaie qu'une fois.
+let thinkingRefuse = false
+
 async function callGemini(system: string, user: string): Promise<string | null> {
   const key = Deno.env.get('GEMINI_API_KEY')
   if (!key) return null
   const model = Deno.env.get('GEMINI_MODEL') || 'gemini-3.6-flash'
-  const ctrl = new AbortController()
-  const res = await withTimeout(fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal: ctrl.signal,
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: system }] },
-        contents: [{ role: 'user', parts: [{ text: user }] }],
-        generationConfig: { temperature: 0.4, maxOutputTokens: 800 },
-      }),
-    },
-  ), 9000, ctrl)
-  if (!res.ok) throw new Error(`gemini ${res.status}: ${await res.text()}`)
-  const data = await res.json()
-  const text = data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join('').trim()
-  return text || null
+
+  for (const sansReflexion of (thinkingRefuse ? [false] : [true, false])) {
+    const generationConfig: Record<string, unknown> = { temperature: 0.4, maxOutputTokens: 4096 }
+    if (sansReflexion) generationConfig.thinkingConfig = { thinkingBudget: 0 }
+
+    const ctrl = new AbortController()
+    const res = await withTimeout(fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: ctrl.signal,
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: system }] },
+          contents: [{ role: 'user', parts: [{ text: user }] }],
+          generationConfig,
+        }),
+      },
+    ), 10000, ctrl)
+
+    // 400 sur la PREMIÈRE tentative = `thinkingConfig` inconnu de ce modèle.
+    // On consomme le corps (sinon la connexion reste ouverte) et on rejoue.
+    if (res.status === 400 && sansReflexion) {
+      if (!thinkingRefuse) console.warn('[gemini] thinkingConfig refusé par', model, '— on cesse de le proposer')
+      thinkingRefuse = true
+      await res.text().catch(() => '')
+      continue
+    }
+    if (!res.ok) throw new Error(`gemini ${res.status}: ${await res.text()}`)
+
+    const data = await res.json()
+    const cand = data?.candidates?.[0]
+    const text = cand?.content?.parts?.map((p: any) => p.text).filter(Boolean).join('').trim()
+    if (cand?.finishReason === 'MAX_TOKENS') {
+      console.error(`[gemini] réponse tronquée (MAX_TOKENS, modèle ${model}) — repli sur Groq`)
+      return null
+    }
+    return text || null
+  }
+  return null
 }
 
 async function callGroq(system: string, user: string): Promise<string | null> {
@@ -489,14 +544,89 @@ async function callGroq(system: string, user: string): Promise<string | null> {
     body: JSON.stringify({
       model,
       temperature: 0.4,
-      max_tokens: 800,
+      // `openai/gpt-oss-120b` produit lui aussi du raisonnement, imputé sur ce
+      // plafond : 800 le tronquait dès que la réponse était longue.
+      //
+      // MAIS PAS TROP HAUT NON PLUS — mesuré dans les journaux le 2026-08-29 :
+      // Groq réserve `prompt + max_tokens` sur son quota par MINUTE (8 000 en
+      // palier gratuit). Un essai à 2048 a produit « Limit 8000, Used 6376,
+      // Requested 4236 » — un 429 causé non par le trafic mais par la place
+      // qu'on réservait sans l'utiliser. 1200 laisse finir une description de
+      // huit phrases tout en divisant par deux la pression sur le quota.
+      max_tokens: 1200,
       messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
     }),
-  }), 9000, ctrl)
+  }), 10000, ctrl)
   if (!res.ok) throw new Error(`groq ${res.status}: ${await res.text()}`)
   const data = await res.json()
-  const text = data?.choices?.[0]?.message?.content?.trim()
+  const choix = data?.choices?.[0]
+  // `length` = le modèle a été coupé au plafond. On préfère le repli déterministe,
+  // qui est complet et ancré, à une phrase qui s'arrête au milieu.
+  if (choix?.finish_reason === 'length') {
+    console.error(`[groq] réponse tronquée (length, modèle ${model})`)
+    return null
+  }
+  const text = choix?.message?.content?.trim()
   return text || null
+}
+
+// ============================================================================
+// DIFFUSION — parler dès le premier mot, au lieu d'attendre le dernier
+// ----------------------------------------------------------------------------
+// POURQUOI. En attente complète, le guide vocal reste muet deux à quatre
+// secondes avant d'ouvrir la bouche : le temps de produire la réponse ENTIÈRE.
+// Ce silence est ce qui distingue un assistant vif d'un formulaire, et aucune
+// optimisation du modèle ne le rattrape — il faut commencer à parler avant
+// d'avoir fini de penser. La voix de synthèse devient alors le tampon : tant
+// qu'elle prononce la première phrase, le modèle a le temps d'écrire la suite.
+//
+// ADDITIF, ET C'EST VOLONTAIRE. Sans `stream: true` dans le corps, cette
+// fonction se comporte exactement comme avant — même JSON, mêmes champs. Quatre
+// écrans en dépendent ; on n'en casse aucun pour en accélérer un.
+//
+// GROQ SEULEMENT. Il est le moteur primaire (voir l'ordre plus bas) et son
+// format de flux est le format OpenAI, stable et documenté. Si la diffusion
+// échoue, on retombe sur l'appel complet — un guide qui parle tard vaut mieux
+// qu'un guide qui ne parle pas.
+async function* callGroqFlux(system: string, user: string): AsyncGenerator<string> {
+  const key = Deno.env.get('GROQ_API_KEY') || Deno.env.get('GROK_API_KEY')
+  if (!key) throw new Error('groq: pas de clé')
+  const model = Deno.env.get('GROQ_MODEL') || 'openai/gpt-oss-120b'
+
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+    body: JSON.stringify({
+      model, temperature: 0.4, max_tokens: 1200, stream: true,
+      messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
+    }),
+  })
+  if (!res.ok || !res.body) throw new Error(`groq flux ${res.status}: ${(await res.text()).slice(0, 200)}`)
+
+  const lecteur = res.body.getReader()
+  const dec = new TextDecoder()
+  let reste = ''
+  while (true) {
+    const { done, value } = await lecteur.read()
+    if (done) break
+    reste += dec.decode(value, { stream: true })
+    // Les évènements SSE sont séparés par une ligne vide. On ne traite QUE les
+    // blocs complets : un « data: » coupé en deux par le réseau produirait un
+    // JSON invalide, et une exception au milieu du flux.
+    const blocs = reste.split('\n\n')
+    reste = blocs.pop() || ''
+    for (const bloc of blocs) {
+      const ligne = bloc.split('\n').find((l) => l.startsWith('data:'))
+      if (!ligne) continue
+      const charge = ligne.slice(5).trim()
+      if (charge === '[DONE]') return
+      try {
+        const d = JSON.parse(charge)
+        const t = d?.choices?.[0]?.delta?.content
+        if (t) yield t
+      } catch { /* fragment illisible : on saute, le flux continue */ }
+    }
+  }
 }
 
 // Repli déterministe CHALEUREUX (aucune clé LLM / échec des deux).
@@ -574,11 +704,66 @@ Deno.serve(async (req) => {
     // On appelle le LLM dès qu'on a du contexte OU une salutation OU des œuvres du monde.
     const user = buildUserPrompt(q, g.blocks, mondiales)
     const systeme = systemePour(institution)
+    // ORDRE DES MOTEURS — GROQ D'ABORD, et c'est une décision de quota, pas de goût.
+    //
+    // Mesuré le 2026-08-29 : la clé Gemini est plafonnée à VINGT requêtes par
+    // jour en palier gratuit (5 par minute). Elle s'épuise en quelques minutes
+    // d'usage réel, après quoi chaque visiteur payait un aller-retour perdu vers
+    // un 429 AVANT d'atteindre le moteur qui allait réellement répondre. Groq,
+    // lui, tient 8 000 tokens par minute — deux ordres de grandeur au-dessus.
+    //
+    // On le rend RÉGLABLE PAR SECRET plutôt que figé : le jour où le palier
+    // Gemini change, il ne faudra pas redéployer six fonctions pour en profiter.
+    //   LLM_PRIMAIRE = 'gemini'  → ordre historique
+    //   absent ou autre          → Groq d'abord (défaut actuel)
+    const geminiDAbord = (Deno.env.get('LLM_PRIMAIRE') || 'groq').toLowerCase() === 'gemini'
+    const moteurs: Array<[string, (s: string, u: string) => Promise<string | null>]> = geminiDAbord
+      ? [['gemini', callGemini], ['groq', callGroq]]
+      : [['groq', callGroq], ['gemini', callGemini]]
+
+    // ---- DIFFUSION demandée : on parle au fil de la production --------------
+    //
+    // Les LIENS et les VIGNETTES partent EN PREMIER, avant le moindre mot : ils
+    // sont déjà calculés (la récupération locale est faite), et l'interface peut
+    // les afficher pendant que la voix démarre. Les faire attendre la fin du
+    // texte annulerait la moitié du bénéfice.
+    if (body?.stream === true) {
+      const enc = new TextEncoder()
+      const flux = new ReadableStream({
+        async start(c) {
+          const envoyer = (o: unknown) => c.enqueue(enc.encode(`data: ${JSON.stringify(o)}\n\n`))
+          envoyer({ meta: { links: g.links, cards } })
+          let rien = true
+          try {
+            for await (const frag of callGroqFlux(systeme, user)) { rien = false; envoyer({ t: frag }) }
+          } catch (e) {
+            console.error('[groq flux]', String(e))
+          }
+          // La diffusion n'a rien donné : on rejoue la voie complète plutôt que
+          // de laisser le visiteur devant un silence. Un guide qui parle tard
+          // vaut mieux qu'un guide qui ne parle pas.
+          if (rien) {
+            let secours: string | null = null
+            for (const [nom, appeler] of moteurs) {
+              if (secours) break
+              try { secours = await appeler(systeme, user) } catch (e) { console.error(`[${nom}]`, String(e)) }
+            }
+            envoyer({ t: secours || fallbackChaleureux(q, g, mondiales, greeted, institution) })
+          }
+          envoyer({ fin: true })
+          c.close()
+        }
+      })
+      return new Response(flux, {
+        headers: { ...cors, 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-cache' }
+      })
+    }
+
     let text: string | null = null
     let source = 'grounded'
-    try { text = await callGemini(systeme, user); if (text) source = 'gemini' } catch (e) { console.error('[gemini]', String(e)) }
-    if (!text) {
-      try { text = await callGroq(systeme, user); if (text) source = 'groq' } catch (e) { console.error('[groq]', String(e)) }
+    for (const [nom, appeler] of moteurs) {
+      if (text) break
+      try { text = await appeler(systeme, user); if (text) source = nom } catch (e) { console.error(`[${nom}]`, String(e)) }
     }
     if (!text) { text = fallbackChaleureux(q, g, mondiales, greeted, institution); source = 'grounded' }
 

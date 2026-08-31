@@ -70,8 +70,8 @@ export function viderCachePublic() { cache.clear() }
 // maillage. La colonne calculée `a_3d` porte l'information « ce objet a un
 // modèle », qui suffit à la pastille « 3D · AR ».
 //
-// La fiche détaillée, elle, garde `select('*')` : elle a réellement besoin du
-// modèle, et ne charge qu'UNE ligne.
+// La fiche détaillée ajoute `COLONNES_RA` ci-dessous : elle ne charge qu'UNE
+// ligne, elle peut se permettre les réglages d'immersion.
 const COLONNES_LISTE =
   'id, sector_id, nom, nom_commun, description, photo, photo_thumb,' +
   ' published, published_at, seo, created_at, a_3d,' +
@@ -121,9 +121,25 @@ export async function pubObjectsForMuseum(museumId) {
 //
 // Meme parti pris que l'ERP (useObjectStore.chargerMedias) : le lourd se
 // demande separement, quand il sert.
+// Réglages d'immersion RA — UNE SEULE LIGNE À LA FOIS, jamais dans une liste.
+//
+// Ils ne servent qu'à la visionneuse : les vignettes d'un catalogue n'ont que
+// faire d'une douceur d'ombre. Les mêler à `COLONNES_LISTE` rejouerait à petite
+// échelle la faute mesurée le 2026-08-19 — transporter partout ce qui n'est
+// utile qu'à un endroit. On les ajoute donc à la fiche, et à elle seule.
+const COLONNES_RA =
+  ', ar_scale, ar_xr_environment, ar_shadow_intensity, ar_shadow_softness,' +
+  ' ar_exposure, ar_camera_orbit, ar_min_orbit, ar_max_orbit,' +
+  ' ar_interpolation_decay, ar_annotations,' +
+  // Immersion sensorielle : ambiance sonore, matière (retour haptique),
+  // adaptation de la lumière à l'heure du visiteur.
+  ' ambiance_url, ambiance_volume, ambiance_spatiale, matiere, lumiere_auto,' +
+  // L'objet caché : mot déclencheur et récit relu (voir services/intentions.js).
+  ' secret_mot, secret_recit, secret_indice'
+
 export async function pubObject(id) {
   const { data } = await scoped(supabase.from('objects').select(
-    COLONNES_LISTE + ', sectors(museum_id)'
+    COLONNES_LISTE + COLONNES_RA + ', sectors(museum_id)'
   )).eq('id', id).eq('published', true).maybeSingle()
   return data
 }
@@ -536,7 +552,10 @@ export async function pubTour(id) {
       .from('scene_hotspots')
       .select(`*,
         objects(id, nom, nom_commun, photo, description, model3d, model3d_ios,
-                ar_placement, ar_echelle, sector_id, published),
+                ar_placement, ar_echelle, ar_seulement, ar_scale, ar_xr_environment,
+                ar_shadow_intensity, ar_shadow_softness, ar_exposure,
+                ar_camera_orbit, ar_min_orbit, ar_max_orbit,
+                ar_interpolation_decay, ar_annotations, sector_id, published),
         personnages(id, nom, prenom, titre, portrait, regne_debut, regne_fin, published)`))
       .in('scene_id', ids).order('id')
 

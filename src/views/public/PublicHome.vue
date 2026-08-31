@@ -180,7 +180,7 @@ function toggleFav(id) {
       <div v-else class="works">
         <router-link v-for="o in objects" :key="o.id" :to="to(`/objets/${o.id}`)" class="work">
           <div class="work__img">
-            <img v-if="o.photo" :src="o.photo" :alt="o.nom" />
+            <img v-if="o.photo" :src="o.photo" :alt="o.nom" loading="lazy" decoding="async" />
             <div v-else class="ph"><i class="pi pi-box" /></div>
             <button class="work__fav" :class="{ on: favorites.has(o.id) }" @click.stop.prevent="toggleFav(o.id)" :aria-label="$t('common.favorite')">
               <i :class="favorites.has(o.id) ? 'pi pi-heart-fill' : 'pi pi-heart'" />
@@ -223,7 +223,7 @@ function toggleFav(id) {
       <div class="museums">
         <router-link v-for="m in museums" :key="m.id" :to="to(`/musees/${m.id}`)" class="mcard">
           <div class="mcard__img">
-            <img v-if="m.photo" :src="m.photo" :alt="m.nom" />
+            <img v-if="m.photo" :src="m.photo" :alt="m.nom" loading="lazy" decoding="async" />
             <div v-else class="ph"><i class="pi pi-building" /></div>
             <span v-if="m.type" class="mcard__type">{{ m.type }}</span>
           </div>

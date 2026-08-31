@@ -1,4 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+/* PAS D'@import DE POLICES ICI — index.html s'en charge.
+   Cette ligne demandait Inter et Fraunces une SECONDE fois. Et un @import dans
+   une feuille CSS est le pire endroit pour une police : le navigateur ne le
+   decouvre qu'apres avoir telecharge la feuille, donc il bloque le rendu une
+   deuxieme fois, en serie derriere elle. Les liens d'index.html, eux, partent
+   des la premiere lecture du document. */
 
 :root {
   /* ERP « Génius » — blanc + navy + orange, sur gris froid */
@@ -455,6 +460,59 @@ tr:hover .row-actions .p-button, .row-actions .p-button:focus-visible { opacity:
   content: ' *';
   color: #c0392b;
   font-weight: 700;
+}
+
+/* ---------- Mot de passe : l'oeil qui montre ce qu'on tape ----------
+   Un champ masque sans moyen de le relire est une faute d'ergonomie ordinaire
+   mais couteuse : sur mobile, l'auto-correction et les touches voisines
+   produisent des fautes qu'on ne peut NI VOIR NI CORRIGER. Le visiteur
+   recommence, se trompe encore, et finit par abandonner l'inscription. Un
+   formulaire de creation de compte demande deux fois le mot de passe
+   precisement parce qu'on ne peut pas le relire — l'oeil rend cette double
+   saisie supportable.
+
+   L'UTILITAIRE EST GLOBAL, ET C'EST NECESSAIRE. Les vues portent chacune leurs
+   styles en « scoped » avec leur propre prefixe (su-in, sl__in, sp-in) ; un
+   composant partage ne recevrait pas ces regles, puisque le CSS scoped ne
+   traverse pas la frontiere d'un composant. On garde donc l'input dans le
+   gabarit de la vue — il reste style par elle — et on n'ajoute ici que
+   l'habillage.
+
+   LE BOUTON EST type="button", TOUJOURS. Sans cet attribut, un bouton place
+   dans un formulaire le SOUMET : cliquer sur l'oeil enverrait l'inscription
+   avec un mot de passe a demi tape. C'est le piege classique de ce motif. */
+.vi-mdp { position: relative; display: block; }
+
+.vi-mdp > input {
+  width: 100%;
+  padding-right: 2.9rem;   /* de quoi ne pas ecrire sous l'oeil */
+}
+
+.vi-mdp__oeil {
+  position: absolute;
+  right: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 44 px : la cible tactile minimale, comme le reste des commandes de ce
+     projet (voir la section MOBILE plus bas). */
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--vi-muted, #6b7280);
+  border-radius: 8px;
+}
+
+.vi-mdp__oeil:hover { color: inherit; }
+
+.vi-mdp__oeil:focus-visible {
+  outline: 2px solid var(--vi-accent, #0f766e);
+  outline-offset: 2px;
 }
 
 /* ============================================================================

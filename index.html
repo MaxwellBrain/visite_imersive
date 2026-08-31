@@ -19,8 +19,14 @@
     <!-- Polices : Anton (titres display type TCHOKOS), Inter (texte), Fraunces (serif éditorial) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Toutes les donnees ET toutes les images viennent de Supabase. Sans
+         cette ligne, la premiere requete paie un DNS + TLS complet avant
+         d avoir commence : sur les reseaux qui nous interessent, cela se
+         compte en centaines de millisecondes. Vite remplace %VITE_SUPABASE_URL%
+         a la compilation. -->
+    <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,300..800&display=swap"
       rel="stylesheet"
     />
   </head>

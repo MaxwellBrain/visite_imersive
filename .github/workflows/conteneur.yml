@@ -18,6 +18,41 @@ concurrency:
   group: conteneur-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# ── CONSTANTES ───────────────────────────────────────────────────────────
+#
+# Toutes ces valeurs etaient des variables GitHub. Aucune n'est un secret :
+# une region, un nom de cluster, un domaine public se lisent dans le code
+# Terraform d'a cote. Les ramener ici les rend versionnees, visibles en revue,
+# et modifiables par une pull request — au lieu d'un formulaire d'interface
+# que personne ne relit et dont personne ne connait l'etat.
+#
+# Les noms viennent de infra-conteneurs/ (prefixe musea-conteneurs-production).
+#
+# LES TROIS DERNIERES SONT VIDES A DESSEIN : elles commandent les
+# deploiements. Vides, les jobs ECS et EKS se sautent — c'est l'etat
+# d'aujourd'hui. Les renseigner suffit a les activer, sans rien toucher
+# d'autre.
+env:
+  REGION_AWS: eu-west-3
+  DEPOT_ECR: musea
+  DOMAINE_PLATEFORME: nexacode.store
+  DOMAINE_CONTENEURS: conteneurs.nexacode.store
+  SECRET_APPLICATION: musea/production/application
+
+  # Deploiement ECS — valeurs reelles a recopier pour l'activer :
+  #   ECS_CLUSTER: musea-conteneurs-production-cluster
+  #   ECS_SERVICE: musea-conteneurs-production
+  #   ECS_TACHE:   musea-conteneurs-production
+  ECS_CLUSTER: ''
+  ECS_SERVICE: ''
+  ECS_TACHE: ''
+
+  # Deploiement EKS — valeurs reelles a recopier pour l'activer :
+  #   EKS_CLUSTER: musea-conteneurs-production-eks-cluster
+  #   EKS_ROLE_IRSA: arn:aws:iam::492562025058:role/musea-conteneurs-production-irsa
+  EKS_CLUSTER: ''
+  EKS_ROLE_IRSA: ''
+
 permissions:
   contents: read
 
@@ -50,7 +85,7 @@ jobs:
           build-args: |
             VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
             VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}
-            VITE_PLATFORM_DOMAIN=${{ vars.PLATFORM_DOMAIN }}
+            VITE_PLATFORM_DOMAIN=${{ env.DOMAINE_PLATEFORME }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -175,7 +210,11 @@ jobs:
     name: Publier l'image
     runs-on: ubuntu-latest
     needs: verifier
-    if: github.event_name != 'pull_request' && vars.CONTENEUR_DEPLOY_ENABLED == 'true'
+    # Plus d'interrupteur a configurer : on publie des qu'on n'est pas sur une
+    # pull request. Si aucun registre n'est configure, l'etape « Choisir les
+    # registres » le constate et saute la construction — le job finit vert,
+    # sans avoir rien fabrique pour rien.
+    if: github.event_name != 'pull_request'
 
     permissions:
       id-token: write # le jeton OIDC presente a AWS
@@ -185,6 +224,11 @@ jobs:
       etiquette: ${{ steps.metadonnees.outputs.version }}
       empreinte: ${{ steps.construire.outputs.digest }}
       image_ecr: ${{ steps.cibles.outputs.ecr }}
+      # ECS et EKS lisent cette sortie : sans AWS ils se sautent proprement,
+      # au lieu d echouer sur des identifiants absents.
+      aws: ${{ steps.mode.outputs.aws }}
+      ecs: ${{ steps.mode.outputs.ecs }}
+      eks: ${{ steps.mode.outputs.eks }}
 
     steps:
       - uses: actions/checkout@v4
@@ -193,48 +237,101 @@ jobs:
       # « Could not load credentials from any providers » ou un refus OIDC :
       # deux messages qui ne disent rien de la cause reelle, et qu'on passe des
       # heures a attribuer a AWS alors que le probleme est dans GitHub.
-      - name: Verifier le secret de deploiement
+      # ── AWS EST FACULTATIF, ET C'EST LA DECISION DE CONCEPTION DE CE JOB ──
+      #
+      # Auparavant, l'absence du secret AWS FAISAIT ECHOUER la publication.
+      # Autrement dit : on ne pouvait pas publier une image sans compte AWS,
+      # alors que Docker Hub suffit parfaitement a livrer une image. Un
+      # registre indisponible arretait une chaine qui n'avait aucun besoin
+      # de lui.
+      #
+      # Desormais on decide ICI, une seule fois, et tout le job s'y plie :
+      #   role present et bien forme -> ECR + Docker Hub, deploiement possible
+      #   role absent, ou AWS coupe  -> Docker Hub seul, AUCUNE connexion a AWS
+      #
+      # La variable CONTENEUR_AWS a 'false' coupe AWS meme quand le secret
+      # existe : utile pendant une panne de role, ou pour publier une image
+      # sans toucher au compte.
+      - name: Choisir les registres
+        id: mode
         env:
           ROLE: ${{ secrets.AWS_ROLE_ARN_CONTENEURS }}
+          UTILISATEUR_HUB: ${{ secrets.DOCKERHUB_USERNAME }}
+          JETON_HUB: ${{ secrets.DOCKERHUB_TOKEN }}
+          ECS_SERVICE: ${{ env.ECS_SERVICE }}
+          EKS_CLUSTER: ${{ env.EKS_CLUSTER }}
         run: |
+          set -euo pipefail
+          AWS=false
+          HUB=false
+
           if [ -z "${ROLE:-}" ]; then
-            echo "::error::Le secret AWS_ROLE_ARN_CONTENEURS est VIDE dans ce job."
-            echo ""
-            echo "Deux causes, par ordre de frequence :"
-            echo ""
-            echo "1. Le secret a ete cree dans un ENVIRONNEMENT"
-            echo "   (Settings > Environments > conteneurs > Secrets)."
-            echo "   Un secret d'environnement n'est visible QUE par un job qui"
-            echo "   declare 'environment:'. Ce job-ci n'en declare pas, donc il"
-            echo "   ne le voit pas. Le recreer au niveau du DEPOT :"
-            echo "   Settings > Secrets and variables > Actions > onglet Secrets."
-            echo ""
-            echo "2. Le nom ne correspond pas. Il doit etre exactement :"
-            echo "   AWS_ROLE_ARN_CONTENEURS"
-            echo "   (et non AWS_ROLE_ARN, qui appartient au workflow deploy.yml)."
-            exit 1
+            echo "Aucun role AWS configure : on publie sans AWS."
+            echo "  (pour l activer : secret AWS_ROLE_ARN_CONTENEURS au niveau du"
+            echo "   DEPOT — Settings > Secrets and variables > Actions. Un secret"
+            echo "   d ENVIRONNEMENT ne serait pas visible ici : ce job ne declare"
+            echo "   pas de bloc environment.)"
+          else
+            # On ne montre jamais la valeur : seulement sa forme.
+            case "$ROLE" in
+              arn:aws:iam::*:role/*)
+                AWS=true
+                echo "Role AWS present et bien forme : ECR sera utilise." ;;
+              *)
+                echo "::warning::AWS_ROLE_ARN_CONTENEURS ne ressemble pas a un ARN IAM."
+                echo "  Attendu : arn:aws:iam::<compte>:role/<nom>"
+                echo "  On continue SANS AWS au lieu d echouer : Docker Hub suffit." ;;
+            esac
           fi
 
-          # On ne montre jamais la valeur : seulement sa forme.
-          case "$ROLE" in
-            arn:aws:iam::*:role/*)
-              echo "Secret present, forme d'ARN correcte." ;;
-            *)
-              echo "::error::AWS_ROLE_ARN_CONTENEURS ne ressemble pas a un ARN de role IAM."
-              echo "Attendu, exactement, sans espace ni retour a la ligne :"
-              echo "  arn:aws:iam::492562025058:role/musea-conteneurs-production-deploiement"
-              echo "Obtenu : une chaine de ${#ROLE} caracteres commencant par « ${ROLE%%:*} »."
-              exit 1 ;;
-          esac
+          # LE DEPOT DOCKER HUB SE DEDUIT DU COMPTE, il n'a pas a etre configure.
+          # « maxbrian » + le nom de l'image donnent « maxbrian/musea » : c'est la
+          # convention de Docker Hub, et une variable de moins a tenir.
+          DEPOT_HUB=''
+          if [ -n "${UTILISATEUR_HUB:-}" ] && [ -n "${JETON_HUB:-}" ]; then
+            HUB=true
+            DEPOT_HUB="${UTILISATEUR_HUB}/${DEPOT_ECR}"
+            echo "Docker Hub configure : $DEPOT_HUB"
+          else
+            echo "Docker Hub non configure : il faut les secrets DOCKERHUB_USERNAME"
+            echo "  et DOCKERHUB_TOKEN. Le nom du depot en est deduit."
+          fi
+
+          # AUCUN REGISTRE : ON SAUTE, ON N'ECHOUE PAS.
+          #
+          # Construire une image multi-architecture pendant dix minutes pour ne
+          # la pousser nulle part est inutile — mais rougir a chaque push sur un
+          # depot ou personne n'a encore configure de registre l'est davantage :
+          # on finit par ne plus regarder les echecs. Le job se termine vert avec
+          # une note qui dit quoi faire.
+          PUBLIER=true
+          if [ "$AWS" = false ] && [ "$HUB" = false ]; then
+            PUBLIER=false
+            echo "::notice::Aucun registre configure : rien a publier."
+            echo "Posez DOCKERHUB_USERNAME + DOCKERHUB_TOKEN (Settings > Secrets"
+            echo "and variables > Actions > Secrets), ou AWS_ROLE_ARN_CONTENEURS."
+          fi
+
+          echo "aws=$AWS" >> "$GITHUB_OUTPUT"
+          echo "hub=$HUB" >> "$GITHUB_OUTPUT"
+          echo "depot_hub=$DEPOT_HUB" >> "$GITHUB_OUTPUT"
+          echo "publier=$PUBLIER" >> "$GITHUB_OUTPUT"
+
+          # Les cibles de deploiement voyagent par les sorties du job : un
+          # « if: » de job ne sait pas lire le contexte env, mais il lit
+          # parfaitement « needs.publier.outputs ».
+          echo "ecs=${ECS_SERVICE:-}" >> "$GITHUB_OUTPUT"
+          echo "eks=${EKS_CLUSTER:-}" >> "$GITHUB_OUTPUT"
 
       # Aucune cle AWS n'est stockee : GitHub presente un jeton OIDC de courte
       # duree, AWS le verifie et rend des identifiants temporaires. Le role est
       # verrouille sur CE depot (voir infra-conteneurs/oidc.tf).
       - name: S'authentifier aupres d'AWS
+        if: steps.mode.outputs.publier == 'true' && steps.mode.outputs.aws == 'true'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_CONTENEURS }}
-          aws-region: ${{ vars.AWS_REGION || 'eu-west-3' }}
+          aws-region: ${{ env.REGION_AWS }}
           # Audience explicite : c'est la valeur attendue par la condition
           # « :aud » de la politique de confiance. C'est deja le defaut de
           # l'action, mais l'ecrire evite d'avoir a le supposer un jour de panne.
@@ -245,6 +342,7 @@ jobs:
 
       - name: Se connecter a ECR
         id: ecr
+        if: steps.mode.outputs.publier == 'true' && steps.mode.outputs.aws == 'true'
         uses: aws-actions/amazon-ecr-login@v2
 
       # La configuration de compilation vient de Secrets Manager, pas des
@@ -252,15 +350,18 @@ jobs:
       # taches. C'est ce qui evite qu'une valeur change d'un cote et pas de
       # l'autre. Repli sur les secrets GitHub si le secret n'existe pas encore.
       - name: Lire la configuration depuis Secrets Manager
+        if: steps.mode.outputs.publier == 'true'
         # Les valeurs passent par `env:` et jamais par une interpolation `${{ }}`
         # au milieu du script : une valeur contenant un guillemet ou un
         # point-virgule serait sinon interpretee comme du shell. C'est la faille
         # d'injection classique des workflows GitHub.
         env:
-          NOM_SECRET: ${{ vars.SECRET_APPLICATION }}
+          # Vide quand AWS est coupe : le script retombe alors directement
+          # sur les secrets GitHub, sans jamais appeler l AWS CLI.
+          NOM_SECRET: ${{ steps.mode.outputs.aws == 'true' && env.SECRET_APPLICATION || '' }}
           REPLI_URL: ${{ secrets.VITE_SUPABASE_URL }}
           REPLI_CLE: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-          REPLI_DOMAINE: ${{ vars.PLATFORM_DOMAIN }}
+          REPLI_DOMAINE: ${{ env.DOMAINE_PLATEFORME }}
         run: |
           set -euo pipefail
           URL=''; CLE=''; DOM=''
@@ -302,29 +403,37 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Determiner les registres cibles
+        if: steps.mode.outputs.publier == 'true'
         id: cibles
         env:
+          AWS_ACTIF: ${{ steps.mode.outputs.aws }}
+          HUB_ACTIF: ${{ steps.mode.outputs.hub }}
           REGISTRE_ECR: ${{ steps.ecr.outputs.registry }}
-          NOM_DEPOT: ${{ vars.ECR_REPOSITORY_NAME }}
-          DEPOT_HUB: ${{ vars.DOCKERHUB_REPOSITORY }}
+          NOM_DEPOT: ${{ env.DEPOT_ECR }}
+          DEPOT_HUB: ${{ steps.mode.outputs.depot_hub }}
           UTILISATEUR_HUB: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
           set -euo pipefail
-          ECR="${REGISTRE_ECR}/${NOM_DEPOT:-musea}"
-          echo "ecr=$ECR" >> "$GITHUB_OUTPUT"
+          # L etape « Choisir les registres » a deja garanti qu au moins l un
+          # des deux existe : on se contente ici de les assembler.
+          LISTE=''
+          ECR=''
 
-          # Docker Hub est facultatif : sans depot ET sans identifiants, on
-          # publie sur ECR seul et le workflow continue. Une vitrine absente
-          # n'est pas une panne — mais un deploiement rate, si.
-          if [ -n "${DEPOT_HUB:-}" ] && [ -n "${UTILISATEUR_HUB:-}" ]; then
-            echo "Registres : ECR + Docker Hub ($DEPOT_HUB)"
-            echo "hub=$DEPOT_HUB" >> "$GITHUB_OUTPUT"
-            LISTE="$ECR"$'\n'"$DEPOT_HUB"
-          else
-            echo "Docker Hub non configure : publication sur ECR uniquement."
-            echo "hub=" >> "$GITHUB_OUTPUT"
+          if [ "${AWS_ACTIF:-false}" = "true" ] && [ -n "${REGISTRE_ECR:-}" ]; then
+            ECR="${REGISTRE_ECR}/${NOM_DEPOT:-musea}"
             LISTE="$ECR"
           fi
+
+          if [ "${HUB_ACTIF:-false}" = "true" ]; then
+            if [ -n "$LISTE" ]; then
+              LISTE="$LISTE"$'\n'"$DEPOT_HUB"
+            else
+              LISTE="$DEPOT_HUB"
+            fi
+          fi
+
+          echo "ecr=$ECR" >> "$GITHUB_OUTPUT"
+          echo "hub=${DEPOT_HUB:-}" >> "$GITHUB_OUTPUT"
 
           # Sortie multiligne : le delimiteur est obligatoire, GitHub refuse
           # un retour a la ligne dans la forme « cle=valeur ».
@@ -334,16 +443,22 @@ jobs:
             echo 'FIN_DES_IMAGES'
           } >> "$GITHUB_OUTPUT"
 
+      # docker login, par l action officielle : elle masque le jeton dans les
+      # journaux et ecrit le magasin d identifiants comme il faut. La commande
+      # nue « docker login -p » laisserait le mot de passe visible dans la
+      # table des processus du runner.
       - name: Se connecter a Docker Hub
-        if: steps.cibles.outputs.hub != ''
+        if: steps.mode.outputs.publier == 'true' && steps.mode.outputs.hub == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
 
       # Calcule les etiquettes a partir de la reference git. C'est ici que
       # « pousser une etiquette v1.2.3 » devient « publier une version ».
       - name: Calculer les etiquettes
+        if: steps.mode.outputs.publier == 'true'
         id: metadonnees
         uses: docker/metadata-action@v5
         with:
@@ -361,9 +476,12 @@ jobs:
             org.opencontainers.image.vendor=Fondation Jean Felicien Gacha
 
       - uses: docker/setup-qemu-action@v3
+        if: steps.mode.outputs.publier == 'true'
       - uses: docker/setup-buildx-action@v3
+        if: steps.mode.outputs.publier == 'true'
 
       - name: Construire et publier
+        if: steps.mode.outputs.publier == 'true'
         id: construire
         uses: docker/build-push-action@v6
         with:
@@ -389,6 +507,7 @@ jobs:
           provenance: false
 
       - name: Recapituler
+        if: steps.mode.outputs.publier == 'true'
         run: |
           {
             echo "### Image publiee"
@@ -412,11 +531,11 @@ jobs:
     name: Deployer sur ECS Fargate
     runs-on: ubuntu-latest
     needs: publier
-    if: vars.ECS_SERVICE != '' && (github.event_name != 'workflow_dispatch' || inputs.deployer)
+    if: needs.publier.outputs.aws == 'true' && needs.publier.outputs.ecs != '' && (github.event_name != 'workflow_dispatch' || inputs.deployer)
 
     environment:
       name: conteneurs
-      url: https://${{ vars.CONTENEUR_DOMAINE }}
+      url: https://${{ env.DOMAINE_CONTENEURS }}
 
     permissions:
       id-token: write
@@ -429,7 +548,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_CONTENEURS }}
-          aws-region: ${{ vars.AWS_REGION || 'eu-west-3' }}
+          aws-region: ${{ env.REGION_AWS }}
           audience: sts.amazonaws.com
           role-session-name: musea-conteneur-${{ github.run_id }}
 
@@ -444,7 +563,7 @@ jobs:
           echo "Image visee : $IMAGE"
 
           aws ecs describe-task-definition \
-            --task-definition '${{ vars.ECS_TASK_FAMILY }}' \
+            --task-definition '${{ env.ECS_TACHE }}' \
             --query taskDefinition > actuelle.json
 
           # `describe` rend des champs que `register` refuse : ils decrivent la
@@ -467,8 +586,8 @@ jobs:
         run: |
           set -euo pipefail
           aws ecs update-service \
-            --cluster '${{ vars.ECS_CLUSTER }}' \
-            --service '${{ vars.ECS_SERVICE }}' \
+            --cluster '${{ env.ECS_CLUSTER }}' \
+            --service '${{ env.ECS_SERVICE }}' \
             --task-definition '${{ steps.definition.outputs.arn }}' \
             --query 'service.deployments[0].{statut:rolloutState,taches:desiredCount}' \
             --output table
@@ -479,8 +598,8 @@ jobs:
           # deviennent pas saines, ECS remet la version precedente tout seul et
           # cette attente echoue. Le site, lui, ne tombe pas.
           aws ecs wait services-stable \
-            --cluster '${{ vars.ECS_CLUSTER }}' \
-            --service '${{ vars.ECS_SERVICE }}'
+            --cluster '${{ env.ECS_CLUSTER }}' \
+            --service '${{ env.ECS_SERVICE }}'
           echo "Service stable."
 
       # Verification a posteriori : on controle ce que le visiteur recoit
@@ -488,7 +607,7 @@ jobs:
       - name: Verifier le service en ligne
         run: |
           set -e
-          BASE="https://${{ vars.CONTENEUR_DOMAINE }}"
+          BASE="https://${{ env.DOMAINE_CONTENEURS }}"
 
           echo "-- sonde de sante --"
           test "$(curl -fsS --retry 5 --retry-delay 3 $BASE/sante)" = "ok"
@@ -502,7 +621,7 @@ jobs:
           esac
 
           echo "-- redirection HTTP vers HTTPS --"
-          CODE=$(curl -s -o /dev/null -w '%{http_code}' "http://${{ vars.CONTENEUR_DOMAINE }}/sante")
+          CODE=$(curl -s -o /dev/null -w '%{http_code}' "http://${{ env.DOMAINE_CONTENEURS }}/sante")
           test "$CODE" = "301" || { echo "Redirection absente : $CODE"; exit 1; }
 
           echo "Deploiement verifie : $BASE"
@@ -511,8 +630,8 @@ jobs:
         if: always()
         run: |
           aws ecs describe-services \
-            --cluster '${{ vars.ECS_CLUSTER }}' \
-            --services '${{ vars.ECS_SERVICE }}' \
+            --cluster '${{ env.ECS_CLUSTER }}' \
+            --services '${{ env.ECS_SERVICE }}' \
             --query 'services[0].deployments[].{statut:rolloutState,motif:rolloutStateReason,actives:runningCount}' \
             --output table || true
 
@@ -523,7 +642,7 @@ jobs:
     name: Deployer sur EKS
     runs-on: ubuntu-latest
     needs: publier
-    if: vars.EKS_CLUSTER != '' && (github.event_name != 'workflow_dispatch' || inputs.deployer)
+    if: needs.publier.outputs.aws == 'true' && needs.publier.outputs.eks != '' && (github.event_name != 'workflow_dispatch' || inputs.deployer)
 
     permissions:
       id-token: write
@@ -536,7 +655,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_CONTENEURS }}
-          aws-region: ${{ vars.AWS_REGION || 'eu-west-3' }}
+          aws-region: ${{ env.REGION_AWS }}
           audience: sts.amazonaws.com
           role-session-name: musea-conteneur-${{ github.run_id }}
 
@@ -547,8 +666,8 @@ jobs:
       - name: Obtenir le kubeconfig
         run: |
           aws eks update-kubeconfig \
-            --name '${{ vars.EKS_CLUSTER }}' \
-            --region '${{ vars.AWS_REGION || 'eu-west-3' }}'
+            --name '${{ env.EKS_CLUSTER }}' \
+            --region '${{ env.REGION_AWS }}'
           kubectl version --client
 
       # Version figee plutot qu'un script d'installation distant : on veut le
@@ -575,7 +694,7 @@ jobs:
           # L'overlay porte un ARN a substituer (voir serviceaccount-irsa.yaml).
           # Sans lui, le pod n'obtient aucun identifiant AWS et les appels SES
           # echouent en « NoCredentialProviders ».
-          ROLE='${{ vars.EKS_IRSA_ROLE_ARN }}'
+          ROLE='${{ env.EKS_ROLE_IRSA }}'
           if [ -n "$ROLE" ]; then
             sed -i "s#REMPLACER_PAR_LA_SORTIE_role_irsa#${ROLE}#" serviceaccount-irsa.yaml
           else

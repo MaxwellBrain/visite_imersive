@@ -22,6 +22,11 @@ const error = ref('')
 const slugState = ref('')    // '' | checking | free | taken | invalid
 
 const account = reactive({ email: '', password: '', passwordConfirm: '', fullName: '' })
+// Un oeil par champ, et pas un seul pour les deux : on demande deux saisies
+// justement pour les comparer, et les devoiler ensemble reviendrait a recopier
+// la premiere dans la seconde sans la retaper.
+const voirMdp = ref(false)
+const voirMdpConfirm = ref(false)
 
 // LOGO — le fichier attend en mémoire et n'est déposé qu'APRÈS la création de
 // l'organisation : le Storage range les médias sous `<tenant>/…` et refuse tout
@@ -287,19 +292,36 @@ async function createOrg() {
         <h1>{{ $t('signup.title1') }}</h1>
         <p class="su-lead">{{ $t('signup.lead1') }}</p>
 
-        <label class="su-lbl">{{ $t('signup.fFullName') }}</label>
-        <input v-model="account.fullName" class="su-in" type="text" :placeholder="$t('signup.fFullNamePlaceholder')" />
+        <label class="su-lbl" for="su-fullName">{{ $t('signup.fFullName') }}</label>
+        <input id="su-fullName" v-model="account.fullName" class="su-in" type="text" :placeholder="$t('signup.fFullNamePlaceholder')" />
 
-        <label class="vi-req su-lbl">{{ $t('signup.fEmail') }}</label>
-        <input v-model="account.email" class="su-in" type="email" placeholder="vous@exemple.cm" />
+        <label class="vi-req su-lbl" for="su-email">{{ $t('signup.fEmail') }}</label>
+        <input id="su-email" v-model="account.email" class="su-in" type="email" placeholder="vous@exemple.cm" />
 
-        <label class="vi-req su-lbl">{{ $t('signup.fPassword') }}</label>
-        <input v-model="account.password" class="su-in" type="password" :placeholder="$t('signup.fPasswordPlaceholder')" />
+        <label class="vi-req su-lbl" for="su-mdp">{{ $t('signup.fPassword') }}</label>
+        <span class="vi-mdp">
+          <input id="su-mdp" v-model="account.password" class="su-in"
+                 :type="voirMdp ? 'text' : 'password'" autocomplete="new-password"
+                 :placeholder="$t('signup.fPasswordPlaceholder')" />
+          <button type="button" class="vi-mdp__oeil"
+                  :aria-label="voirMdp ? $t('common.hidePassword') : $t('common.showPassword')"
+                  :aria-pressed="voirMdp" @click="voirMdp = !voirMdp">
+            <i :class="voirMdp ? 'pi pi-eye-slash' : 'pi pi-eye'" />
+          </button>
+        </span>
 
-        <label class="vi-req su-lbl">{{ $t('signup.fPasswordConfirm') }}</label>
-        <input v-model="account.passwordConfirm" class="su-in" type="password"
-               :class="{ 'su-in--bad': account.passwordConfirm && !motsDePasseIdentiques }"
-               :placeholder="$t('signup.fPasswordConfirmPlaceholder')" />
+        <label class="vi-req su-lbl" for="su-mdp2">{{ $t('signup.fPasswordConfirm') }}</label>
+        <span class="vi-mdp">
+          <input id="su-mdp2" v-model="account.passwordConfirm" class="su-in"
+                 :type="voirMdpConfirm ? 'text' : 'password'" autocomplete="new-password"
+                 :class="{ 'su-in--bad': account.passwordConfirm && !motsDePasseIdentiques }"
+                 :placeholder="$t('signup.fPasswordConfirmPlaceholder')" />
+          <button type="button" class="vi-mdp__oeil"
+                  :aria-label="voirMdpConfirm ? $t('common.hidePassword') : $t('common.showPassword')"
+                  :aria-pressed="voirMdpConfirm" @click="voirMdpConfirm = !voirMdpConfirm">
+            <i :class="voirMdpConfirm ? 'pi pi-eye-slash' : 'pi pi-eye'" />
+          </button>
+        </span>
         <!-- Le désaccord se signale à la saisie, pas au clic sur « Suivant » :
              corriger deux champs cachés après coup est autrement plus pénible. -->
         <small v-if="account.passwordConfirm && !motsDePasseIdentiques" class="su-mismatch">
@@ -323,16 +345,16 @@ async function createOrg() {
         <h1>{{ $t('signup.title2') }}</h1>
         <p class="su-lead">{{ $t('signup.lead2') }}</p>
 
-        <label class="vi-req su-lbl">{{ $t('signup.fOrgName') }}</label>
-        <input v-model="org.nom" class="su-in" type="text" :placeholder="$t('admin.org.fNamePlaceholder')" />
+        <label class="vi-req su-lbl" for="su-orgnom">{{ $t('signup.fOrgName') }}</label>
+        <input id="su-orgnom" v-model="org.nom" class="su-in" type="text" :placeholder="$t('admin.org.fNamePlaceholder')" />
 
-        <label class="su-lbl">{{ $t('signup.fType') }}</label>
-        <select v-model="org.type" class="su-in">
+        <label class="su-lbl" for="su-type">{{ $t('signup.fType') }}</label>
+        <select id="su-type" v-model="org.type" class="su-in">
           <option v-for="o in typeOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
         </select>
 
-        <label class="vi-req su-lbl">{{ $t('signup.fSlug') }}</label>
-        <input v-model="org.slug" class="su-in" type="text" placeholder="bandjoun" />
+        <label class="vi-req su-lbl" for="su-slug">{{ $t('signup.fSlug') }}</label>
+        <input id="su-slug" v-model="org.slug" class="su-in" type="text" placeholder="bandjoun" />
         <div class="su-url"><i class="pi pi-link" /> <code>{{ publicUrl }}</code></div>
         <small v-if="slugState === 'checking'" class="su-hint">{{ $t('admin.org.slugChecking') }}</small>
         <small v-else-if="slugState === 'free'" class="su-ok"><i class="pi pi-check" /> {{ $t('admin.org.slugFree') }}</small>
@@ -342,20 +364,20 @@ async function createOrg() {
 
         <div class="su-row">
           <div>
-            <label class="su-lbl">{{ $t('signup.fSigle') }}</label>
-            <input v-model="org.sigle" class="su-in" type="text" :placeholder="$t('signup.fSiglePlaceholder')" />
+            <label class="su-lbl" for="su-sigle">{{ $t('signup.fSigle') }}</label>
+            <input id="su-sigle" v-model="org.sigle" class="su-in" type="text" :placeholder="$t('signup.fSiglePlaceholder')" />
           </div>
           <div>
-            <label class="su-lbl">{{ $t('signup.fYear') }}</label>
-            <input v-model="org.anneeCreation" class="su-in" type="number" min="1000" :max="new Date().getFullYear()" placeholder="1932" />
+            <label class="su-lbl" for="su-anneeCreation">{{ $t('signup.fYear') }}</label>
+            <input id="su-anneeCreation" v-model="org.anneeCreation" class="su-in" type="number" min="1000" :max="new Date().getFullYear()" placeholder="1932" />
           </div>
         </div>
 
-        <label class="su-lbl">{{ $t('signup.fDescription') }}</label>
-        <textarea v-model="org.description" class="su-in su-ta" rows="3" :placeholder="$t('signup.fDescriptionPlaceholder')" />
+        <label class="su-lbl" for="su-description">{{ $t('signup.fDescription') }}</label>
+        <textarea id="su-description" v-model="org.description" class="su-in su-ta" rows="3" :placeholder="$t('signup.fDescriptionPlaceholder')" />
 
-        <label class="su-lbl">{{ $t('signup.fWebsite') }}</label>
-        <input v-model="org.siteWeb" class="su-in" type="url" placeholder="https://…" />
+        <label class="su-lbl" for="su-siteWeb">{{ $t('signup.fWebsite') }}</label>
+        <input id="su-siteWeb" v-model="org.siteWeb" class="su-in" type="url" placeholder="https://…" />
 
         <p v-if="error" class="su-err"><i class="pi pi-exclamation-triangle" /> {{ error }}</p>
         <button class="ps-btn su-btn" :disabled="!canCreateOrg" @click="goToContacts">
@@ -371,70 +393,70 @@ async function createOrg() {
         <h2 class="su-sec">{{ $t('signup.secContact') }}</h2>
         <div class="su-row">
           <div>
-            <label class="su-lbl">{{ $t('signup.fContactEmail') }}</label>
-            <input v-model="org.contactEmail" class="su-in" type="email" />
+            <label class="su-lbl" for="su-contactEmail">{{ $t('signup.fContactEmail') }}</label>
+            <input id="su-contactEmail" v-model="org.contactEmail" class="su-in" type="email" />
           </div>
           <div>
-            <label class="su-lbl">{{ $t('signup.fPhone') }}</label>
-            <input v-model="org.contactTel" class="su-in" type="tel" />
-          </div>
-        </div>
-        <div class="su-row">
-          <div>
-            <label class="su-lbl">{{ $t('signup.fCountry') }}</label>
-            <input v-model="org.pays" class="su-in" type="text" />
-          </div>
-          <div>
-            <label class="su-lbl">{{ $t('signup.fRegion') }}</label>
-            <input v-model="org.region" class="su-in" type="text" :placeholder="$t('signup.fRegionPlaceholder')" />
+            <label class="su-lbl" for="su-contactTel">{{ $t('signup.fPhone') }}</label>
+            <input id="su-contactTel" v-model="org.contactTel" class="su-in" type="tel" />
           </div>
         </div>
         <div class="su-row">
           <div>
-            <label class="su-lbl">{{ $t('signup.fCity') }}</label>
-            <input v-model="org.ville" class="su-in" type="text" />
+            <label class="su-lbl" for="su-pays">{{ $t('signup.fCountry') }}</label>
+            <input id="su-pays" v-model="org.pays" class="su-in" type="text" />
           </div>
           <div>
-            <label class="su-lbl">{{ $t('signup.fAddress') }}</label>
-            <input v-model="org.adresse" class="su-in" type="text" />
+            <label class="su-lbl" for="su-region">{{ $t('signup.fRegion') }}</label>
+            <input id="su-region" v-model="org.region" class="su-in" type="text" :placeholder="$t('signup.fRegionPlaceholder')" />
+          </div>
+        </div>
+        <div class="su-row">
+          <div>
+            <label class="su-lbl" for="su-ville">{{ $t('signup.fCity') }}</label>
+            <input id="su-ville" v-model="org.ville" class="su-in" type="text" />
+          </div>
+          <div>
+            <label class="su-lbl" for="su-adresse">{{ $t('signup.fAddress') }}</label>
+            <input id="su-adresse" v-model="org.adresse" class="su-in" type="text" />
           </div>
         </div>
 
         <h2 class="su-sec">{{ $t('signup.secManager') }}</h2>
         <div class="su-row">
           <div>
-            <label class="su-lbl">{{ $t('signup.fManagerName') }}</label>
-            <input v-model="org.responsableNom" class="su-in" type="text" />
+            <label class="su-lbl" for="su-responsableNom">{{ $t('signup.fManagerName') }}</label>
+            <input id="su-responsableNom" v-model="org.responsableNom" class="su-in" type="text" />
           </div>
           <div>
-            <label class="su-lbl">{{ $t('signup.fManagerRole') }}</label>
-            <input v-model="org.responsableFonction" class="su-in" type="text" :placeholder="$t('signup.fManagerRolePlaceholder')" />
+            <label class="su-lbl" for="su-responsableFonction">{{ $t('signup.fManagerRole') }}</label>
+            <input id="su-responsableFonction" v-model="org.responsableFonction" class="su-in" type="text" :placeholder="$t('signup.fManagerRolePlaceholder')" />
           </div>
         </div>
         <div class="su-row">
           <div>
-            <label class="su-lbl">{{ $t('signup.fManagerEmail') }}</label>
-            <input v-model="org.responsableEmail" class="su-in" type="email" />
+            <label class="su-lbl" for="su-responsableEmail">{{ $t('signup.fManagerEmail') }}</label>
+            <input id="su-responsableEmail" v-model="org.responsableEmail" class="su-in" type="email" />
           </div>
           <div>
-            <label class="su-lbl">{{ $t('signup.fManagerPhone') }}</label>
-            <input v-model="org.responsableTel" class="su-in" type="tel" />
+            <label class="su-lbl" for="su-responsableTel">{{ $t('signup.fManagerPhone') }}</label>
+            <input id="su-responsableTel" v-model="org.responsableTel" class="su-in" type="tel" />
           </div>
         </div>
 
         <h2 class="su-sec">{{ $t('signup.secAdmin') }}</h2>
-        <label class="su-lbl">{{ $t('signup.fRegistry') }}</label>
-        <input v-model="org.registreNumero" class="su-in" type="text" :placeholder="$t('signup.fRegistryPlaceholder')" />
+        <label class="su-lbl" for="su-registreNumero">{{ $t('signup.fRegistry') }}</label>
+        <input id="su-registreNumero" v-model="org.registreNumero" class="su-in" type="text" :placeholder="$t('signup.fRegistryPlaceholder')" />
         <div class="su-row">
           <div>
-            <label class="su-lbl">{{ $t('signup.fLanguage') }}</label>
-            <select v-model="org.langueDefaut" class="su-in">
+            <label class="su-lbl" for="su-langueDefaut">{{ $t('signup.fLanguage') }}</label>
+            <select id="su-langueDefaut" v-model="org.langueDefaut" class="su-in">
               <option v-for="o in langueOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
             </select>
           </div>
           <div>
-            <label class="su-lbl">{{ $t('signup.fCurrency') }}</label>
-            <select v-model="org.devise" class="su-in">
+            <label class="su-lbl" for="su-devise">{{ $t('signup.fCurrency') }}</label>
+            <select id="su-devise" v-model="org.devise" class="su-in">
               <option v-for="d in deviseOptions" :key="d" :value="d">{{ d }}</option>
             </select>
           </div>

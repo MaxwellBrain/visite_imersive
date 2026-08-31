@@ -72,8 +72,7 @@ const navGroups = computed(() => [
   ] },
   { label: t('admin.nav.grpCommerce'), items: [
     { to: '/produits', icon: 'pi pi-shopping-bag', label: t('admin.nav.products') },
-    { to: '/commandes', icon: 'pi pi-receipt', label: t('admin.nav.orders') },
-    { to: '/billets', icon: 'pi pi-qrcode', label: t('admin.nav.tickets') }
+    { to: '/commandes', icon: 'pi pi-receipt', label: t('admin.nav.orders') }
   ] },
   { label: t('admin.nav.grpEngagement'), items: [
     { to: '/evenements', icon: 'pi pi-calendar', label: t('admin.nav.events') },
@@ -84,7 +83,6 @@ const navGroups = computed(() => [
     { to: '/campagnes', icon: 'pi pi-send', label: t('admin.nav.campaigns') }
   ] },
   { label: t('admin.nav.grpManagement'), items: [
-    { to: '/decisionnel', icon: 'pi pi-chart-bar', label: t('admin.nav.analytics') },
     { to: '/tarifs', icon: 'pi pi-tag', label: t('admin.nav.pricing') },
     { to: '/organisation', icon: 'pi pi-building', label: t('admin.nav.organization') },
     { to: '/parametres', icon: 'pi pi-cog', label: t('admin.nav.settings') }
@@ -206,7 +204,7 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
 
         <label class="search">
           <i class="pi pi-search" />
-          <input v-model="search" type="text" :placeholder="$t('admin.layout.searchPlaceholder')" @keyup.enter="onSearch" />
+          <input v-model="search" type="text" :aria-label="$t('admin.layout.searchPlaceholder')" :placeholder="$t('admin.layout.searchPlaceholder')" @keyup.enter="onSearch" />
         </label>
 
         <div class="topbar__right">

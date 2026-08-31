@@ -54,6 +54,45 @@ export default defineConfig(({ mode }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url))
       }
     },
+    build: {
+      // ── DÉCOUPAGE DU SOCLE ─────────────────────────────────────────────────
+      //
+      // MESURÉ le 2026-08-29 : le fragment d'entrée pesait 724 ko à lui seul, et
+      // le tiers venait du client Supabase (auth 400 ko de source, storage 106,
+      // postgrest 104, temps réel 95). Tout cela partait dans UN SEUL fichier,
+      // avec notre code.
+      //
+      // LE VRAI COÛT N'ÉTAIT PAS LA TAILLE, MAIS L'INVALIDATION. Le nom du
+      // fragment contient une empreinte du contenu : corriger une virgule dans
+      // une vue changeait l'empreinte du fichier ENTIER, et chaque visiteur
+      // retéléchargeait 724 ko — socle compris — à chaque déploiement. Sur les
+      // réseaux qui nous intéressent, c'est ce qui fait « le site est redevenu
+      // lent » alors que rien n'a grossi.
+      //
+      // Séparés, ces morceaux ne bougent qu'aux montées de version. Un
+      // déploiement ne renouvelle plus que le fragment applicatif, et le
+      // navigateur télécharge le reste en parallèle plutôt qu'en un seul bloc.
+      //
+      // ON NE DÉCOUPE PAS PLUS FIN. Multiplier les fragments multiplie les
+      // requêtes, et sur une connexion à forte latence chaque requête coûte
+      // plus cher que les octets qu'elle transporte.
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return
+            if (id.includes('@supabase')) return 'socle-supabase'
+            // PAS DE RÈGLE POUR PRIMEVUE, ET C'EST UNE LEÇON MESURÉE.
+            // Regrouper primevue/* fait passer le premier écran de 724 ko à
+            // 1 372 ko : ses composants n'étaient chargés que par les écrans qui
+            // les utilisent — donc l'administration — et les réunir dans un
+            // fragment que l'entrée importe les rend TOUS obligatoires. Rollup
+            // les répartit mieux tout seul, route par route. Ne pas rétablir.
+            if (id.includes('vue-i18n') || id.includes('@intlify')) return 'socle-i18n'
+            if (id.includes('/vue/') || id.includes('@vue/') || id.includes('vue-router') || id.includes('/pinia/')) return 'socle-vue'
+          }
+        }
+      }
+    },
     server: {
       // Honore le port assigné par l'outil de preview (variable PORT), sinon 5173.
       port: Number(process.env.PORT) || 5173,

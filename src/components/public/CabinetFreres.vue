@@ -200,7 +200,7 @@ function quitterRelief() { yawRelief = 0; pitchRelief = 0 }
         <!-- L'œuvre, au centre, sur son socle -->
         <div class="cf__centre">
           <div class="cf__socle" />
-          <img v-if="photo" :src="photo" :alt="nom" class="cf__oeuvre" />
+          <img v-if="photo" :src="photo" :alt="nom" class="cf__oeuvre" loading="lazy" decoding="async" />
           <div v-else class="cf__oeuvre cf__oeuvre--ph"><i class="pi pi-box" /></div>
         </div>
 
@@ -239,7 +239,7 @@ function quitterRelief() { yawRelief = 0; pitchRelief = 0 }
             <img v-show="!reliefActif" :src="actif.image" :alt="actif.titre" class="cf__toile-repli" />
             <span v-if="reliefActif" class="cf__relief-note">{{ $t('cabinet.public.relief') }}</span>
           </div>
-          <img v-else-if="actif.image" :src="actif.image" :alt="actif.titre" />
+          <img v-else-if="actif.image" :src="actif.image" :alt="actif.titre" loading="lazy" decoding="async" />
           <div class="cf__fiche-txt">
             <strong>{{ actif.titre }}</strong>
             <p class="cf__fiche-meta">{{ [actif.culture, actif.pays].filter(Boolean).join(' · ') }}</p>

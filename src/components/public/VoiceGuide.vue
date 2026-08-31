@@ -95,7 +95,7 @@ onBeforeUnmount(stop)
       </div>
       <label v-if="guide.langues && guide.langues.length > 1" class="vg__lang">
         <i class="pi pi-globe" />
-        <select v-model="lang">
+        <select v-model="lang" :aria-label="$t('voiceGuide.language')">
           <option v-for="l in guide.langues" :key="l" :value="l">{{ l.toUpperCase() }}</option>
         </select>
       </label>

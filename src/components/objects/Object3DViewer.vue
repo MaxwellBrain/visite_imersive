@@ -4,6 +4,7 @@ import Dialog from 'primevue/dialog'
 import Message from 'primevue/message'
 import { chargerModelViewer } from '@/services/modelViewer'
 import ObjectGuideRobot from './ObjectGuideRobot.vue'
+import { useGuideFocus } from '@/composables/useGuideFocus'
 
 // VISUALISEUR 3D — et la distinction que tout le monde rate ici.
 //
@@ -32,7 +33,18 @@ const props = defineProps({
   // l'ensemble du locataire. Facultatifs — sans eux, le guide reste pertinent
   // mais cherche plus large.
   museumId: { type: [String, Number], default: null },
-  sectorId: { type: [String, Number], default: null }
+  sectorId: { type: [String, Number], default: null },
+  // Le guide salue-t-il de lui-même à l'ouverture ? OUI côté visiteur, NON dans
+  // l'ERP — un conservateur qui contrôle un maillage n'a pas demandé qu'une voix
+  // parte et que le navigateur réclame son micro. Là-bas, l'avatar continue
+  // d'attendre un geste sur la pièce.
+  accueil: { type: Boolean, default: false },
+  // L'objet caché ({ mot, recit }) — transmis tel quel au guide vocal.
+  secret: { type: Object, default: null },
+  // Sans identifiant, pas d'agent vocal temps réel : la session xAI se noue
+  // autour d'une pièce précise, dont le serveur charge le dossier.
+  objectId: { type: [String, Number], default: null },
+  tenantId: { type: [String, Number], default: null }
 })
 defineEmits(['update:visible'])
 
@@ -67,16 +79,30 @@ watch(() => props.visible, (ouvert) => {
 // distingue le geste du visiteur (`user-interaction`) du reste.
 
 const robot = ref(null)
+const { prendreLaParole, rendreLaParole } = useGuideFocus()
 
 function surRotation(e) {
-  if (e?.detail?.source === 'user-interaction') robot.value?.reveiller()
+  if (e?.detail?.source !== 'user-interaction') return
+  robot.value?.reveiller()
+  // Le nombre de manipulations nourrit la lecture du tempérament : beaucoup de
+  // rotations en peu de temps, c'est quelqu'un qui cherche, pas qui contemple.
+  robot.value?.noterGeste()
 }
 
 // Le dialogue se referme : le guide aussi, et il se tait. Sans cela, la voix
 // continuerait de parler d'un objet qui n'est plus à l'écran.
+//
+// Et tant qu'il est ouvert, l'avatar a la parole POUR LUI SEUL. Le site monte
+// en permanence un fil de discussion écrit (`GuideChat`) et un bot vocal
+// (`VoiceBot`) : sans cette prise de parole, ouvrir la 3D d'une œuvre affichait
+// une bulle de chat par-dessus l'avatar, et deux composants se disputaient le
+// même moteur de synthèse et le même micro. Voir `useGuideFocus`.
+// `immediate` : un visualiseur monté déjà ouvert (navigation directe sur une
+// fiche, lien partagé) doit prendre la parole sans attendre un changement.
 watch(() => props.visible, (ouvert) => {
-  if (!ouvert) robot.value?.fermer()
-})
+  if (ouvert) prendreLaParole()
+  else { robot.value?.fermer(); rendreLaParole() }
+}, { immediate: true })
 </script>
 
 <template>
@@ -117,6 +143,10 @@ watch(() => props.visible, (ouvert) => {
             :objet="title"
             :museum-id="museumId"
             :sector-id="sectorId"
+            :auto="accueil"
+            :secret="secret"
+            :object-id="objectId"
+            :tenant-id="tenantId"
           />
         </div>
         <p class="viewer3d__hint">

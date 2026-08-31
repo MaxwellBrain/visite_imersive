@@ -6,6 +6,11 @@ import { qrSvg } from '@/services/qrcode'
 import { chargerModelViewer } from '@/services/modelViewer'
 import { useTts } from '@/services/tts'
 import ObjectGuideRobot from '@/components/objects/ObjectGuideRobot.vue'
+import { useGuideFocus } from '@/composables/useGuideFocus'
+import * as ambiance from '@/services/ambiance'
+import * as haptique from '@/services/haptique'
+import { reglagesLumiere, msAvantProchainMoment } from '@/services/lumiere'
+import { composerPoster, offrirPoster } from '@/services/poster'
 
 // RÉALITÉ AUGMENTÉE — « Retour au pays ».
 //
@@ -58,13 +63,138 @@ const { speaking: ttsSpeaking, speak: ttsSpeak, stop: ttsStop } = useTts()
 const mv = ref(null)
 const robot = ref(null)
 
+// Ici, exister C'EST être ouvert : la vue RA n'a pas de prop `visible`, elle est
+// montée quand on la regarde. L'avatar prend donc la parole dès le montage, et
+// `useGuideFocus` la rend tout seul au démontage — y compris sur un retour
+// arrière, où aucune fermeture propre n'a lieu.
+const { prendreLaParole } = useGuideFocus()
+prendreLaParole()
+
 // Le robot se réveille au premier geste sur la pièce. `camera-change` ne se
 // déclenche que si la caméra est manipulable — donc pas en mode « RA seule »,
 // où le clic reste le seul signal. On garde les deux : ils couvrent chacun un
 // cas que l'autre laisse passer.
+// Un geste réel sur la pièce déclenche trois choses d'un coup : le guide se
+// réveille, le contexte audio se débloque (les navigateurs l'exigent), et le
+// doigt reçoit la matière.
 function surGeste(e) {
-  if (!e || e?.detail?.source === 'user-interaction') robot.value?.reveiller()
+  const vrai = !e || e?.detail?.source === 'user-interaction'
+  if (!vrai) return
+  robot.value?.reveiller()
+  robot.value?.noterGeste()                  // alimente la mesure du tempérament
+  ambiance.debloquer()
+  demarrerAmbiance()
+  haptique.matiere(props.objet?.matiere)     // bridé à ~9 Hz par le service
+  suivreDistance()
 }
+
+// ------------------------------------------------------- PAYSAGE SONORE -----
+//
+// SPATIALISATION, ET CE QU'ELLE PEUT VRAIMENT FAIRE ICI. Dans une visionneuse
+// à plateau tournant, la caméra orbite autour de la pièce EN LA REGARDANT :
+// l'objet reste donc toujours devant l'auditeur, et l'azimut ne change jamais.
+// Prétendre le contraire serait un trucage. Ce qui change réellement, c'est la
+// DISTANCE : on s'approche, le son se rapproche. C'est cela qu'on restitue.
+//
+// La spatialisation à la tête — tourner sur soi et entendre la source rester en
+// place — n'a de sens que là où l'appareil bouge indépendamment de la scène,
+// c'est-à-dire dans la session WebXR du Guide Spectral. Elle y sera branchée
+// avec le reste du parcours immersif.
+// L'objet caché de cette pièce, s'il en a un. On ne transmet l'objet que
+// lorsqu'il est COMPLET : un mot sans récit produirait une révélation muette.
+const secretDeLObjet = computed(() => {
+  const m = props.objet?.secret_mot
+  const r = props.objet?.secret_recit
+  return m && r ? { mot: m, recit: r, indice: props.objet?.secret_indice || '' } : null
+})
+
+const ambianceCoupee = ambiance.ambianceCoupee
+// La fiche déclare-t-elle une ambiance, à l'un des trois niveaux ? Sert à ne
+// PAS afficher un bouton qui ne commanderait rien.
+const aUneAmbiance = computed(() => !!ambiance.ambiancePour({
+  objet: props.objet,
+  secteur: props.objet?.sectors,
+  musee: props.objet?.sectors?.museums
+}))
+
+let ambianceLancee = false
+function demarrerAmbiance() {
+  if (ambianceLancee) return
+  const choix = ambiance.ambiancePour({
+    objet: props.objet,
+    secteur: props.objet?.sectors,
+    musee: props.objet?.sectors?.museums
+  })
+  if (!choix) return
+  ambianceLancee = true
+  ambiance.poser(choix.url, {
+    volume: choix.volume,
+    spatiale: choix.spatiale,
+    position: [0, 0.5, -1.4]
+  })
+}
+
+function suivreDistance() {
+  const el = mv.value
+  if (!el?.getCameraOrbit) return
+  try {
+    const o = el.getCameraOrbit()
+    // `radius` est en mètres dans le repère de la scène : on le reporte tel
+    // quel sur l'axe de profondeur, l'objet restant au centre.
+    ambiance.placer(0, 0.5, -Math.max(0.4, Number(o.radius) || 1.4))
+  } catch { /* orbite indisponible : la nappe reste à sa place */ }
+}
+
+// Le guide a la priorité absolue sur l'ambiance : deux sources qui se battent,
+// et le visiteur coupe le son — donc perd les deux.
+watch(ttsSpeaking, (parle) => { parle ? ambiance.baisser() : ambiance.remonter() })
+
+function basculerAmbiance() {
+  ambiance.debloquer()
+  demarrerAmbiance()
+  ambiance.basculerCoupure()
+}
+
+// ------------------------------------------------------- MODE PHOTO POSTER --
+// Le visiteur cadre la pièce comme il l'entend, appuie, et repart avec une
+// affiche aux couleurs de l'institution — QR compris, pour que l'image ramène
+// à la collection au lieu de circuler seule.
+const posterEnCours = ref(false)
+const posterMsg = ref('')
+
+async function prendrePoster() {
+  if (posterEnCours.value) return
+  posterEnCours.value = true
+  posterMsg.value = ''
+  haptique.geste('toucher')
+  try {
+    const affiche = await composerPoster(mv.value, {
+      titre: titre.value,
+      musee: props.objet?.sectors?.museums?.nom || '',
+      lien: lien.value,
+      couleur: '#0e6f5c'
+    })
+    const issue = await offrirPoster(affiche, `musea-${(titre.value || 'oeuvre').replace(/[^\w-]+/g, '-').toLowerCase()}.png`)
+    if (issue !== 'annule') { haptique.geste('succes'); posterMsg.value = t('ar.posterOk') }
+    // L'adresse blob n'est plus utile une fois le fichier remis : la garder
+    // retiendrait l'image entière en mémoire pour rien.
+    setTimeout(() => URL.revokeObjectURL(affiche.url), 4000)
+  } catch (e) {
+    haptique.geste('erreur')
+    // On NOMME la cause quand on la connaît. « texture-non-cors » n'est pas une
+    // panne mystérieuse : c'est un modèle servi sans en-tête CORS, et le
+    // conservateur peut le corriger.
+    posterMsg.value = e?.message === 'texture-non-cors' ? t('ar.posterCors') : t('ar.posterKo')
+  } finally {
+    posterEnCours.value = false
+  }
+}
+
+function basculerNuit() {
+  nuitAuMusee.value = !nuitAuMusee.value
+  haptique.geste('toucher')
+}
+
 const arPossible = ref(null) // null = on ne sait pas encore
 const charge = ref(false)
 const statut = ref('')
@@ -101,6 +231,95 @@ const echelleAttr = computed(() => `${echelle.value} ${echelle.value} ${echelle.
 const hauteurCm = computed(() => {
   if (dimensions.value) return Math.round(dimensions.value.y * 100)
   return demo.value ? Math.round(demoModelInfo(props.variante).hauteur * 100) : null
+})
+
+// ------------------------------------------------------- réglages d'immersion
+//
+// Ils viennent tous de la fiche de l'objet (migration `ar_reglages_immersifs`)
+// et retombent sur des valeurs par défaut si la colonne est vide ou si l'on
+// regarde la pièce de démonstration. Le principe est celui du §8 de la recette :
+// on ne calibre pas une ombre en redéployant. Un masque et une case n'ont pas
+// le même contraste, et le bon réglage se trouve en regardant, sur un vrai
+// téléphone, pas en raisonnant.
+function reglage(cle, defaut) {
+  const v = props.objet?.[cle]
+  return v === null || v === undefined || v === '' ? defaut : v
+}
+const nombre = (cle, defaut) => {
+  const n = Number(reglage(cle, defaut))
+  return Number.isFinite(n) ? n : defaut
+}
+
+// L'ÉCHELLE, ET CE QU'ELLE ENGAGE.
+//   fixed — l'objet apparaît à sa TAILLE RÉELLE et ne se redimensionne pas.
+//           Pour une case obus, c'est le sujet même : on doit reculer pour la
+//           voir entière, comme dans une cour. La rendre pinçable la ramènerait
+//           au rang de maquette.
+//   auto  — Scene Viewer pose l'objet à une taille commode et laisse pincer.
+//           C'est ce qu'il faut pour un tabouret ou un masque, qu'on retourne.
+// Le choix est donc porté par la FICHE, pas par le composant : c'est la seule
+// façon que les deux cohabitent sans que l'un abîme l'autre.
+const arScale = computed(() => (reglage('ar_scale', 'auto') === 'fixed' ? 'fixed' : 'auto'))
+
+// Estimation de lumière réelle (WebXR). Principal facteur de crédibilité : sans
+// elle, un objet correctement posé garde l'air d'un autocollant. Débrayable par
+// objet, car c'est aussi une surface d'échec de plus sur un WebXR capricieux.
+const xrEnv = computed(() => reglage('ar_xr_environment', true) !== false)
+
+// ------------------------------------------------------- LUMIÈRE ADAPTATIVE --
+// Les trois réglages d'éclairage ne sortent plus directement de la fiche : ils
+// la traversent d'abord. Le moment de la journée chez LE VISITEUR module ce que
+// le conservateur a posé — les deux se composent au lieu de s'écraser. Voir
+// `services/lumiere.js` pour le détail des moments.
+const nuitAuMusee = ref(false)
+const momentActuel = ref('')
+const tictac = ref(0)              // forcé à changer au passage d'un moment à l'autre
+
+const lumiere = computed(() => {
+  tictac.value                     // dépendance explicite : sans elle, pas de recalcul
+  return reglagesLumiere({
+    auto: reglage('lumiere_auto', true) !== false,
+    nuit: nuitAuMusee.value,
+    base: {
+      exposure: nombre('ar_exposure', 1.05),
+      ombre: nombre('ar_shadow_intensity', 1.4),
+      douceur: nombre('ar_shadow_softness', 0.9)
+    }
+  })
+})
+
+const ombreForce = computed(() => lumiere.value.ombre)
+const ombreDouceur = computed(() => lumiere.value.douceur)
+const exposition = computed(() => lumiere.value.exposure)
+const inertie = computed(() => nombre('ar_interpolation_decay', 200))
+const orbite = computed(() => reglage('ar_camera_orbit', '0deg 75deg 105%'))
+const orbiteMin = computed(() => reglage('ar_min_orbit', 'auto auto 60%'))
+const orbiteMax = computed(() => reglage('ar_max_orbit', 'auto auto 180%'))
+
+// L'affiche évite le carré noir pendant le téléchargement — un .glb de plusieurs
+// mégaoctets en 4G, c'est plusieurs secondes de vide. On réutilise la photo de
+// l'objet : elle existe déjà, elle est à la bonne échelle, et elle montre
+// exactement ce qui va apparaître.
+const affiche = computed(() => {
+  const p = props.objet?.photo || ''
+  return p && !p.startsWith('blob:') ? p : ''
+})
+
+// ANNOTATIONS ancrées dans le maillage. `normal` n'est pas décoratif : c'est lui
+// qui permet à model-viewer de MASQUER un point passé derrière l'objet. Sans
+// lui, les points d'une face cachée flottent par-dessus et le volume s'effondre.
+const annotations = computed(() => {
+  const a = props.objet?.ar_annotations
+  const liste = Array.isArray(a) ? a : []
+  return liste
+    .filter((p) => p && typeof p.position === 'string')
+    .slice(0, 12)                       // au-delà, la pièce disparaît sous les pastilles
+    .map((p, i) => ({
+      cle: `db-${i}`,
+      position: p.position,
+      normal: typeof p.normal === 'string' ? p.normal : '0 1 0',
+      titre: p.titre || p.texte || ''
+    }))
 })
 
 const lien = computed(() => {
@@ -153,17 +372,66 @@ async function detecter() {
   }, 250)
 }
 
+// ---------------------------------------------------- chargement du modèle ---
+//
+// TROIS MÉCANISMES POUR UNE SEULE QUESTION : « est-ce chargé ? ». Ce n'est pas
+// de la ceinture-bretelles, chacun rattrape un cas que les autres laissent
+// passer, et sans eux la vue reste bloquée sur son tourniquet.
+//
+//  1. L'ÉVÉNEMENT `load` — le cas nominal.
+//  2. LA SONDE — `load` n'est jamais émis si le modèle était DÉJÀ en cache au
+//     moment où l'on s'abonne. On interroge donc `loaded` par intervalle : le
+//     visiteur qui revient sur une fiche est précisément celui qui a le modèle
+//     en cache, et c'est lui qui restait devant un spinner éternel.
+//  3. LE DÉLAI DE GARDE — un .glb de plusieurs mégaoctets sur un réseau lent
+//     peut échouer SANS émettre `error`. Au bout de 90 s, on tranche et on
+//     propose autre chose plutôt que de faire attendre indéfiniment.
+const progression = ref(0)
+let sonde = null
+let garde = null
+
+function arreterSurveillance() {
+  if (sonde) { clearInterval(sonde); sonde = null }
+  if (garde) { clearTimeout(garde); garde = null }
+}
+
 function onLoad() {
+  if (charge.value) return
   charge.value = true
   erreur.value = ''
+  progression.value = 100
+  arreterSurveillance()
   try { dimensions.value = mv.value?.getDimensions?.() || null } catch { dimensions.value = null }
 }
 function onError() {
   erreur.value = t('ar.loadFailed')
   charge.value = true
+  arreterSurveillance()
+}
+function onProgress(e) {
+  const p = Number(e?.detail?.totalProgress)
+  if (Number.isFinite(p)) progression.value = Math.round(p * 100)
+}
+
+function surveillerChargement() {
+  arreterSurveillance()
+  sonde = setInterval(() => {
+    const el = mv.value
+    if (el && (el.loaded || el.model)) onLoad()
+  }, 250)
+  garde = setTimeout(() => {
+    if (!charge.value) { erreur.value = t('ar.loadTimeout'); charge.value = true }
+    arreterSurveillance()
+  }, 90000)
 }
 function onArStatus(e) {
   statut.value = e?.detail?.status || ''
+  // L'ancrage réussi est L'ÉVÉNEMENT du parcours — la pièce vient d'apparaître
+  // dans la vraie pièce. Il mérite sa vibration, et elle passe outre
+  // l'intervalle de sobriété du service.
+  if (statut.value === 'object-placed' || statut.value === 'session-started') {
+    haptique.geste('poser')
+  }
 }
 
 // LANCEMENT — trois niveaux, du plus propre au plus brutal.
@@ -256,45 +524,89 @@ function raconter() {
 
 // Cette vue EXISTE pour montrer un modele : le charger des son montage est
 // justifie, contrairement au chargement global qui frappait toutes les pages.
-onMounted(() => { chargerModelViewer().catch(() => {}); nextTick(detecter) })
+// Un seul minuteur, reprogrammé à chaque bascule, plutôt qu'un sondage de
+// l'heure en boucle. Une visite peut durer assez longtemps pour traverser un
+// changement de lumière — et c'est un joli détail quand cela arrive tout seul.
+let minuteurMoment = null
+function programmerMoment() {
+  clearTimeout(minuteurMoment)
+  momentActuel.value = lumiere.value.moment
+  minuteurMoment = setTimeout(() => {
+    tictac.value++            // force le recalcul de `lumiere`
+    programmerMoment()
+  }, Math.min(msAvantProchainMoment() + 1000, 2147483000))
+}
+
+onMounted(() => {
+  chargerModelViewer().catch(() => {})
+  nextTick(detecter)
+  surveillerChargement()
+  programmerMoment()
+})
 onBeforeUnmount(() => {
   if (poll) clearInterval(poll)
+  clearTimeout(minuteurMoment)
+  arreterSurveillance()
   ttsStop()
+  // La nappe sonore ne doit JAMAIS survivre à la vue : une ambiance de forêt
+  // qui continue sur la page suivante est le genre de détail qui fait fermer
+  // l'onglet.
+  ambiance.arreter()
+  haptique.stopper()
 })
-watch(() => props.objet?.id, () => { charge.value = false; dimensions.value = null; erreur.value = '' })
+watch(() => props.objet?.id, () => {
+  charge.value = false
+  dimensions.value = null
+  erreur.value = ''
+  progression.value = 0
+  surveillerChargement()          // nouveau modèle, nouvelle surveillance
+})
 </script>
 
 <template>
   <div class="arv" :class="{ 'arv--compact': compact }">
     <div class="arv__stage">
-      <!-- RÉGLAGES RA — alignés sur le projet de référence.
-           · ar-modes : WebXR d'abord, puis Scene Viewer (l'application Google,
-             adossée à ARCore), puis Quick Look. Sur Android c'est Scene Viewer
-             qui fait le travail dès que WebXR n'est pas disponible.
-           · PAS de `ar-scale="fixed"` : à taille réelle, une case de six mètres
-             posée dans une pièce est un mur de texture, et le visiteur croit que
-             rien ne s'est affiché. En mode automatique, Scene Viewer la pose à
-             une taille exploitable et la rend redimensionnable.
-           · PAS de `xr-environment` : il ne concerne que WebXR et ajoute une
-             surface d'échec pour rien. -->
+      <!-- RÉGLAGES RA.
+           · ar-modes : SCENE VIEWER d'ABORD. C'est l'application de Google,
+             adossée à ARCore : sur Android elle est plus stable que WebXR et
+             surtout mieux éclairée. WebXR reste en second — il ne sert que là où
+             Scene Viewer manque — et Quick Look récupère iOS de lui-même.
+           · ar-scale : porté par la FICHE (`ar_scale`), pas écrit ici. `fixed`
+             pose l'objet à sa taille réelle et interdit le pincement : c'est
+             tout le propos d'une architecture, où l'on doit reculer pour voir.
+             `auto` reste le bon choix pour un objet de main. Voir `arScale`.
+           · xr-environment : estimation de la lumière RÉELLE de la pièce. C'est
+             le principal facteur de crédibilité ; débrayable par objet, car
+             c'est aussi une surface d'échec de plus en WebXR.
+           · interaction-prompt="none" : la main animée de model-viewer passe
+             par-dessus la pièce et fait « démo ». La rotation lente suffit à
+             faire comprendre qu'on peut toucher. -->
       <model-viewer
         ref="mv"
         :src="src"
         :alt="titre"
+        :poster="affiche || undefined"
         :camera-controls="arSeul ? undefined : true"
         :auto-rotate="arSeul ? undefined : true"
         auto-rotate-delay="2500"
         rotation-per-second="14deg"
+        interaction-prompt="none"
+        :camera-orbit="orbite"
+        :min-camera-orbit="orbiteMin"
+        :max-camera-orbit="orbiteMax"
+        :interpolation-decay="inertie"
         :ios-src="srcIos || undefined"
         :ar-placement="placement"
+        :ar-scale="arScale"
+        :xr-environment="xrEnv || undefined"
         :scale="echelleAttr"
         ar
-        ar-modes="webxr scene-viewer quick-look"
+        ar-modes="scene-viewer webxr quick-look"
         loading="eager"
         reveal="auto"
-        shadow-intensity="1.4"
-        shadow-softness="0.9"
-        exposure="1.05"
+        :shadow-intensity="ombreForce"
+        :shadow-softness="ombreDouceur"
+        :exposure="exposition"
         environment-image="neutral"
         touch-action="pan-y"
         class="arv__mv"
@@ -302,15 +614,36 @@ watch(() => props.objet?.id, () => { charge.value = false; dimensions.value = nu
         @camera-change="surGeste"
         @load="onLoad"
         @error="onError"
+        @progress="onProgress"
         @ar-status="onArStatus"
       >
-        <!-- Annotations ancrées sur le maillage : elles ne valent que pour la
-             pièce de démonstration, dont on connaît la géométrie. -->
-        <template v-if="demo">
-          <button slot="hotspot-1" class="arv__pin" data-position="0 0.52 0" data-normal="0 1 0">
+        <!-- ANNOTATIONS DE LA FICHE — relevées dans Blender, ou par
+             `positionAndNormalFromPoint()` en cliquant sur le maillage.
+             `data-visibility-attribute="visible"` demande à model-viewer de
+             marquer lui-même les points qui passent DERRIÈRE l'objet : c'est ce
+             qui les fait disparaître au lieu de flotter par-dessus. -->
+        <button
+          v-for="p in annotations"
+          :key="p.cle"
+          :slot="`hotspot-${p.cle}`"
+          class="arv__pin"
+          :data-position="p.position"
+          :data-normal="p.normal"
+          data-visibility-attribute="visible"
+        >
+          <span>{{ p.titre }}</span>
+        </button>
+
+        <!-- Repères de la pièce de démonstration : on ne les pose que faute
+             d'annotations propres, et jamais sur un vrai modèle dont on ignore
+             la géométrie. -->
+        <template v-if="demo && !annotations.length">
+          <button slot="hotspot-1" class="arv__pin" data-position="0 0.52 0" data-normal="0 1 0"
+                  data-visibility-attribute="visible">
             <span>{{ $t('ar.pinSeat') }}</span>
           </button>
-          <button slot="hotspot-2" class="arv__pin" data-position="0.09 0.24 0" data-normal="1 0 0">
+          <button slot="hotspot-2" class="arv__pin" data-position="0.09 0.24 0" data-normal="1 0 0"
+                  data-visibility-attribute="visible">
             <span>{{ $t('ar.pinShaft') }}</span>
           </button>
         </template>
@@ -319,8 +652,13 @@ watch(() => props.objet?.id, () => { charge.value = false; dimensions.value = nu
           <i class="pi pi-mobile" /> {{ $t('ar.launch') }}
         </button>
 
+        <!-- Une progression CHIFFRÉE, pas un tourniquet. Sur un modèle de
+             plusieurs mégaoctets en 4G, « 38 % » dit qu'il se passe quelque
+             chose ; un rond qui tourne dit seulement qu'on attend. -->
         <div slot="progress-bar" class="arv__load" :class="{ on: !charge }">
-          <i class="pi pi-spin pi-spinner" /> {{ $t('ar.loading') }}
+          <i class="pi pi-spin pi-spinner" />
+          <span>{{ progression > 0 ? $t('ar.loadingPct', { n: progression }) : $t('ar.loading') }}</span>
+          <span class="arv__bar"><i :style="{ width: progression + '%' }" /></span>
         </div>
       </model-viewer>
 
@@ -333,6 +671,10 @@ watch(() => props.objet?.id, () => { charge.value = false; dimensions.value = nu
         :objet="titre"
         :museum-id="objet?.sectors?.museum_id ?? null"
         :sector-id="objet?.sector_id ?? null"
+        :secret="secretDeLObjet"
+        :object-id="objet?.id ?? null"
+        :tenant-id="objet?.tenant_id ?? null"
+        auto
       />
 
       <button v-if="compact" class="arv__x" :aria-label="$t('common.close')" @click="emit('close')">
@@ -393,6 +735,36 @@ watch(() => props.objet?.id, () => { charge.value = false; dimensions.value = nu
           <i :class="ttsSpeaking ? 'pi pi-stop' : 'pi pi-volume-up'" />
           {{ ttsSpeaking ? $t('tour.stopGuide') : $t('ar.narrate') }}
         </button>
+
+        <!-- L'ambiance ne se propose QUE si la fiche en déclare une : un bouton
+             qui ne commande rien apprend au visiteur à ignorer la barre. -->
+        <button
+          v-if="aUneAmbiance"
+          class="ps-btn ps-btn--sm ps-btn--line"
+          :aria-pressed="!ambianceCoupee"
+          @click="basculerAmbiance"
+        >
+          <i :class="ambianceCoupee ? 'pi pi-volume-off' : 'pi pi-headphones'" />
+          {{ ambianceCoupee ? $t('ar.ambienceOff') : $t('ar.ambienceOn') }}
+        </button>
+
+        <!-- « Nuit au musée » n'est pas l'heure de nuit : c'est une mise en
+             scène, plus sombre et plus contrastée. On la propose, jamais on ne
+             l'impose. -->
+        <button
+          class="ps-btn ps-btn--sm ps-btn--line"
+          :aria-pressed="nuitAuMusee"
+          @click="basculerNuit"
+        >
+          <i :class="nuitAuMusee ? 'pi pi-sun' : 'pi pi-moon'" />
+          {{ nuitAuMusee ? $t('ar.dayMode') : $t('ar.nightMode') }}
+        </button>
+        <!-- Repartir avec une image : c'est ce qui circule quand la visite,
+             elle, ne circule pas. -->
+        <button class="ps-btn ps-btn--sm ps-btn--line" :disabled="posterEnCours || !charge" @click="prendrePoster">
+          <i :class="posterEnCours ? 'pi pi-spin pi-spinner' : 'pi pi-camera'" />
+          {{ $t('ar.poster') }}
+        </button>
         <slot name="actions" />
       </div>
 
@@ -400,6 +772,7 @@ watch(() => props.objet?.id, () => { charge.value = false; dimensions.value = nu
       <p v-else-if="statut === 'object-placed'" class="arv__status"><i class="pi pi-check-circle" /> {{ $t('ar.statusPlaced') }}</p>
       <p v-else-if="statut === 'failed'" class="arv__status arv__status--ko"><i class="pi pi-times-circle" /> {{ $t('ar.statusFailed') }}</p>
       <p v-if="erreur" class="arv__status arv__status--ko"><i class="pi pi-times-circle" /> {{ erreur }}</p>
+      <p v-if="posterMsg" class="arv__status"><i class="pi pi-camera" /> {{ posterMsg }}</p>
 
       <slot />
     </div>
@@ -495,6 +868,14 @@ watch(() => props.objet?.id, () => { charge.value = false; dimensions.value = nu
 
 .arv__load { display: none; align-items: center; gap: 0.5rem; color: #cfc9bd; font-size: 0.85rem; }
 .arv__load.on { display: flex; }
+/* La barre double le pourcentage écrit : le chiffre dit où l'on en est, la
+   barre dit s'il avance encore. Un téléchargement bloqué à 38 % ne se distingue
+   d'un téléchargement lent que si l'on voit la progression s'arrêter. */
+.arv__bar { position: relative; width: 8rem; height: 3px; border-radius: 2px;
+  background: rgba(255, 255, 255, .16); overflow: hidden; }
+.arv__bar i { position: absolute; inset: 0 auto 0 0; display: block;
+  background: linear-gradient(90deg, #1a9c72, #7fe8c6); border-radius: 2px;
+  transition: width .3s ease; }
 
 .arv__scale, .arv__demo {
   position: absolute; display: inline-flex; align-items: center; gap: 0.35rem;

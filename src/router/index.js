@@ -1,34 +1,44 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/useAuthStore'
+import { installerPrimeVue } from '@/services/primevue'
 import { parseHost, urlPubliqueTenant } from '@/services/host'
 
 // Pages du site public — partagées entre le site historique (/site) et
 // le site d'une organisation (/c/:slug). Les noms de route sont suffixés
 // pour rester uniques.
+// LE MARQUEUR DU SITE VISITEUR — il commande le chargement de PrimeVue.
+//
+// Pose ici, dans la fabrique, il couvre d'un coup les DEUX arbres publics
+// (/site et /c/:slug). Le garde plus bas s'en sert a l'envers : PrimeVue est
+// installe pour tout ce qui n'est PAS marque. Cette inversion est deliberee —
+// une route nouvelle, oubliee, recevra PrimeVue et fonctionnera. L'inverse
+// produirait un ecran casse que personne ne verrait avant la production.
+const META_PUBLIC = { sansPrimeVue: true }
+
 const publicChildren = (suffix = '') => [
-  { path: '', name: `pub-home${suffix}`, component: () => import('@/views/public/PublicHome.vue') },
-  { path: 'musees', name: `pub-catalog${suffix}`, component: () => import('@/views/public/PublicCatalog.vue') },
-  { path: 'boutiques', name: `pub-boutiques${suffix}`, component: () => import('@/views/public/PublicBoutiques.vue') },
-  { path: 'musees/:id', name: `pub-museum${suffix}`, component: () => import('@/views/public/PublicMuseum.vue') },
+  { path: '', name: `pub-home${suffix}`, component: () => import('@/views/public/PublicHome.vue'), meta: META_PUBLIC },
+  { path: 'musees', name: `pub-catalog${suffix}`, component: () => import('@/views/public/PublicCatalog.vue'), meta: META_PUBLIC },
+  { path: 'boutiques', name: `pub-boutiques${suffix}`, component: () => import('@/views/public/PublicBoutiques.vue'), meta: META_PUBLIC },
+  { path: 'musees/:id', name: `pub-museum${suffix}`, component: () => import('@/views/public/PublicMuseum.vue'), meta: META_PUBLIC },
   // Parcours voulu : musée → salle → œuvres. La salle est une étape à part entière,
   // pas un simple libellé : c'est elle qui donne le sentiment de se déplacer.
-  { path: 'secteurs/:id', name: `pub-sector${suffix}`, component: () => import('@/views/public/PublicSector.vue') },
-  { path: 'musees/:id/boutique', name: `pub-museum-boutique${suffix}`, component: () => import('@/views/public/PublicMuseumBoutique.vue') },
-  { path: 'objets/:id', name: `pub-object${suffix}`, component: () => import('@/views/public/PublicObject.vue') },
-  { path: 'visite/:id', name: `pub-tour${suffix}`, component: () => import('@/views/public/PublicTour.vue') },
+  { path: 'secteurs/:id', name: `pub-sector${suffix}`, component: () => import('@/views/public/PublicSector.vue'), meta: META_PUBLIC },
+  { path: 'musees/:id/boutique', name: `pub-museum-boutique${suffix}`, component: () => import('@/views/public/PublicMuseumBoutique.vue'), meta: META_PUBLIC },
+  { path: 'objets/:id', name: `pub-object${suffix}`, component: () => import('@/views/public/PublicObject.vue'), meta: META_PUBLIC },
+  { path: 'visite/:id', name: `pub-tour${suffix}`, component: () => import('@/views/public/PublicTour.vue'), meta: META_PUBLIC },
   // Cible du QR affiché sur l'ordinateur ; « demo » ouvre la pièce générée.
-  { path: 'ar/:id', name: `pub-ar${suffix}`, component: () => import('@/views/public/PublicAr.vue') },
+  { path: 'ar/:id', name: `pub-ar${suffix}`, component: () => import('@/views/public/PublicAr.vue'), meta: META_PUBLIC },
   // Guide Spectral : la case entière, grandeur nature, avec son guide.
   // `?audio=1` bascule en mode audio-seul (accessibilité, appareil sans WebXR).
-  { path: 'spectral/:id', name: `pub-spectral${suffix}`, component: () => import('@/views/public/PublicSpectral.vue') },
-  { path: 'genealogie', name: `pub-genealogy${suffix}`, component: () => import('@/views/public/PublicGenealogy.vue') },
-  { path: 'personnages/:id', name: `pub-personnage${suffix}`, component: () => import('@/views/public/PublicPersonnage.vue') },
-  { path: 'panier', name: `pub-cart${suffix}`, component: () => import('@/views/public/PublicCart.vue') },
+  { path: 'spectral/:id', name: `pub-spectral${suffix}`, component: () => import('@/views/public/PublicSpectral.vue'), meta: META_PUBLIC },
+  { path: 'genealogie', name: `pub-genealogy${suffix}`, component: () => import('@/views/public/PublicGenealogy.vue'), meta: META_PUBLIC },
+  { path: 'personnages/:id', name: `pub-personnage${suffix}`, component: () => import('@/views/public/PublicPersonnage.vue'), meta: META_PUBLIC },
+  { path: 'panier', name: `pub-cart${suffix}`, component: () => import('@/views/public/PublicCart.vue'), meta: META_PUBLIC },
   // Porte d'entrée du site de l'organisation : un seul formulaire, visiteur ET
   // personnel. C'est le rôle du compte qui décide de la suite (site ou ERP).
-  { path: 'connexion', name: `pub-login${suffix}`, component: () => import('@/views/public/PublicLogin.vue') },
-  { path: 'quetes/:id', name: `pub-quest${suffix}`, component: () => import('@/views/public/PublicQuest.vue') },
-  { path: 'compte', name: `pub-account${suffix}`, component: () => import('@/views/public/PublicAccount.vue') }
+  { path: 'connexion', name: `pub-login${suffix}`, component: () => import('@/views/public/PublicLogin.vue'), meta: META_PUBLIC },
+  { path: 'quetes/:id', name: `pub-quest${suffix}`, component: () => import('@/views/public/PublicQuest.vue'), meta: META_PUBLIC },
+  { path: 'compte', name: `pub-account${suffix}`, component: () => import('@/views/public/PublicAccount.vue'), meta: META_PUBLIC }
 ]
 
 const routes = [
@@ -139,12 +149,6 @@ const routes = [
         meta: { title: 'admin.nav.orders', group: 'admin.groups.commerce', icon: 'pi pi-receipt' }
       },
       {
-        path: 'billets',
-        name: 'billets',
-        component: () => import('@/views/TicketScanView.vue'),
-        meta: { title: 'admin.nav.tickets', group: 'admin.groups.commerce', icon: 'pi pi-qrcode' }
-      },
-      {
         path: 'tarifs',
         name: 'tarifs',
         component: () => import('@/views/PricingView.vue'),
@@ -199,12 +203,6 @@ const routes = [
         meta: { title: 'admin.nav.drafts', icon: 'pi pi-inbox' }
       },
       {
-        path: 'decisionnel',
-        name: 'decisionnel',
-        component: () => import('@/views/AnalyticsView.vue'),
-        meta: { title: 'admin.nav.analytics', group: 'admin.groups.system', icon: 'pi pi-chart-bar' }
-      },
-      {
         path: 'messagerie',
         name: 'messagerie',
         component: () => import('@/views/MessagesView.vue'),
@@ -242,6 +240,31 @@ const routes = [
         meta: { title: 'admin.nav.tenants', requiresSuperAdmin: true, icon: 'pi pi-sitemap' }
       }
     ]
+  },
+
+  // ─── TOUT LE RESTE ────────────────────────────────────────────────────────
+  //
+  // Il n'y avait AUCUNE route de repli : n'importe quelle adresse inconnue
+  // donnait un écran blanc, sans message ni retour possible. Une faute de frappe
+  // dans une URL, un lien partagé qui a vieilli, un favori vers un écran retiré
+  // — et le visiteur se retrouvait devant du vide, en se demandant si le site
+  // était en panne.
+  //
+  // ON RAMÈNE OÙ L'ON ÉTAIT, pas à la racine de la plateforme. Un visiteur perdu
+  // sur le site d'une chefferie doit revenir à l'accueil DE CETTE CHEFFERIE : le
+  // renvoyer sur la vitrine générale lui ferait quitter le musée qu'il visitait.
+  {
+    path: '/:reste(.*)*',
+    name: 'introuvable',
+    redirect: (to) => {
+      const chemin = to.path || '/'
+      // On découpe plutôt qu'on ne filtre : '/c/madjin/musees' donne
+      // ['', 'c', 'madjin', 'musees'], et la chefferie est en troisième position.
+      const morceaux = chemin.split('/')
+      if (morceaux[1] === 'c' && morceaux[2]) return '/c/' + morceaux[2]
+      if (chemin.startsWith('/site')) return '/site'
+      return '/'
+    }
   }
 ]
 
@@ -251,6 +274,19 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
+  // PRIMEVUE, AVANT D'ENTRER — et seulement si l'écran en a besoin.
+  //
+  // On l'installe pour tout ce qui n'est PAS marqué site visiteur. Attendre ici
+  // plutôt que de lancer le chargement en arrière-plan est ce qui supprime la
+  // course : un composant PrimeVue ne peut pas se monter avant que le plugin
+  // soit posé, puisque sa route ne s'ouvre pas tant que cette promesse n'est
+  // pas tenue.
+  //
+  // Le site public, lui, ne paie rien : ni le téléchargement, ni l'attente.
+  if (!to.matched.some((r) => r.meta?.sansPrimeVue)) {
+    await installerPrimeVue().catch((e) => console.error('[primevue]', e.message))
+  }
+
   const auth = useAuthStore()
   await auth.ensureReady()
   const needsStaff = to.matched.some((r) => r.meta.requiresStaff)

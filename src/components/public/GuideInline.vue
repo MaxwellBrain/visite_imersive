@@ -72,7 +72,7 @@ function replay() {
       <button v-for="s in suggestions" :key="s" type="button" @click="send(s)">{{ s }}</button>
     </div>
     <form class="gi__form" @submit.prevent="send()">
-      <input v-model="input" type="text" :placeholder="$t('guideInline.placeholder')" :disabled="busy" />
+      <input v-model="input" type="text" :aria-label="$t('guideInline.placeholder')" :placeholder="$t('guideInline.placeholder')" :disabled="busy" />
       <button type="submit" :disabled="busy || !input.trim()" :aria-label="$t('common.send')">
         <i :class="busy ? 'pi pi-spin pi-spinner' : 'pi pi-send'" />
       </button>

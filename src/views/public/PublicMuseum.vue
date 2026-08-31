@@ -130,7 +130,7 @@ const age = computed(() => (museum.value?.annee_fondation ? new Date().getFullYe
           <p class="gen-sub">{{ $t('museum.genealogySub') }}</p>
           <div class="gen-cards">
             <router-link v-for="c in chefs" :key="c.id" :to="to(`/personnages/${c.id}`)" class="gen-card ps-card ps-card--hover">
-              <img v-if="c.portrait" :src="c.portrait" :alt="c.nom" class="gen-card__img" />
+              <img v-if="c.portrait" :src="c.portrait" :alt="c.nom" class="gen-card__img" loading="lazy" decoding="async" />
               <div v-else class="gen-card__img gen-card__img--ph"><i class="pi pi-user" /></div>
               <div class="gen-card__b">
                 <span v-if="c.titre" class="gen-card__titre">{{ c.titre }}</span>

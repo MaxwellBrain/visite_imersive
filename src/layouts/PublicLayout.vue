@@ -12,6 +12,7 @@ import { canonicalOrigin, parseHost } from '@/services/host'
 import '@/assets/public-site.css' // design system partagé des pages publiques (.ps-*)
 import GuideChat from '@/components/public/GuideChat.vue'
 import VoiceBot from '@/components/public/VoiceBot.vue'
+import { paroleImmersive } from '@/composables/useGuideFocus'
 import LangSwitcher from '@/components/LangSwitcher.vue'
 
 const router = useRouter()
@@ -297,8 +298,16 @@ function go(to) { drawer.value = false; router.push(to) }
       </div>
     </footer>
 
-    <GuideChat />
-    <VoiceBot />
+    <!-- Les deux guides GLOBAUX s'effacent dès qu'un visualiseur immersif tient
+         la parole (3D d'une œuvre, réalité augmentée). Sur un objet en 3D, on
+         regarde et on écoute : une bulle de discussion écrite posée par-dessus
+         l'avatar vocal proposerait de LIRE la réponse, ce qui est exactement le
+         geste que la visite immersive cherche à remplacer. `VoiceBot`, lui,
+         parle avec le même moteur de synthèse et le même micro que l'avatar :
+         les laisser ensemble, c'est deux voix qui se coupent. Voir
+         `useGuideFocus`. -->
+    <GuideChat v-if="!paroleImmersive" />
+    <VoiceBot v-if="!paroleImmersive" />
   </div>
 </template>
 
@@ -420,6 +429,43 @@ function go(to) { drawer.value = false; router.push(to) }
   .topbar__burger { display: inline-flex; }
   .logo__sub { display: none; }
   .foot__cols { grid-template-columns: 1fr 1fr; gap: 2rem; }
+
+  /* ── LE NOM DE L'INSTITUTION SUR UN TÉLÉPHONE ──────────────────────────
+     MESURÉ sur un écran de 375 px : « Fondation Jean Felicien Gacha » partait
+     sur QUATRE lignes de 93 px de haut, dans une barre qui en fait 72. Le nom
+     débordait de son en-tête et repoussait toute la page.
+
+     La cause est arithmétique : la barre est une grille, la colonne du logo n'y
+     reçoit que ~106 px, et la police Anton à 1,45 rem y tient six caractères.
+
+     TROIS GESTES, ET AUCUN NE COUPE LE NOM. Un nom d'institution tronqué en
+     « Fondation Jean Feli… » serait pire que quatre lignes : on ampute une
+     chefferie de son identité pour gagner deux pixels. On réduit donc la taille,
+     on resserre l'interligne, et on autorise DEUX lignes — « Fondation Jean /
+     Felicien Gacha » se lit très bien.
+
+     min-width: 0 est indispensable : sans lui, un élément de grille refuse de
+     descendre sous la largeur de son contenu, et tout le reste continuerait de
+     déborder quoi qu'on fasse à la police. */
+  .logo { min-width: 0; gap: 0.45rem; }
+  .logo__stack { min-width: 0; }
+  .logo__img { width: 32px; height: 32px; }
+  .logo__name {
+    /* 0,85 rem sur TOUTE la plage mobile, et pas une taille qui grandit avec
+       l'écran. MESURÉ : à 0,95 rem, « Fondation Jean Felicien Gacha » tenait à
+       375 px mais se faisait tronquer à 414 px — la police grandissait alors que
+       la colonne de la grille, elle, ne bougeait presque pas. Une taille unique
+       est ici plus juste qu'une taille « responsive » qui suit la mauvaise
+       mesure. */
+    font-size: 0.85rem;
+    line-height: 1.08;
+    letter-spacing: 0.02em;
+    /* Deux lignes au plus ; au-delà, et seulement au-delà, on abrège. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 }
 @media (max-width: 560px) {
   .foot__cols { grid-template-columns: 1fr; }

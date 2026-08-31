@@ -61,6 +61,12 @@ function sansMarkdown(t) {
     .replace(/\*\*+([^*]+)\*\*+/g, '$1')   // **gras**
     .replace(/__([^_]+)__/g, '$1')          // __gras__
     .replace(/^#{1,6}\s+/gm, '')            // titres
+    // PUCES ET NUMÉROS. Ils passaient jusqu'ici parce que la bulle du chat les
+    // rendait acceptables. À VOIX HAUTE, non : la synthèse prononce l'astérisque.
+    // Mesuré le 2026-08-29 — le modèle produit des listes malgré la consigne, et
+    // le guide vocal disait « astérisque vous présenter ».
+    .replace(/^\s*[*•‣–-]\s+/gm, '')
+    .replace(/^\s*\d+[.)]\s+/gm, '')
 }
 
 
@@ -92,7 +98,17 @@ function journaliser(question, scope, source) {
 
 // Point d'entrée : tente l'Edge Function, se rabat sur la recherche locale en cas d'échec.
 // `scope` (optionnel) = { museumId, sectorId } : ancre la réponse au musée / à la salle courants.
-export async function ask(question, scope = {}) {
+//
+// `opts.journal` — CE QU'IL FAUT ÉCRIRE DANS LE JOURNAL DES QUESTIONS, quand ce
+// n'est pas `question`. L'agent vocal n'envoie pas une question nue : il envoie
+// une consigne qui porte le fil de la conversation, le nom de la pièce regardée
+// et les règles d'élocution. Journaliser CELA remplirait `guide_questions` de
+// prompts et détruirait le seul usage de cette table — montrer au conservateur
+// ce que les visiteurs demandent et que ses notices ne couvrent pas.
+//   opts.journal = 'à quoi servait le grenier ?'  → c'est cela qu'on enregistre
+//   opts.journal = null                            → on n'enregistre rien
+//                                                    (salutation : personne n'a rien demandé)
+export async function ask(question, scope = {}, opts = {}) {
   const q = (question || '').trim()
   if (!q) return { text: 'Posez-moi une question sur nos musées, nos objets ou la généalogie des chefs.', links: [] }
 
@@ -108,7 +124,7 @@ export async function ask(question, scope = {}) {
     const brut = await askRemote(q, scope, cards)
     // L'IA a rédigé le texte ; on garantit que les vignettes suivent.
     if (cards.length && !(brut.cards || []).length) brut.cards = cards
-    journaliser(q, scope, brut.source)
+    if (opts.journal !== null) journaliser(opts.journal ?? q, scope, brut.source)
     return normaliserReponse(brut)
   } catch (e) {
     console.warn('[guide] Edge Function indisponible, repli local :', e?.message || e)
@@ -126,9 +142,99 @@ export async function ask(question, scope = {}) {
         }
       } catch { /* la recherche mondiale ne doit jamais bloquer la réponse locale */ }
     }
-    journaliser(q, scope, 'grounded')   // repli local : on n'a pas su répondre par l'IA
+    // repli local : on n'a pas su répondre par l'IA
+    if (opts.journal !== null) journaliser(opts.journal ?? q, scope, 'grounded')
     return normaliserReponse(r)
   }
+}
+
+// ---------------------------------------------------------------------------
+// DIFFUSION — le guide vocal parle dès le premier mot
+// ---------------------------------------------------------------------------
+// POURQUOI UNE SECONDE VOIE plutôt que de convertir `ask()`. Quatre écrans
+// appellent `ask()` et attendent un objet complet ; les faire tous basculer sur
+// un flux pour n'en servir qu'un serait une réécriture gratuite. `ask()` reste
+// donc ce qu'il est, et le guide vocal — le seul que le silence pénalise —
+// prend ce chemin-ci.
+//
+// CE QU'ELLE REND, dans l'ordre :
+//   { meta: { links, cards } }   avant le moindre mot, pour afficher tout de suite
+//   { texte: '…' }               fragment par fragment
+//   { fin: true }                terminé
+//   { erreur }                   l'appelant décide du repli
+//
+// `signal` permet de COUPER LE RÉSEAU quand le visiteur interrompt : sans lui,
+// le serveur continuerait de produire — et de facturer — une réponse que
+// personne n'écoute plus.
+export async function* askStream(question, scope = {}, opts = {}) {
+  const q = (question || '').trim()
+  if (!q) { yield { fin: true }; return }
+
+  const corps = { question: q, stream: true }
+  const tenantId = getPublicTenant()
+  if (tenantId != null) corps.tenantId = tenantId
+  if (scope.museumId) corps.museumId = scope.museumId
+  if (scope.sectorId) corps.sectorId = scope.sectorId
+
+  let recuDuTexte = false
+  let res
+  try {
+    res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/guide-agent`, {
+      method: 'POST',
+      signal: opts.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify(corps)
+    })
+  } catch (e) {
+    yield { erreur: opts.signal?.aborted ? 'annulee' : (e?.message || 'reseau') }
+    return
+  }
+  if (!res.ok || !res.body) { yield { erreur: `reponse ${res.status}` }; return }
+
+  const lecteur = res.body.getReader()
+  const dec = new TextDecoder()
+  let reste = ''
+  try {
+    while (true) {
+      const { done, value } = await lecteur.read()
+      if (done) break
+      reste += dec.decode(value, { stream: true })
+      // On ne traite que les blocs COMPLETS : un « data: » coupé en deux par le
+      // réseau produirait un JSON invalide au milieu du flux.
+      const blocs = reste.split('\n\n')
+      reste = blocs.pop() || ''
+      for (const bloc of blocs) {
+        const ligne = bloc.split('\n').find((l) => l.startsWith('data:'))
+        if (!ligne) continue
+        let evt
+        try { evt = JSON.parse(ligne.slice(5).trim()) } catch { continue }
+        if (evt.meta) {
+          yield { meta: { ...evt.meta, links: (evt.meta.links || []).map((l) => ({ ...l, to: auPrefixeCourant(l.to) })) } }
+        } else if (evt.t) {
+          recuDuTexte = true
+          yield { texte: evt.t }
+        } else if (evt.fin) {
+          // LE JOURNAL DU CONSERVATEUR NE DOIT PAS DISPARAÎTRE avec le flux.
+          // `ask()` journalise ; si cette voie ne le faisait pas, toutes les
+          // questions POSÉES À LA VOIX cesseraient d'apparaître dans « ce que
+          // les visiteurs demandent » — l'écran qui sert à repérer les notices
+          // manquantes deviendrait aveugle au canal le plus utilisé.
+          if (opts.journal !== null) {
+            journaliser(opts.journal ?? q, scope, recuDuTexte ? 'flux' : 'grounded')
+          }
+          yield { fin: true }; return
+        }
+      }
+    }
+  } catch (e) {
+    yield { erreur: opts.signal?.aborted ? 'annulee' : (e?.message || 'flux') }
+    return
+  }
+  yield { fin: true }
 }
 
 const WORLD = /(monde|ailleurs|[eé]tranger|autres?\s+mus[eé]es?|international|diaspora|similaire|apparent|fr[eè]re|comparer|comparaison|met(ropolitan)?|louvre|exemple|dispers|semblable|proche|[eé]quivalent|m[eê]me\s+type)/i

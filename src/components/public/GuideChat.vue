@@ -103,7 +103,7 @@ async function send(text) {
         </div>
 
         <form class="guide__input" @submit.prevent="send()">
-          <input v-model="input" type="text" :placeholder="$t('guideChat.placeholder')" :disabled="busy" />
+          <input v-model="input" type="text" :aria-label="$t('guideChat.placeholder')" :placeholder="$t('guideChat.placeholder')" :disabled="busy" />
           <button type="submit" :disabled="busy || !input.trim()" :aria-label="$t('common.send')"><i class="pi pi-send" /></button>
         </form>
       </div>

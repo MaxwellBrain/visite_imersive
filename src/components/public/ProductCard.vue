@@ -1,13 +1,23 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useToast } from 'primevue/usetoast'
 import { useCartStore } from '@/stores/useCartStore'
 import { useSettingsStore } from '@/stores/useSettingsStore'
 
 const props = defineProps({ product: { type: Object, required: true } })
 const { t } = useI18n()
-const toast = useToast()
+// LA CONFIRMATION EST SUR LA CARTE, PAS DANS UN COIN DE L'ÉCRAN.
+//
+// Ce composant utilisait le toast de PrimeVue. C'était le SEUL lien du site
+// public vers cette bibliothèque — et comme la carte figure sur la page
+// d'accueil, il obligeait chaque visiteur à télécharger tout PrimeVue pour un
+// message de deux secondes.
+//
+// Le remplacer par un état local n'est pas seulement plus léger : « Ajouté ✓ »
+// s'affiche LÀ OÙ LE DOIGT VIENT D'APPUYER, au lieu d'apparaître à l'autre bout
+// de l'écran, ce qui est le bon endroit pour un retour d'action.
+const message = ref('')
+let minuterie = null
 const cart = useCartStore()
 const settings = useSettingsStore()
 
@@ -35,12 +45,11 @@ function addToCart() {
     montant: props.product.prix || 0,
     devise: props.product.devise || 'FCFA'
   })
-  toast.add({
-    severity: ok ? 'success' : 'info',
-    summary: ok ? t('boutique.added') : t('boutique.alreadyIn'),
-    detail: props.product.nom,
-    life: 1800
-  })
+  message.value = ok ? t('boutique.added') : t('boutique.alreadyIn')
+  // On repart de zéro à chaque clic : sans cela, deux ajouts rapprochés
+  // laisseraient la première minuterie effacer le second message.
+  clearTimeout(minuterie)
+  minuterie = setTimeout(() => { message.value = '' }, 1800)
 }
 </script>
 
@@ -66,11 +75,23 @@ function addToCart() {
           </button>
         </div>
       </div>
+      <p v-if="message" class="pc__ok" role="status" aria-live="polite">
+        <i class="pi pi-check-circle" /> {{ message }}
+      </p>
     </div>
   </article>
 </template>
 
 <style scoped>
+.pc__ok {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #1f7a4d;
+}
 .pc { background: #fff; border: 1px solid #e8e9e6; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.18s, box-shadow 0.18s; }
 .pc:hover { transform: translateY(-4px); box-shadow: 0 20px 44px -20px rgba(10,20,15,0.28); }
 .pc__img { position: relative; aspect-ratio: 1 / 1; background: #eef0ed; overflow: hidden; }

@@ -26,6 +26,12 @@ const busy = ref(false)
 const erreur = ref('')
 
 const form = reactive({ fullName: '', email: '', password: '', passwordConfirm: '' })
+// Un oeil par champ. Les deux premiers servent a la creation, le troisieme a la
+// reprise d'un compte existant : ils ne s'affichent jamais ensemble, mais leur
+// etat doit rester distinct pour ne pas se souvenir d'un devoilement precedent.
+const voirMdp = ref(false)
+const voirMdpConfirm = ref(false)
+const voirMdpExistant = ref(false)
 
 const motsDePasseIdentiques = computed(() =>
   !!form.passwordConfirm && form.password === form.passwordConfirm)
@@ -125,19 +131,35 @@ function versTableauDeBord() { router.push('/dashboard') }
         </div>
 
         <template v-if="mode === 'creer'">
-          <label class="sp-lbl">{{ $t('setup.fName') }}</label>
-          <input v-model="form.fullName" class="sp-in" type="text" :placeholder="$t('setup.fNamePlaceholder')" />
+          <label class="sp-lbl" for="sp-fullName">{{ $t('setup.fName') }}</label>
+          <input id="sp-fullName" v-model="form.fullName" class="sp-in" type="text" :placeholder="$t('setup.fNamePlaceholder')" />
 
-          <label class="vi-req sp-lbl">{{ $t('setup.fEmail') }}</label>
-          <input v-model="form.email" class="sp-in" type="email" placeholder="vous@exemple.cm" autocomplete="username" />
+          <label class="vi-req sp-lbl" for="sp-email">{{ $t('setup.fEmail') }}</label>
+          <input id="sp-email" v-model="form.email" class="sp-in" type="email" placeholder="vous@exemple.cm" autocomplete="username" />
 
-          <label class="vi-req sp-lbl">{{ $t('setup.fPassword') }}</label>
-          <input v-model="form.password" class="sp-in" type="password" autocomplete="new-password"
-                 :placeholder="$t('setup.fPasswordPlaceholder')" />
+          <label class="vi-req sp-lbl" for="sp-mdp">{{ $t('setup.fPassword') }}</label>
+          <span class="vi-mdp">
+            <input id="sp-mdp" v-model="form.password" class="sp-in"
+                   :type="voirMdp ? 'text' : 'password'" autocomplete="new-password"
+                   :placeholder="$t('setup.fPasswordPlaceholder')" />
+          <button type="button" class="vi-mdp__oeil"
+                  :aria-label="voirMdp ? $t('common.hidePassword') : $t('common.showPassword')"
+                  :aria-pressed="voirMdp" @click="voirMdp = !voirMdp">
+            <i :class="voirMdp ? 'pi pi-eye-slash' : 'pi pi-eye'" />
+          </button>
+          </span>
 
-          <label class="vi-req sp-lbl">{{ $t('setup.fPasswordConfirm') }}</label>
-          <input v-model="form.passwordConfirm" class="sp-in" type="password" autocomplete="new-password"
-                 :class="{ 'sp-in--bad': form.passwordConfirm && !motsDePasseIdentiques }" />
+          <label class="vi-req sp-lbl" for="sp-mdp2">{{ $t('setup.fPasswordConfirm') }}</label>
+          <span class="vi-mdp">
+            <input id="sp-mdp2" v-model="form.passwordConfirm" class="sp-in"
+                   :type="voirMdpConfirm ? 'text' : 'password'" autocomplete="new-password"
+                   :class="{ 'sp-in--bad': form.passwordConfirm && !motsDePasseIdentiques }" />
+          <button type="button" class="vi-mdp__oeil"
+                  :aria-label="voirMdpConfirm ? $t('common.hidePassword') : $t('common.showPassword')"
+                  :aria-pressed="voirMdpConfirm" @click="voirMdpConfirm = !voirMdpConfirm">
+            <i :class="voirMdpConfirm ? 'pi pi-eye-slash' : 'pi pi-eye'" />
+          </button>
+          </span>
           <small v-if="form.passwordConfirm && !motsDePasseIdentiques" class="sp-bad">
             {{ $t('setup.errMismatch') }}
           </small>
@@ -151,11 +173,19 @@ function versTableauDeBord() { router.push('/dashboard') }
         <template v-else>
           <p class="sp-note">{{ $t('setup.existingNote') }}</p>
 
-          <label class="vi-req sp-lbl">{{ $t('setup.fEmail') }}</label>
-          <input v-model="form.email" class="sp-in" type="email" autocomplete="username" />
+          <label class="vi-req sp-lbl" for="sp-email2">{{ $t('setup.fEmail') }}</label>
+          <input id="sp-email2" v-model="form.email" class="sp-in" type="email" autocomplete="username" />
 
-          <label class="vi-req sp-lbl">{{ $t('setup.fPasswordExisting') }}</label>
-          <input v-model="form.password" class="sp-in" type="password" autocomplete="current-password" />
+          <label class="vi-req sp-lbl" for="sp-mdp3">{{ $t('setup.fPasswordExisting') }}</label>
+          <span class="vi-mdp">
+            <input id="sp-mdp3" v-model="form.password" class="sp-in"
+                   :type="voirMdpExistant ? 'text' : 'password'" autocomplete="current-password" />
+          <button type="button" class="vi-mdp__oeil"
+                  :aria-label="voirMdpExistant ? $t('common.hidePassword') : $t('common.showPassword')"
+                  :aria-pressed="voirMdpExistant" @click="voirMdpExistant = !voirMdpExistant">
+            <i :class="voirMdpExistant ? 'pi pi-eye-slash' : 'pi pi-eye'" />
+          </button>
+          </span>
 
           <p v-if="erreur" class="sp-err"><i class="pi pi-exclamation-triangle" /> {{ $t('setup.err_' + erreur, erreur) }}</p>
           <button class="ps-btn sp-btn" :disabled="busy || !peutEntrer" @click="utiliserCompteExistant">

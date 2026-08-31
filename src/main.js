@@ -1,12 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
-import PrimeVue from 'primevue/config'
-import Aura from '@primevue/themes/aura'
-import { definePreset } from '@primevue/themes'
-import ToastService from 'primevue/toastservice'
-import ConfirmationService from 'primevue/confirmationservice'
-import Tooltip from 'primevue/tooltip'
+import { enregistrerApp } from '@/services/primevue'
 
 // <model-viewer> N'EST PLUS CHARGÉ ICI. Il l'était au démarrage, donc sur CHAQUE
 // page — 1 Mo, près d'un tiers du JavaScript du site, pour un composant que la
@@ -39,24 +34,9 @@ if ('serviceWorker' in navigator) {
   }
 }
 
-// Palette ERP « Génius » : orange #F26B21 (primaire) + navy #16223C.
-const Marron = definePreset(Aura, {
-  semantic: {
-    primary: {
-      50: '#fef3ec',
-      100: '#fcdcc6',
-      200: '#f9bd97',
-      300: '#f69a67',
-      400: '#f47f40',
-      500: '#f26b21',
-      600: '#d85817',
-      700: '#b44513',
-      800: '#8f3612',
-      900: '#742d12',
-      950: '#3f1507'
-    }
-  }
-})
+// La palette ERP a suivi PrimeVue dans services/primevue.js : elle n'a de sens
+// qu'avec le thème, et la garder ici aurait ramené definePreset — donc tout le
+// moteur de thèmes — dans le chemin critique du site public.
 
 // Applique le thème mémorisé avant le montage pour éviter le flash.
 if (localStorage.getItem('vi-theme') === 'dark') {
@@ -69,18 +49,14 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 app.use(i18n)
-app.use(PrimeVue, {
-  theme: {
-    preset: Marron,
-    options: {
-      darkModeSelector: '.app-dark',
-      cssLayer: false
-    }
-  }
-})
-app.use(ToastService)
-app.use(ConfirmationService)
-app.directive('tooltip', Tooltip)
+// PRIMEVUE N'EST PLUS INSTALLÉ ICI. Il l'est à la demande, par le garde de
+// route, pour les seuls écrans qui s'en servent — c'est-à-dire l'ERP. Le
+// visiteur d'un musée ne télécharge plus la bibliothèque de composants du
+// back-office pour regarder une œuvre. Voir services/primevue.js.
+//
+// L'application est déposée auprès du service : c'est le garde de route qui
+// décidera, écran par écran, s'il faut poser le thème avant d'entrer.
+enregistrerApp(app)
 
 // Vérifie la session Supabase avant le 1er rendu (le guard de route attend ensureReady()).
 useAuthStore(pinia).init()

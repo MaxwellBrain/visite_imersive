@@ -52,6 +52,9 @@ function destination() {
 }
 const email = ref('')
 const password = ref('')
+// L'oeil du champ : cet ecran sert a la connexion ET a l'inscription du
+// personnel, ou une faute de frappe invisible coute un aller-retour complet.
+const voirMdp = ref(false)
 const loading = ref(false)
 const error = ref('')
 const info = ref('')
@@ -244,13 +247,20 @@ async function google() {
           </div>
           <div class="vi-field">
             <label class="vi-req" for="l-pw">{{ $t('admin.login.password') }}</label>
-            <InputText
-              id="l-pw"
-              v-model="password"
-              type="password"
-              :autocomplete="mode === 'signup' ? 'new-password' : 'current-password'"
-              placeholder="••••••••"
-            />
+            <span class="vi-mdp">
+              <InputText
+                id="l-pw"
+                v-model="password"
+                :type="voirMdp ? 'text' : 'password'"
+                :autocomplete="mode === 'signup' ? 'new-password' : 'current-password'"
+                placeholder="••••••••"
+              />
+              <button type="button" class="vi-mdp__oeil"
+                      :aria-label="voirMdp ? $t('common.hidePassword') : $t('common.showPassword')"
+                      :aria-pressed="voirMdp" @click="voirMdp = !voirMdp">
+                <i :class="voirMdp ? 'pi pi-eye-slash' : 'pi pi-eye'" />
+              </button>
+            </span>
             <small v-if="mode === 'signup'">{{ $t('admin.login.passwordHint') }}</small>
           </div>
           <Button

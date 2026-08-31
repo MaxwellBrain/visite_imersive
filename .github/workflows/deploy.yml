@@ -18,59 +18,91 @@ concurrency:
   group: deploy-${{ inputs.environnement || 'production' }}
   cancel-in-progress: false
 
+# ── CONSTANTES DU DEPLOIEMENT ────────────────────────────────────────────
+#
+# Elles etaient des variables GitHub. Une region et un nom de domaine ne sont
+# pourtant ni l'un ni l'autre des secrets : les mettre ici les rend versionnes,
+# relisibles dans une revue, et modifiables par une pull request plutot que par
+# un formulaire que personne ne relit. On ne garde en secret que ce qui en est
+# vraiment un : les identifiants et les cles.
+env:
+  REGION_AWS: eu-west-3
+  DOMAINE_PLATEFORME: nexacode.store
+
 jobs:
   deploy:
     name: Publier sur AWS
     runs-on: ubuntu-latest
     environment: ${{ inputs.environnement || 'production' }}
 
-    # Interrupteur : tant que l'infrastructure n'existe pas, ce workflow ne doit
-    # pas s'exécuter. Sans ce garde-fou, chaque push sur main afficherait un échec
-    # rouge sans rapport avec le code — et on finit par ne plus regarder les échecs.
-    #
-    # À activer une fois `terraform apply` passé :
-    #   GitHub → Settings → Secrets and variables → Actions → Variables
-    #   DEPLOY_ENABLED = true
-    #
-    # (Une variable, et non un secret : GitHub interdit les secrets dans un `if`
-    #  au niveau du job.)
-    if: vars.DEPLOY_ENABLED == 'true'
 
     permissions:
       id-token: write # indispensable : c'est le jeton OIDC présenté à AWS
       contents: read
 
     steps:
+      # ── Y A-T-IL DE QUOI DEPLOYER ? ─────────────────────────────────────
+      #
+      # Remplace l'ancienne variable DEPLOY_ENABLED. Le principe est le meme —
+      # ne pas afficher un echec rouge tant que l'infrastructure n'existe pas —
+      # mais il n'y a plus rien a configurer : la presence des secrets DIT deja
+      # si le deploiement est possible. Un reglage de moins a tenir a jour, et
+      # un de moins a oublier.
+      #
+      # GitHub interdit le contexte `secrets` dans un `if` de job : c'est
+      # pourquoi ce controle est une ETAPE, et non une condition de job.
+      - name: Verifier la configuration
+        id: pret
+        env:
+          ROLE: ${{ secrets.AWS_ROLE_ARN }}
+          SEAU: ${{ secrets.S3_BUCKET }}
+        run: |
+          set -euo pipefail
+          if [ -n "${ROLE:-}" ] && [ -n "${SEAU:-}" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+            echo "Configuration presente : le deploiement peut avoir lieu."
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Deploiement ignore : il manque AWS_ROLE_ARN et/ou S3_BUCKET."
+            echo "Les poser dans Settings > Secrets and variables > Actions > Secrets."
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.pret.outputs.ok == 'true'
 
       - uses: actions/setup-node@v4
+        if: steps.pret.outputs.ok == 'true'
         with:
           node-version: 20
           cache: npm
 
       - name: Installer les dépendances
+        if: steps.pret.outputs.ok == 'true'
         run: npm ci
 
       - name: Compiler
+        if: steps.pret.outputs.ok == 'true'
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-          VITE_PLATFORM_DOMAIN: ${{ vars.PLATFORM_DOMAIN }}
+          VITE_PLATFORM_DOMAIN: ${{ env.DOMAINE_PLATEFORME }}
         run: npm run build
 
       # Aucune clé AWS n'est stockée : GitHub présente un jeton OIDC de courte
       # durée, AWS le vérifie et renvoie des identifiants temporaires.
       - name: S'authentifier auprès d'AWS
+        if: steps.pret.outputs.ok == 'true'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION || 'eu-west-3' }}
+          aws-region: ${{ env.REGION_AWS }}
 
       # ---------------------------------------------------------------------
       # Publication, en quatre passes. L'ordre et la séparation ne sont pas
       # cosmétiques : chaque famille de fichiers a sa durée de cache et son type.
       # ---------------------------------------------------------------------
       - name: Publier les fichiers immuables
+        if: steps.pret.outputs.ok == 'true'
         run: |
           # Les noms contiennent un hachage : le contenu ne changera jamais.
           aws s3 sync dist/ "s3://${{ secrets.S3_BUCKET }}/" \
@@ -83,6 +115,7 @@ jobs:
             --exclude "*.usdz"
 
       - name: Publier les modèles 3D avec le bon type MIME
+        if: steps.pret.outputs.ok == 'true'
         run: |
           # S3 étiquette par défaut binary/octet-stream. Le navigateur s'en
           # accommode, mais Scene Viewer (Android) et Quick Look (iOS) refusent
@@ -98,6 +131,7 @@ jobs:
             --cache-control "public,max-age=604800"
 
       - name: Publier les fichiers jamais mis en cache
+        if: steps.pret.outputs.ok == 'true'
         run: |
           # index.html porte les références aux bundles hachés, et sw.js décide
           # de ce que voient les visiteurs déjà venus. Mis en cache, l'un ou
@@ -115,6 +149,7 @@ jobs:
             --content-type "application/manifest+json"
 
       - name: Purger le cache CloudFront
+        if: steps.pret.outputs.ok == 'true'
         run: |
           ID=$(aws cloudfront create-invalidation \
             --distribution-id "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" \
@@ -129,9 +164,10 @@ jobs:
       # Vérification a posteriori : on contrôle ce que le visiteur reçoit
       # vraiment, pas ce qu'on croit avoir déployé.
       - name: Vérifier le site en ligne
+        if: steps.pret.outputs.ok == 'true'
         run: |
           set -e
-          BASE="https://${{ vars.PLATFORM_DOMAIN || 'nexacode.store' }}"
+          BASE="https://${{ env.DOMAINE_PLATEFORME }}"
 
           echo "── Page d'accueil ──"
           curl -fsS -o /dev/null -w "%{http_code}\n" "$BASE/" | grep -q 200

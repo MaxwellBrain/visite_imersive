@@ -218,11 +218,23 @@ const suggestions = computed(() =>
         </div>
       </div>
 
+      <!-- `museum-id` / `sector-id` ne sont pas décoratifs : ils ancrent l'avatar
+           vocal sur le corpus de CE musée et de CETTE salle. Sans eux, il
+           cherchait dans tout le locataire et répondait à côté sur une œuvre
+           précise — le guide paraissait bête alors qu'il était mal renseigné. -->
       <Object3DViewer
         v-model:visible="viewer.visible"
         :src="modeles.model3d"
         :ios-src="modeles.model3d_ios"
         :title="object.nom"
+        :museum-id="museumId"
+        :sector-id="object.sector_id || object.sectors?.id || null"
+        :secret="object.secret_mot && object.secret_recit
+          ? { mot: object.secret_mot, recit: object.secret_recit, indice: object.secret_indice || '' }
+          : null"
+        :object-id="object.id"
+        :tenant-id="object.tenant_id ?? null"
+        accueil
       />
     </template>
     <div v-else class="ps-muted">{{ $t('object.notFound') }}</div>

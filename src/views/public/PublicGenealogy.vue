@@ -88,7 +88,7 @@ watch(focusId, (id) => {
         <aside class="gen__side">
           <div class="gen__search">
             <i class="pi pi-search" />
-            <input v-model="q" type="text" :placeholder="$t('genealogy.searchPlaceholder')" />
+            <input v-model="q" type="text" :aria-label="$t('genealogy.searchPlaceholder')" :placeholder="$t('genealogy.searchPlaceholder')" />
             <button v-if="q" class="gen__clear" :aria-label="$t('common.close')" @click="q = ''">
               <i class="pi pi-times" />
             </button>
@@ -101,7 +101,7 @@ watch(focusId, (id) => {
             <li v-for="p in liste" :key="p.id">
               <div class="gen__row" :class="{ on: p.id === focusId, cmp: p.id === compareId }">
                 <button class="gen__item" @click="centrer(p.id)">
-                  <img v-if="p.portrait" :src="p.portrait" :alt="nomComplet(p)" />
+                  <img v-if="p.portrait" :src="p.portrait" :alt="nomComplet(p)" loading="lazy" decoding="async" />
                   <span v-else class="gen__ph"><i class="pi pi-user" /></span>
                   <span class="gen__item-b">
                     <strong>{{ nomComplet(p) }}</strong>

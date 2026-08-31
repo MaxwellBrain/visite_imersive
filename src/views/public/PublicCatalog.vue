@@ -37,7 +37,7 @@ const filtered = computed(() => {
         <p class="ps-hero__lead">{{ $t('catalog.lead') }}</p>
         <div class="csearch">
           <i class="pi pi-search" />
-          <input v-model="q" type="text" :placeholder="$t('catalog.searchPlaceholder')" />
+          <input v-model="q" type="text" :aria-label="$t('catalog.searchPlaceholder')" :placeholder="$t('catalog.searchPlaceholder')" />
         </div>
       </div>
     </header>
@@ -52,7 +52,7 @@ const filtered = computed(() => {
       <div v-else-if="filtered.length" class="cards">
         <router-link v-for="m in filtered" :key="m.id" :to="to(`/musees/${m.id}`)" class="mcard ps-card ps-card--hover">
           <div class="mcard__img">
-            <img v-if="m.photo" :src="m.photo" :alt="m.nom" />
+            <img v-if="m.photo" :src="m.photo" :alt="m.nom" loading="lazy" decoding="async" />
             <div v-else class="ps-ph"><i class="pi pi-building" /></div>
             <span v-if="m.type" class="ps-tag mcard__type">{{ m.type }}</span>
           </div>
