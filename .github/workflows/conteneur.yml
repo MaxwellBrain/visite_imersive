@@ -208,6 +208,7 @@ jobs:
     # AWS par OIDC. Sans AWS, le demander serait un privilege gratuit.
     permissions:
       contents: read
+      
 
     outputs:
       etiquette: ${{ steps.metadonnees.outputs.version }}

@@ -26,7 +26,15 @@ concurrency:
 # un formulaire que personne ne relit. On ne garde en secret que ce qui en est
 # vraiment un : les identifiants et les cles.
 env:
-  REGION_AWS: eu-west-3
+  # La region du seau S3 et de la distribution CloudFront. Verifie le
+  # 2026-08-31 : musea-production-007fc014 est bien en eu-west-3.
+  #
+  # ELLE PORTE DIRECTEMENT LE NOM QUE L AWS CLI ATTEND. Une variable
+  # intermediaire aurait oblige a la recopier dans le env: du job — or
+  # GitHub interdit le contexte env a cet endroit, puisqu il s y
+  # definirait lui-meme. La valeur serait arrivee vide, et chaque
+  # commande aws aurait repondu « You must specify a region ».
+  AWS_DEFAULT_REGION: eu-west-3
   DOMAINE_PLATEFORME: nexacode.store
 
 jobs:
@@ -36,9 +44,23 @@ jobs:
     environment: ${{ inputs.environnement || 'production' }}
 
 
+    # Plus de « id-token: write » : ce jeton ne servait qu'à présenter une
+    # identité OIDC à AWS. On passe par une clé d'accès, ce privilège n'a
+    # donc plus de raison d'être demandé.
     permissions:
-      id-token: write # indispensable : c'est le jeton OIDC présenté à AWS
       contents: read
+
+    # LES IDENTIFIANTS, POSÉS UNE FOIS POUR TOUT LE JOB. L'AWS CLI les lit
+    # d'elle-même dans ces trois variables : aucune étape d'authentification
+    # n'est nécessaire, et chaque commande `aws` en dispose.
+    #
+    # ⚠️ Une clé d'accès ne tourne pas toute seule, contrairement au jeton
+    # OIDC qui expirait en une heure. Celle-ci reste valable tant qu'elle
+    # n'est pas révoquée : si elle fuite, il faut aller la désactiver dans
+    # IAM. C'est le prix de la simplicité, et il vaut d'être connu.
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     steps:
       # ── Y A-T-IL DE QUOI DEPLOYER ? ─────────────────────────────────────
@@ -54,16 +76,18 @@ jobs:
       - name: Verifier la configuration
         id: pret
         env:
-          ROLE: ${{ secrets.AWS_ROLE_ARN }}
+          CLE: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          SECRET: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           SEAU: ${{ secrets.S3_BUCKET }}
         run: |
           set -euo pipefail
-          if [ -n "${ROLE:-}" ] && [ -n "${SEAU:-}" ]; then
+          if [ -n "${CLE:-}" ] && [ -n "${SECRET:-}" ] && [ -n "${SEAU:-}" ]; then
             echo "ok=true" >> "$GITHUB_OUTPUT"
             echo "Configuration presente : le deploiement peut avoir lieu."
           else
             echo "ok=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Deploiement ignore : il manque AWS_ROLE_ARN et/ou S3_BUCKET."
+            echo "::notice::Deploiement ignore : identifiants AWS ou seau S3 absents."
+            echo "Requis : AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET."
             echo "Les poser dans Settings > Secrets and variables > Actions > Secrets."
           fi
 
@@ -88,14 +112,6 @@ jobs:
           VITE_PLATFORM_DOMAIN: ${{ env.DOMAINE_PLATEFORME }}
         run: npm run build
 
-      # Aucune clé AWS n'est stockée : GitHub présente un jeton OIDC de courte
-      # durée, AWS le vérifie et renvoie des identifiants temporaires.
-      - name: S'authentifier auprès d'AWS
-        if: steps.pret.outputs.ok == 'true'
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ env.REGION_AWS }}
 
       # ---------------------------------------------------------------------
       # Publication, en quatre passes. L'ordre et la séparation ne sont pas
