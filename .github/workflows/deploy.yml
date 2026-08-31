@@ -82,6 +82,40 @@ jobs:
         run: |
           set -euo pipefail
           if [ -n "${CLE:-}" ] && [ -n "${SECRET:-}" ] && [ -n "${SEAU:-}" ]; then
+            # ── ON NETTOIE LE NOM DU SEAU AVANT DE S EN SERVIR ──────────────
+            #
+            # MESURE LE 2026-08-31 : le deploiement a echoue sur
+            #   Invalid bucket name "***"
+            # Le secret etait bien present — le controle passait — mais sa
+            # valeur ne ressemblait pas a un nom de seau. Trois recopies
+            # fautives reviennent tout le temps : le prefixe « s3:// » colle
+            # avec le nom, une barre oblique finale, et un retour a la ligne
+            # invisible ramasse en copiant depuis un terminal.
+            #
+            # Le message d AWS ne dit rien de tout cela : il affiche « *** »,
+            # puisque la valeur est masquee, et recite une expression
+            # reguliere de trois lignes. On peut y passer une heure.
+            SEAU=$(printf %s "$SEAU" | tr -d " \t\r\n")
+            SEAU=${SEAU#s3://}
+            SEAU=${SEAU%/}
+
+            # La valeur nettoyee est masquee a son tour : sans cela, une
+            # variante du secret apparaitrait en clair dans les journaux.
+            echo "::add-mask::$SEAU"
+
+            # Les regles d AWS : 3 a 63 caracteres, minuscules, chiffres,
+            # points et tirets. On refuse ICI, avec un message lisible,
+            # plutot que de laisser la CLI le faire six etapes plus loin.
+            if ! printf %s "$SEAU" | grep -Eq "^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$"; then
+              echo "ok=false" >> "$GITHUB_OUTPUT"
+              echo "::error::Le secret S3_BUCKET ne ressemble pas a un nom de seau."
+              echo "Attendu : le NOM SEUL, par exemple musea-production-007fc014"
+              echo "Ni s3://, ni barre oblique finale, ni URL complete, ni ARN."
+              echo "Obtenu : une chaine de ${#SEAU} caracteres."
+              exit 0
+            fi
+
+            echo "SEAU_S3=$SEAU" >> "$GITHUB_ENV"
             echo "ok=true" >> "$GITHUB_OUTPUT"
             echo "Configuration presente : le deploiement peut avoir lieu."
           else
@@ -121,7 +155,7 @@ jobs:
         if: steps.pret.outputs.ok == 'true'
         run: |
           # Les noms contiennent un hachage : le contenu ne changera jamais.
-          aws s3 sync dist/ "s3://${{ secrets.S3_BUCKET }}/" \
+          aws s3 sync dist/ "s3://${{ env.SEAU_S3 }}/" \
             --delete \
             --cache-control "public,max-age=31536000,immutable" \
             --exclude "index.html" \
@@ -136,12 +170,12 @@ jobs:
           # S3 étiquette par défaut binary/octet-stream. Le navigateur s'en
           # accommode, mais Scene Viewer (Android) et Quick Look (iOS) refusent
           # le fichier : la 3D s'affiche et la réalité augmentée échoue en silence.
-          aws s3 sync dist/ "s3://${{ secrets.S3_BUCKET }}/" \
+          aws s3 sync dist/ "s3://${{ env.SEAU_S3 }}/" \
             --exclude "*" --include "*.glb" \
             --content-type "model/gltf-binary" \
             --cache-control "public,max-age=604800"
 
-          aws s3 sync dist/ "s3://${{ secrets.S3_BUCKET }}/" \
+          aws s3 sync dist/ "s3://${{ env.SEAU_S3 }}/" \
             --exclude "*" --include "*.usdz" \
             --content-type "model/vnd.usdz+zip" \
             --cache-control "public,max-age=604800"
@@ -152,15 +186,15 @@ jobs:
           # index.html porte les références aux bundles hachés, et sw.js décide
           # de ce que voient les visiteurs déjà venus. Mis en cache, l'un ou
           # l'autre fige le site sur la version précédente.
-          aws s3 cp dist/index.html "s3://${{ secrets.S3_BUCKET }}/index.html" \
+          aws s3 cp dist/index.html "s3://${{ env.SEAU_S3 }}/index.html" \
             --cache-control "no-cache,no-store,must-revalidate" \
             --content-type "text/html; charset=utf-8"
 
-          aws s3 cp dist/sw.js "s3://${{ secrets.S3_BUCKET }}/sw.js" \
+          aws s3 cp dist/sw.js "s3://${{ env.SEAU_S3 }}/sw.js" \
             --cache-control "no-cache,no-store,must-revalidate" \
             --content-type "application/javascript; charset=utf-8"
 
-          aws s3 cp dist/manifest.webmanifest "s3://${{ secrets.S3_BUCKET }}/manifest.webmanifest" \
+          aws s3 cp dist/manifest.webmanifest "s3://${{ env.SEAU_S3 }}/manifest.webmanifest" \
             --cache-control "public,max-age=3600" \
             --content-type "application/manifest+json"
 
