@@ -53,7 +53,16 @@ const FENETRE_MIN = 10    // …sur dix minutes
 // de route. Les modèles Live sont tous en « preview » : ils changent vite et
 // disparaissent sans préavis. Poser `GEMINI_LIVE_MODEL` permet d'en changer
 // depuis le tableau de bord Supabase, sans redéployer une ligne de code.
-const MODELE_DEFAUT = 'gemini-3.1-flash-live-preview'
+//
+// ⚠️ CE DÉFAUT EST CHOISI POUR SON PALIER GRATUIT, pas pour ses performances.
+// Au 2026-09, la grille tarifaire de Google donne :
+//   · gemini-2.5-flash-native-audio-preview-12-2025 → gratuit en entrée ET en
+//     sortie audio. C'est celui-ci.
+//   · gemini-3.1-flash-live-preview → l'audio est facturé ($3/M en entrée,
+//     $12/M en sortie, soit ~0,005 $ et ~0,018 $ la minute).
+// Une chefferie doit pouvoir essayer l'agent sans ouvrir de facturation. Qui
+// veut la dernière génération pose GEMINI_LIVE_MODEL et accepte la dépense.
+const MODELE_DEFAUT = 'gemini-2.5-flash-native-audio-preview-12-2025'
 
 // Plusieurs orthographes possibles pour la clé : on les accepte toutes et on
 // DIT laquelle on a cherchée si rien n'est trouvé. La différence entre un
