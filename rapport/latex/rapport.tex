@@ -378,6 +378,54 @@ musées : cas de la Fondation Jean Félicien Gacha}
     \end{minipage}}
   \end{center}}
 
+% --- Placement des flottants -------------------------------------------------
+% Les réglages par défaut de LaTeX sont très conservateurs : ils interdisent
+% qu'une page porte plus de 70 % de flottants et exigent 20 % de texte, ce qui,
+% dans un chapitre chargé en tableaux et en captures, laisse des pages à moitié
+% vides. On desserre ces bornes sans permettre les pages entièrement flottantes.
+\renewcommand{\topfraction}{0.90}
+\renewcommand{\bottomfraction}{0.80}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+
+% --- Placement des flottants -------------------------------------------------
+% Les réglages par défaut de LaTeX sont conservateurs : ils refusent de poser un
+% grand flottant en haut d'une page qui contient du texte, ce qui, dans un
+% chapitre chargé en captures et en schémas, laisse des pages à demi vides. On
+% les assouplit : une figure peut occuper jusqu'à 90 % du haut de page, et il
+% suffit de 7 % de texte pour qu'une page reste une page de texte.
+\renewcommand{\topfraction}{0.90}
+\renewcommand{\bottomfraction}{0.80}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+
+% --- Insertion d'une capture d'écran ----------------------------------------
+% Usage : \capture{nom-du-fichier.png}
+% Si le fichier est présent dans figures/, il est inséré à la largeur du texte,
+% avec un filet fin qui détache la capture du papier (une interface à fond clair
+% se confondrait sinon avec la page). S'il est absent, un cadre nomme le fichier
+% attendu : la compilation aboutit quand même et le manque est visible.
+\newcommand{\capture}[1]{%
+  \IfFileExists{figures/#1}{%
+    \setlength{\fboxsep}{0pt}%
+    \setlength{\fboxrule}{0.4pt}%
+    \fcolorbox{keycemid}{white}{\includegraphics[width=\dimexpr0.74\textwidth-0.8pt\relax]{figures/#1}}%
+  }{%
+    \setlength{\fboxsep}{10pt}%
+    \fcolorbox{keyceorange}{keycesoft}{%
+      \begin{minipage}[c][3.2cm][c]{0.90\textwidth}
+        \centering
+        {\sffamily\bfseries\color{keyceorange}FICHIER IMAGE MANQUANT}\\[6pt]
+        {\footnotesize\ttfamily\color{keycegrey} figures/#1\par}
+      \end{minipage}}%
+  }}
+
 % --- Emplacement réservé à une capture d'écran ou à une photographie ---------
 \newcommand{\acapturer}[2]{%
   \begin{center}
@@ -421,7 +469,7 @@ musées : cas de la Fondation Jean Félicien Gacha}
 \arrayrulecolor{black}
 % Les tableaux sont composés en corps réduit et à interligne simple : sur 27
 % tableaux, cela représente plusieurs pages économisées sans perte de lisibilité.
-\AtBeginEnvironment{tabularx}{\setstretch{1}\footnotesize}
+\AtBeginEnvironment{tabularx}{\setstretch{1}\scriptsize}
 \AtBeginEnvironment{longtable}{\setstretch{1}\footnotesize}
 
 % --- Introduction / conclusion de chapitre -----------------------------------
@@ -469,6 +517,9 @@ musées : cas de la Fondation Jean Félicien Gacha}
 \pagenumbering{Roman}
 \setcounter{page}{\value{derniereliminaire}}
 \entete{Table des matières}
+% Le sommaire ne la mentionnait pas : la table des matières doit y figurer,
+% comme le prévoit la structure générique du guide.
+\addcontentsline{toc}{chapter}{TABLE DES MATIÈRES}
 \etocsettocdepth{subsubsection}
 \etocclasstocstyle
 \etocstandardlines

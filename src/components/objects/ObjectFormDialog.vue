@@ -22,9 +22,11 @@ import { useGenealogyStore } from '@/stores/useGenealogyStore'
 import { OBJECT_CHEF_RELATIONS } from '@/constants/options'
 import { improveDescription, generateSeo } from '@/services/aiService'
 import ImageUploader from '@/components/common/ImageUploader.vue'
+import GalleryUploader from '@/components/common/GalleryUploader.vue'
 import { vignette } from '@/services/image'
 import Object3DViewer from '@/components/objects/Object3DViewer.vue'
 import { televerser } from '@/services/stockage'
+import { convertirUsdzEnGlb, ERREURS as ERREURS_USDZ } from '@/services/usdz'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -46,6 +48,11 @@ const generatingSeo = ref(false)
 const preview3dVisible = ref(false)
 const model3dInput = ref(null)
 const model3dIosInput = ref(null)
+// Étape de la conversion USDZ → GLB, ou null hors conversion. Un scan de 20 000
+// sommets prend une centaine de millisecondes, mais un fichier lourd sur une
+// machine lente peut occuper la page une seconde ou deux : sans ce témoin,
+// l'utilisateur croit que son clic n'a rien fait et recommence.
+const conversion = ref(null)
 
 const form = reactive({
   museumId: null,
@@ -55,6 +62,10 @@ const form = reactive({
   description: '',
   photo: '',
   photoThumb: null,
+  // Vues complementaires (migration 20260905_objet_galerie.sql). La photo
+  // ci-dessus reste la COUVERTURE : c'est elle que voient les listes, les
+  // vignettes et les cartes de partage.
+  photos: [],
   model3d: null,
   model3dName: '',
   model3dIos: null,
@@ -105,6 +116,7 @@ function reset() {
   form.description = obj?.description ?? ''
   form.photo = obj?.photo ?? ''
   form.photoThumb = obj?.photoThumb ?? null
+  form.photos = Array.isArray(obj?.photos) ? obj.photos.map((v) => ({ ...v })) : []
   form.model3d = obj?.model3d ?? null
   form.model3dName = obj?.model3dName ?? ''
   form.model3dIos = obj?.model3dIos ?? null
@@ -140,6 +152,7 @@ watch(
       try {
         const m = await store.chargerMedias(props.object.id)
         form.photo = m.photo || ''
+        form.photos = Array.isArray(m.photos) ? m.photos.map((v) => ({ ...v })) : []
         form.model3d = m.model3d || null
         form.model3dIos = m.model3d_ios || null
       } catch { /* la fiche reste modifiable sans ses médias */ } finally {
@@ -198,30 +211,58 @@ async function formatReel(file) {
   return 'inconnu'
 }
 
-async function lireModele(event, champ) {
-  const file = event.target.files?.[0]
-  if (!file) return
+// Le modele part dans le Storage, PAS en base64. Mesure du 2026-08-19 : un
+// maillage encode dans la colonne pesait 2,72 Mo, relus a chaque requete sur
+// l'objet, et retardait sa fiche publique de 12 s. Ici la colonne ne recoit
+// qu'une URL, et le fichier n'est telecharge qu'a l'ouverture de la 3D.
+async function deposer(file, champ, ext) {
+  const url = await televerser(file, 'modeles', { extensionForcee: ext })
+  form[champ] = url
+  form[`${champ}Name`] = file.name
+}
 
-  // LE contrôle qui manquait. Un USDZ déposé dans le champ GLB ne produit pas un
-  // rendu dégradé : model-viewer affiche « le modèle n'a pas pu être chargé »,
-  // sans indiquer pourquoi. C'est arrivé le 19 août 2026 et a coûté une enquête
-  // complète — le fichier était valide, seule sa destination était fausse.
-  const format = await formatReel(file)
-  const attendu = champ === 'model3d' ? 'glb' : 'usdz'
-  const compatible = attendu === 'glb'
-    ? (format === 'glb' || format === 'gltf-json')
-    : format === 'usdz'
-
-  if (!compatible) {
+// USDZ → GLB, dans la page. Renvoie le fichier converti, ou null si la lecture
+// a échoué — l'échec est alors déjà expliqué à l'utilisateur.
+async function convertirScan(file) {
+  conversion.value = 'lecture'
+  try {
+    const { fichier, stats } = await convertirUsdzEnGlb(file, {
+      onEtape: (etape) => { conversion.value = etape }
+    })
+    // Une UV mal interpolée ou une texture absente donne un modèle qui
+    // s'affiche mais qui est FAUX. Se taire produirait un objet gris que
+    // personne ne saurait expliquer trois semaines plus tard.
+    for (const a of stats.avertissements) {
+      toast.add({
+        severity: 'warn',
+        summary: t('admin.objects.usdzWarn'),
+        detail: t(`admin.objects.usdzWarn_${a.code}`, a),
+        life: 8000
+      })
+    }
+    return fichier
+  } catch (e) {
+    const code = Object.values(ERREURS_USDZ).includes(e?.message) ? e.message : null
+    console.warn('[usdz]', e?.message || e)
     toast.add({
       severity: 'error',
-      summary: t('admin.objects.model3dWrongSlot'),
-      detail: t(format === 'usdz' ? 'admin.objects.model3dIsUsdz' : 'admin.objects.model3dIsGlb'),
-      life: 9000
+      summary: t('admin.objects.usdzFailed'),
+      detail: code ? t(`admin.objects.${code}`) : (e?.message || ''),
+      life: 10000
     })
-    event.target.value = ''
-    return
+    return null
+  } finally {
+    conversion.value = null
   }
+}
+
+async function lireModele(event, champ) {
+  const file = event.target.files?.[0]
+  // Le champ de fichier est vidé tout de suite : la suite est asynchrone et ne
+  // relit jamais l'input, et sans cela redéposer le même fichier ne déclenche
+  // aucun événement.
+  event.target.value = ''
+  if (!file) return
 
   const mo = file.size / (1024 * 1024)
   if (mo > MODEL_MAX_MO) {
@@ -231,17 +272,78 @@ async function lireModele(event, champ) {
       detail: t('admin.objects.model3dUseUrl', { n: mo.toFixed(1) }),
       life: 7000
     })
-    event.target.value = ''
     return
   }
-  // Le modele part dans le Storage, PAS en base64. Mesure du 2026-08-19 : un
-  // maillage encode dans la colonne pesait 2,72 Mo, relus a chaque requete sur
-  // l'objet, et retardait sa fiche publique de 12 s. Ici la colonne ne recoit
-  // qu'une URL, et le fichier n'est telecharge qu'a l'ouverture de la 3D.
+
+  // Le format se lit dans la SIGNATURE du fichier, pas dans son nom.
+  const format = await formatReel(file)
+
   try {
-    const url = await televerser(file, 'modeles', { extensionForcee: attendu })
-    form[champ] = url
-    form[`${champ}Name`] = file.name
+    // ---------------------------------------------------------------- USDZ --
+    //
+    // Un USDZ dans le champ GLB était refusé : « ce fichier va dans le champ
+    // iPhone ». Le contrôle était juste — aucun navigateur n'affiche un usdz —
+    // mais il laissait le conservateur devant une impasse, puisque c'est
+    // précisément ce que rend son iPhone. La conversion existait, hors de
+    // l'ERP, dans `scripts/usdz-vers-glb.py` : il fallait un poste de
+    // développeur pour s'en servir.
+    //
+    // Une seule dépose remplit donc maintenant LES DEUX champs : l'archive
+    // telle quelle pour Quick Look (iOS), sa conversion pour tout le reste du
+    // parc. Le musée n'a plus à savoir lequel va où.
+    if (format === 'usdz') {
+      // CHAQUE CHAMP RESTE MAÎTRE DE SON CONTENU.
+      //
+      // Une première version remplissait LES DEUX champs d'un seul dépôt : le
+      // .usdz partait aussi vers le champ iPhone, en plus de sa conversion. Ce
+      // n'est pas au formulaire d'en décider. La réalité augmentée iOS engage
+      // le musée sur une fonction visible du public — elle se choisit, elle ne
+      // s'active pas toute seule parce qu'un fichier avait le bon format.
+      //
+      // Le champ iPhone reçoit donc l'archive telle quelle, et lui seul. Le
+      // champ « Modèle 3D » reçoit la conversion, et lui seul.
+      if (champ === 'model3dIos') {
+        await deposer(file, 'model3dIos', 'usdz')
+        toast.add({ severity: 'success', summary: t('admin.objects.model3dLoaded'), detail: file.name, life: 2000 })
+        return
+      }
+
+      const glb = await convertirScan(file)
+      if (!glb) return
+      await deposer(glb, 'model3d', 'glb')
+      toast.add({
+        severity: 'success',
+        summary: t('admin.objects.usdzConverted'),
+        detail: t('admin.objects.usdzConvertedDetail', { n: (glb.size / (1024 * 1024)).toFixed(1) }),
+        life: 7000
+      })
+      return
+    }
+
+    // ----------------------------------------------------------- GLB / glTF --
+    //
+    // L'inverse reste une erreur, et sans remède : Quick Look ne lit que du
+    // usdz, et convertir un GLB en usdz demanderait un encodeur USD complet.
+    if (champ === 'model3dIos') {
+      toast.add({
+        severity: 'error',
+        summary: t('admin.objects.model3dWrongSlot'),
+        detail: t('admin.objects.model3dIsGlb'),
+        life: 9000
+      })
+      return
+    }
+    if (format !== 'glb' && format !== 'gltf-json') {
+      toast.add({
+        severity: 'error',
+        summary: t('admin.objects.model3dWrongSlot'),
+        detail: t('admin.objects.model3dUnknown'),
+        life: 9000
+      })
+      return
+    }
+
+    await deposer(file, 'model3d', 'glb')
     toast.add({ severity: 'success', summary: t('admin.objects.model3dLoaded'), detail: file.name, life: 2000 })
   } catch (e) {
     console.warn('[modele3d]', e?.message || e)
@@ -251,8 +353,6 @@ async function lireModele(event, champ) {
       detail: e?.message || '',
       life: 5000
     })
-  } finally {
-    event.target.value = ''
   }
 }
 
@@ -319,6 +419,7 @@ async function save() {
     description: form.description,
     photo: form.photo,
     photoThumb: form.photoThumb,
+    photos: form.photos,
     model3d: form.model3d,
     model3dName: form.model3dName,
     model3dIos: form.model3dIos,
@@ -485,6 +586,7 @@ async function save() {
             <div class="vi-field">
               <label>{{ $t('admin.objects.fPhoto') }}</label>
               <ImageUploader v-model="form.photo" bucket="photos" :label="$t('admin.objects.fPhotoUploader')" />
+              <small>{{ $t('admin.objects.fPhotoHint') }}</small>
             </div>
             <div class="vi-field">
               <label>{{ $t('admin.objects.fModel3d') }}</label>
@@ -512,11 +614,23 @@ async function save() {
                 <input
                   ref="model3dInput"
                   type="file"
-                  accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
+                  accept=".glb,.gltf,.usdz,model/gltf-binary,model/gltf+json,model/vnd.usdz+zip"
                   style="display: none"
                   @change="onModel3dFile"
                 />
               </div>
+
+              <!-- La conversion tient dans la page : on montre l'étape en cours
+                   plutôt qu'un sablier muet, parce qu'un scan lourd occupe le
+                   navigateur une seconde ou deux et qu'un bouton qui ne répond
+                   pas se reclique. -->
+              <p v-if="conversion" class="model3d-conv">
+                <i class="pi pi-spin pi-spinner" />
+                {{ $t('admin.objects.usdzStep_' + conversion) }}
+              </p>
+              <small v-else class="model3d-conv-hint">
+                <i class="pi pi-apple" /> {{ $t('admin.objects.usdzAccepted') }}
+              </small>
 
               <!-- Un modèle lourd se sert mieux par adresse web que stocké en base. -->
               <label class="model3d-url-lbl">{{ $t('admin.objects.model3dUrl') }}</label>
@@ -533,6 +647,16 @@ async function save() {
               </Message>
             </div>
           </div>
+
+          <!-- ============ Vues complémentaires ============
+               Une pièce ne se donne pas dans une seule image : face, profil,
+               revers, détail. La couverture ci-dessus sert les listes ; ces
+               vues-ci sont montrées à côté de la notice sur le site public. -->
+          <fieldset class="gal-set">
+            <legend><i class="pi pi-images" /> {{ $t('admin.objects.galleryTitle') }}</legend>
+            <p class="gal-intro">{{ $t('admin.objects.galleryIntro') }}</p>
+            <GalleryUploader v-model="form.photos" bucket="photos" :max="8" />
+          </fieldset>
 
           <!-- ============ Réalité augmentée ============ -->
           <fieldset class="ar-set">
@@ -661,9 +785,29 @@ async function save() {
 .ar-set legend { padding: 0 0.5rem; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.4rem; }
 .ar-set legend i { color: var(--gold, #cda24e); }
 .ar-intro { margin: 0 0 0.9rem; font-size: 0.83rem; color: var(--vi-muted); line-height: 1.6; }
+/* Les vues complementaires reprennent l'encadre de la RA : meme niveau dans
+   l'onglet Medias, donc meme traitement visuel. */
+.gal-set { border: 1px solid var(--p-content-border-color); border-radius: 10px; padding: 0.9rem 1.1rem 1.1rem; margin-top: 1.2rem; }
+.gal-set legend { padding: 0 0.5rem; font-weight: 700; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.4rem; }
+.gal-set legend i { color: var(--gold, #cda24e); }
+.gal-intro { margin: 0 0 0.9rem; font-size: 0.83rem; color: var(--vi-muted); line-height: 1.6; }
 .ar-url { margin-top: 0.5rem; }
 .model3d-url-lbl { display: block; margin-top: 0.7rem; }
 .model3d-legacy { margin-top: 0.6rem; }
+/* Conversion USDZ : le témoin d'étape prend la place de l'indication, jamais
+   l'inverse — deux lignes qui se remplacent ne font pas sauter la mise en page. */
+.model3d-conv,
+.model3d-conv-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.45rem 0 0;
+  min-height: 1.15rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+.model3d-conv { color: var(--gold, #cda24e); }
+.model3d-conv-hint { color: var(--vi-muted); }
 .publish-row {
   display: flex;
   align-items: center;

@@ -10,6 +10,7 @@ import Select from 'primevue/select'
 import ToggleSwitch from 'primevue/toggleswitch'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
+import { messageSuppression } from '@/services/ecriture'
 import { useSectorStore } from '@/stores/useSectorStore'
 import { useMuseumStore } from '@/stores/useMuseumStore'
 import { SECTOR_LOCATIONS } from '@/constants/options'
@@ -85,7 +86,7 @@ function remove(sector) {
         await store.remove(sector.id)
         toast.add({ severity: 'info', summary: t('admin.sectors.deleted'), life: 2000 })
       } catch (e) {
-        toast.add({ severity: 'error', summary: t('admin.common.deleteFailed'), detail: e.message, life: 3000 })
+        toast.add({ severity: 'error', summary: t('admin.common.deleteFailed'), detail: messageSuppression(e, t), life: 3000 })
       }
     }
   })

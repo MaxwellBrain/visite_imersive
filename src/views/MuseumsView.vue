@@ -8,8 +8,10 @@ import Select from 'primevue/select'
 import ToggleSwitch from 'primevue/toggleswitch'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
+import { messageSuppression } from '@/services/ecriture'
 import { useMuseumStore } from '@/stores/useMuseumStore'
 import { useSectorStore } from '@/stores/useSectorStore'
+import ImportFonds from '@/components/admin/ImportFonds.vue'
 import { MUSEUM_TYPES } from '@/constants/options'
 import MuseumFormDialog from '@/components/museums/MuseumFormDialog.vue'
 
@@ -83,7 +85,7 @@ function remove(museum) {
         await store.remove(museum.id)
         toast.add({ severity: 'info', summary: t('admin.museums.deleted'), life: 2000 })
       } catch (e) {
-        toast.add({ severity: 'error', summary: t('admin.common.deleteFailed'), detail: e.message, life: 3000 })
+        toast.add({ severity: 'error', summary: t('admin.common.deleteFailed'), detail: messageSuppression(e, t), life: 3000 })
       }
     }
   })
@@ -99,7 +101,13 @@ function remove(museum) {
           {{ $t('admin.museums.subtitle', { shown: filtered.length, total: store.items.length }) }}
         </p>
       </div>
-      <Button :label="$t('admin.museums.new')" icon="pi pi-plus" @click="openCreate" />
+      <div class="vi-page__actions">
+        <!-- Le même classeur qu'en « Objets » : il crée musées, salles ET
+             œuvres. Une fondation qui démarre part d'ici, pas de la liste des
+             œuvres — qui est vide à ce moment-là. -->
+        <ImportFonds />
+        <Button :label="$t('admin.museums.new')" icon="pi pi-plus" @click="openCreate" />
+      </div>
     </div>
 
     <div class="list-layout">

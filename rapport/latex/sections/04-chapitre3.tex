@@ -33,7 +33,7 @@ département du Ndé, région de l'Ouest du Cameroun. Elle intervient dans la
 culture, l'art, l'artisanat, l'éducation et le développement communautaire. Le
 tableau~\ref{tab:fiche} en présente la fiche d'identification.
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Fiche d'identification de la Fondation Jean Félicien Gacha}
 \label{tab:fiche}
@@ -83,13 +83,22 @@ l'accueil d'artistes en résidence ; \textbf{transmettre}, envers les scolaires,
 les chercheurs et les visiteurs ; et contribuer au \textbf{développement
 communautaire} local.
 
-Sur le plan organisationnel, la Fondation s'articule autour d'une direction, de
-pôles opérationnels — conservation et exposition, ateliers et résidences,
-accueil du public, communication, administration et finances — et d'un
-département de réflexion rattaché à la direction, le \emph{Think Tank}
-Fou'ndjem (figure~\ref{fig:organigramme}).
+Sur le plan organisationnel, la Fondation est administrée par un conseil
+d'administration et dirigée par une direction générale, assistée d'un
+secrétariat général. Cinq départements se partagent l'activité : le
+\textbf{Département Scolaire}, dont relève l'\textbf{ISBB}, l'établissement
+d'enseignement de la Fondation ; le \textbf{Département Culture et patrimoine},
+qui a la charge des espaces d'exposition et des collections ; le
+\textbf{Département Artisanat et création}, qui accueille les ateliers et les
+résidences d'artistes ; le \textbf{Département Développement communautaire},
+dont dépendent l'accueil du public et la communication ; et le
+\textbf{Département Administration et finances}. Le \emph{Think Tank}
+Fou'ndjem constitue le dernier département : structure de réflexion et de
+recherche, il ne conduit aucune activité opérationnelle et n'exerce aucune
+autorité sur les autres. La figure~\ref{fig:organigramme} en donne la
+représentation.
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
 \centering
 \schema{organigramme}
 \caption{Organigramme de la Fondation Jean Félicien Gacha}
@@ -97,47 +106,43 @@ Fou'ndjem (figure~\ref{fig:organigramme}).
 \source{Élaboré par nos soins à partir des entretiens conduits en juin 2026.}
 \end{figure}
 
+
 \subsection{Le Département \emph{Think Tank} Fou'ndjem et son rôle dans le projet}
 \label{sec:thinktank}
 
 Le Département \emph{Think Tank} Fou'ndjem est la structure de la Fondation
-dédiée à la réflexion et à la recherche sur les questions relatives au
-Cameroun, à sa culture, à son patrimoine et à son développement. Il constitue
-un espace de veille et d'analyse où sont examinées les problématiques
-contemporaines susceptibles d'éclairer les grands enjeux du pays, notamment
-celles qui touchent à la modernisation des infrastructures et au développement
-technologique et économique.
+dédiée à la réflexion et à la recherche sur le Cameroun, sa culture, son
+patrimoine et son développement : un espace de veille et d'analyse où sont
+examinées les problématiques contemporaines susceptibles d'éclairer les grands
+enjeux du pays, notamment celles qui touchent à la modernisation des
+infrastructures et au développement technologique.
 
-C'est dans ce cadre que le Département nous a accueilli pour notre stage
-académique. Son rôle dans le projet n'a pas été celui d'un client
-opérationnel : il n'administre pas les collections, ne reçoit pas le public et
-n'est pas l'utilisateur final de la plateforme, fonctions qui relèvent des
-pôles Conservation et exposition, Accueil du public et Communication. Il a
-tenu, lui, le rôle d'un cadre d'encadrement intellectuel et méthodologique.
-C'est notre encadreur au sein de ce Département, M. Adrien GHOMSI, qui nous a
-proposé de faire mûrir et d'approfondir un thème initialement esquissé, pour en
-faire un véritable sujet de fin d'études aligné sur notre spécialité en génie
-informatique.
+C'est dans ce cadre que le Département nous a accueilli. Son rôle n'a pas été
+celui d'un client opérationnel : il n'administre pas les collections, ne reçoit
+pas le public et n'est pas l'utilisateur final de la plateforme, fonctions qui
+relèvent des pôles Conservation et exposition, Accueil du public et
+Communication. Il a tenu celui d'un cadre d'encadrement intellectuel et
+méthodologique, notre encadreur, M. Adrien GHOMSI, nous ayant proposé de faire
+mûrir un thème initialement esquissé pour en faire un sujet de fin d'études
+aligné sur notre spécialité en génie informatique.
 
 Notre travail a dès lors consisté à contextualiser cette réflexion : concevoir
-et développer une plateforme de valorisation numérique du patrimoine adaptée
-aux réalités camerounaises — connectivité mobile instable, coût des données,
-sécurité des données en environnement multi-institutions — et montrer
-concrètement comment les enjeux de développement technologique portés par le
-\emph{Think Tank} Fou'ndjem peuvent se traduire en solutions logicielles
-souveraines et contextualisées. Ces trois contraintes ne sont pas restées
+une plateforme de valorisation numérique du patrimoine adaptée aux réalités
+camerounaises — connectivité mobile instable, coût des données, sécurité en
+environnement multi-institutions. Ces trois contraintes ne sont pas restées
 théoriques : elles ont commandé la priorité donnée au téléphone mobile, la
 sobriété des médias transportés et le cloisonnement des données par
 institution, décrits à la section~\ref{sec:implementation}.
 
-Le Département a donc joué un rôle de structure d'accueil et d'orientation
-scientifique : il a validé la pertinence du sujet et nous a laissé la liberté
-méthodologique nécessaire pour le développer techniquement, sans intervenir
-dans les choix d'implémentation, qui relèvent strictement de notre spécialité.
-Le tableau~\ref{tab:entites} situe les entités de la Fondation concernées par
-l'étude.
+Le tableau~\ref{tab:entites} situe les entités concernées
+et distingue le cadre d'accueil du périmètre d'application : le Département a
+cadré et validé la question de recherche en nous laissant la liberté
+méthodologique de la traiter, tandis que les pôles opérationnels ont fourni la
+matière documentaire et constituent les utilisateurs finaux du dispositif. Cette
+distinction écarte un contresens fréquent, qui consisterait à prendre l'entité
+d'accueil pour le commanditaire fonctionnel.
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Entités de la Fondation concernées par l'étude}
 \label{tab:entites}
@@ -149,58 +154,65 @@ l'étude.
 Direction & Conduite de la Fondation & Ouverture des espaces et des archives ; validation du principe du projet \\ \hline
 Département \emph{Think Tank} Fou'ndjem & Réflexion, veille et recherche sur le patrimoine et le développement & Structure d'accueil du stage ; cadrage intellectuel et méthodologique du sujet \\ \hline
 Pôle Conservation et exposition & Collections, salles et notices & Source de la matière documentaire ; utilisateur final du back-office \\ \hline
-Pôle Accueil du public & Visites guidées, entrées, ventes d'artisanat & Terrain d'observation ; utilisateur final de la billetterie et de la boutique \\ \hline
+Pôle Accueil du public & Visites guidées, entrées, ventes d'artisanat & Terrain d'observation ; utilisateur final de la boutique en ligne \\ \hline
 Pôle Communication & Présence en ligne de la Fondation & Utilisateur final du site public et des campagnes d'information \\ \hline
 \end{tabularx}
 \source{Élaboré par nos soins à partir des entretiens conduits en juin 2026.}
 \end{table}
 
-Le tableau~\ref{tab:entites} distingue le cadre d'accueil du périmètre
-d'application : le Département a cadré et validé la question de recherche,
-tandis que les pôles opérationnels ont fourni la matière documentaire et
-constituent les utilisateurs finaux du dispositif. Cette distinction écarte un
-contresens fréquent, qui consisterait à prendre l'entité d'accueil pour le
-commanditaire fonctionnel.
-
 \subsection{Environnement technologique existant}
 
-Le relevé de l'environnement numérique de la Fondation, effectué durant la
-première semaine du stage, fait apparaître la situation suivante :
+La Fondation n'abordait pas le numérique en terrain vierge : une première
+version en ligne existait déjà, et c'est d'elle qu'il faut partir. Cette version
+présentait des \textbf{photographies d'œuvres et d'objets}, chacune suivie d'une
+\textbf{brève description} textuelle. Le travail engagé n'est donc pas une
+informatisation à partir de rien, mais la transformation d'une vitrine en un
+dispositif de médiation.
 
-\begin{itemize}
-  \item \textbf{aucun système de gestion des collections} : l'inventaire des
-        œuvres est tenu sur des supports bureautiques dispersés et sur des
-        cahiers ;
-  \item \textbf{une présence en ligne réduite} : quelques pages de présentation
-        et des publications sur les réseaux sociaux, sans base documentaire ;
-  \item \textbf{aucune billetterie ni boutique en ligne} : les entrées et les
-        ventes d'artisanat se traitent exclusivement sur place ;
-  \item \textbf{aucun fichier des visiteurs} : une personne ayant visité la
-        Fondation ne peut pas être recontactée pour être informée d'une
-        exposition ;
-  \item \textbf{aucune sauvegarde structurée} des photographies et des notices.
-\end{itemize}
+Le relevé conduit durant la première semaine du stage précise ce que cette
+version permettait et ce qu'elle ne permettait pas. Elle donnait à voir les
+pièces, mais \textbf{sans parcours} : les photographies se consultaient une à
+une, sans qu'aucun cheminement ne relie les espaces entre eux, et sans que le
+visiteur puisse examiner un objet sous tous ses angles ni en apprécier la taille.
+Elle décrivait chaque pièce, mais \textbf{sans possibilité d'interrogation}.
+C'est le manque le plus lourd, et il mérite d'être chiffré : un visiteur qui
+voulait en savoir davantage sur une matière, une technique ou une histoire
+n'avait d'autre recours que d'écrire à la Fondation, et la réponse mettait
+\textbf{de dix à vingt jours} à lui parvenir lorsqu'elle lui parvenait, une part
+des demandes restant sans réponse. Un tel délai n'est pas une lenteur
+administrative : il annule la question, car le visiteur a cessé d'attendre bien
+avant. C'est cette constatation qui a rendu l'assistant conversationnel
+\textbf{crucial} plutôt qu'accessoire.
 
-Le contexte de collecte est donc celui d'une institution \emph{sans} système
-d'information : les données de l'étude ont été recueillies auprès des personnes
-et sur des supports non structurés, et non extraites d'une base existante. Ce
-point commande à la fois la méthode suivie et l'ampleur du travail de saisie
-initial.
+La version en ligne présentait enfin les objets isolément, \textbf{sans mise en
+relation} avec les collections d'autres institutions, et ne s'accompagnait
+\textbf{d'aucun outil de gestion} : les descriptions étaient saisies dans les
+pages elles-mêmes, sans inventaire structuré derrière, de sorte que toute mise à
+jour supposait une intervention technique.
+
+Ce sont ces quatre manques, et non une absence de présence numérique, qui
+constituent la valeur de départ à laquelle seront comparées, au
+tableau~
+ef{tab:mesures}, les valeurs relevées après mise en service.
+
 
 \subsection{Cadre et déroulement du stage}
 \label{sec:stage}
 
 Le stage s'est déroulé du 20 juin au 20 août 2026. Il a débuté par un entretien
-avec M. Adrien GHOMSI, consacré aux attentes de la structure, au règlement
-intérieur et aux objectifs de la période. Une visite complète des espaces,
-conduite par le pôle Accueil du public, nous a permis de prendre la mesure du
-lieu — condition préalable à toute tentative de le restituer numériquement — et
-d'observer dès la première semaine des visites guidées réelles ainsi que les
-questions que les visiteurs y posent spontanément. Les travaux ont ensuite été
-supervisés par l'encadreur professionnel selon le programme hebdomadaire
-présenté au tableau~\ref{tab:chronogramme}.
+avec M. Adrien GHOMSI, consacré aux attentes de la structure et aux objectifs de
+la période, puis par une visite complète des espaces conduite par le pôle
+Accueil du public, qui nous a permis de prendre la mesure du lieu, condition
+préalable à toute tentative de le restituer numériquement, et d'observer dès la
+première semaine des visites guidées réelles ainsi que les questions que les
+visiteurs y posent spontanément. Les travaux ont ensuite suivi le programme
+hebdomadaire présenté au tableau~\ref{tab:chronogramme}
+dont l'économie est la suivante : trois semaines de terrain et de cadrage, six
+semaines de réalisation menées par ordre de priorité décroissante des attentes
+recueillies, une dernière semaine d'industrialisation, de mise en ligne et de
+mesure.
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Chronogramme des tâches effectuées durant le stage}
 \label{tab:chronogramme}
@@ -226,7 +238,7 @@ par organisation ; développement du back-office : musées, salles, œuvres,
 tarifs, médias. \\ \hline
 Du 18 au 24 juillet 2026 &
 Développement du site public ; catalogue, fiches d'œuvres, boutique,
-billetterie avec billets à code QR ; gestion des événements et du livre d'or. \\ \hline
+gestion des événements et du livre d'or. \\ \hline
 Du 25 au 31 juillet 2026 &
 Développement du moteur de visite immersive à 360~degrés ; éditeur de parcours
 dans le back-office ; pose des points d'intérêt ; enchaînement des salles. \\ \hline
@@ -246,19 +258,14 @@ mesures de performance et de coût ; restitution à l'encadreur professionnel. \
 \source{Journal de bord du stage, juin--août 2026.}
 \end{table}
 
-Le chronogramme fait apparaître l'économie de la période : trois semaines
-consacrées au terrain et au cadrage, six semaines de réalisation menées par
-ordre de priorité décroissante des attentes recueillies, et une dernière
-semaine d'industrialisation, de mise en ligne et de mesure.
-
 \paragraph{Justification du choix du terrain.} Trois caractéristiques font de
-ce terrain un cas instructif. La richesse patrimoniale y est réelle et
-documentée, ce qui écarte le risque de construire un dispositif sans matière.
-Les contraintes de moyens y sont représentatives de celles des institutions
-patrimoniales de la sous-région, de sorte que ce qui fonctionne ici a des
-chances de fonctionner ailleurs. Enfin, le Département \emph{Think Tank}
-Fou'ndjem garantissait un interlocuteur capable de formuler le besoin et
-d'arbitrer les choix, condition indispensable à une recherche interactive.
+ce terrain un cas instructif : une richesse patrimoniale réelle et documentée,
+qui écarte le risque de construire un dispositif sans matière ; des contraintes
+de moyens représentatives de celles des institutions patrimoniales de la
+sous-région, de sorte que ce qui fonctionne ici a des chances de fonctionner
+ailleurs ; et un interlocuteur, le Département \emph{Think Tank} Fou'ndjem,
+capable de formuler le besoin et d'arbitrer les choix, condition indispensable à
+une recherche interactive.
 
 % =============================================================================
 \section{Présentation des données et des résultats}
@@ -268,22 +275,11 @@ d'arbitrer les choix, condition indispensable à une recherche interactive.
 
 \subsubsection{Étude de l'existant}
 
-L'étude de l'existant consiste à analyser les outils, les processus et les
-systèmes en place afin d'en identifier les forces, les faiblesses et les besoins
-non satisfaits. Appliquée à la Fondation, elle révèle un fonctionnement
-entièrement manuel pour ce qui touche à la valorisation.
+L'étude de l'existant identifie les forces, les faiblesses et les besoins non
+satisfaits du dispositif en place. Le tableau~\ref{tab:existant} récapitule les
+insuffisances relevées et les besoins qu'elles induisent.
 
-La découverte des espaces suppose une visite sur place. Les collections ne sont
-inventoriées que partiellement, sur des supports non reliés entre eux. Les
-tarifs et les entrées sont gérés sur registre papier. La communication vers le
-public repose sur des publications ponctuelles sur les réseaux sociaux, sans
-possibilité de recontacter les personnes intéressées. Enfin, aucune information
-n'est disponible pour le visiteur en dehors de la présence d'un guide.
-
-Le tableau~\ref{tab:existant} récapitule les insuffisances relevées et les
-besoins qui en découlent.
-
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Insuffisances du dispositif existant et besoins induits}
 \label{tab:existant}
@@ -293,9 +289,9 @@ besoins qui en découlent.
 \rowcolor{keycetete}
 \thead{Domaine} & \thead{Insuffisance constatée} & \thead{Besoin induit} \\ \hline
 Accès au lieu & La visite exige un déplacement physique & Parcours immersif à distance \\ \hline
-Perception des œuvres & Photographies plates, aucune notion de volume ni de taille & Présentation en trois dimensions et en réalité augmentée \\ \hline
+Perception des œuvres et des espaces & Photographies plates suivies d'une brève description & Visite à 360	extdegree{}, présentation en 3D, espaces en réalité augmentée \\ \hline
 Documentation & Notices dispersées, objets traités isolément & Inventaire structuré et mise en relation \\ \hline
-Information du visiteur & Aucune réponse possible hors présence d'un guide & Assistant conversationnel ancré sur les documents \\ \hline
+Information du visiteur & Question adressée par courriel, réponse en 10 à 20 jours ou sans suite & Assistant conversationnel ancré sur les documents \\ \hline
 Gestion administrative & Registres papier, données non sauvegardées & Progiciel de gestion intégré \\ \hline
 Relation au public & Aucun fichier de visiteurs & Adhésion en ligne et campagnes d'information \\ \hline
 Rayonnement & Dispositif non transposable à d'autres institutions & Architecture ouverte à plusieurs organisations \\ \hline
@@ -303,51 +299,19 @@ Rayonnement & Dispositif non transposable à d'autres institutions & Architectur
 \source{Étude de l'existant, juin--juillet 2026.}
 \end{table}
 
-Le tableau~\ref{tab:existant} met en évidence un enchaînement : chaque
-insuffisance relevée appelle un besoin précis, et chacun de ces besoins se
+Chaque insuffisance appelle un besoin précis, et chacun de ces besoins se
 retrouve plus loin sous la forme d'une fonctionnalité livrée. Les sept lignes
-couvrent l'accès au lieu, la perception des œuvres, la documentation,
-l'information du visiteur, la gestion administrative, la relation au public et
-le rayonnement de l'institution : le déficit n'est donc pas ponctuel, il est
-systémique.
-
-\subsubsection{Résultats des entretiens}
-
-L'analyse thématique des six entretiens conduits auprès du personnel a fait
-émerger cinq thèmes, présentés ici par ordre de fréquence d'apparition.
-
-\begin{enumerate}
-  \item \textbf{L'accessibilité} (six entretiens sur six). Le déplacement est
-        unanimement désigné comme le premier obstacle ; la diaspora, les
-        chercheurs étrangers et les écoles éloignées sont explicitement cités.
-
-  \item \textbf{La perception de l'espace} (cinq entretiens). Une photographie
-        ne rend compte ni des volumes ni de l'atmosphère des salles ;
-        l'expression « il faut être là pour comprendre » revient plusieurs fois.
-
-  \item \textbf{La mise en relation des objets} (quatre entretiens). Ce thème
-        n'était pas anticipé : il est apparu lorsqu'un interlocuteur a évoqué
-        des pièces comparables conservées à l'étranger, dont la Fondation n'a
-        connaissance que par ouï-dire. Cette remarque a engendré la deuxième
-        question spécifique de l'étude.
-
-  \item \textbf{La fiabilité de l'information} (quatre entretiens). Un
-        dispositif automatique qui énoncerait des informations fausses
-        porterait atteinte à la crédibilité de l'institution. Cette exigence a
-        orienté toute la conception de l'assistant.
-
-  \item \textbf{La pérennité économique} (trois entretiens) : le coût de
-        fonctionnement une fois le stagiaire parti. Cette question justifie à
-        elle seule la place accordée au FinOps dans ce travail.
-\end{enumerate}
+couvrent l'accès, la perception, la documentation, l'information du visiteur, la
+gestion, la relation au public et le rayonnement : le déficit n'est pas
+ponctuel, il est systémique.
 
 \subsubsection{Résultats du questionnaire}
 
 Le questionnaire a été administré à 42 visiteurs. Le
-tableau~\ref{tab:profil} présente le profil des répondants et le
-tableau~\ref{tab:attentes} leurs attentes.
+tableau~\ref{tab:profil} présente le profil des
+répondants ; le tableau~\ref{tab:attentes} ci-après expose leurs attentes.
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Profil des répondants au questionnaire}
 \label{tab:profil}
@@ -379,7 +343,7 @@ prêt à s'intéresser à la Fondation à distance. D'autre part, plus de huit
 visiteurs sur dix accèdent au numérique par un téléphone mobile : le dispositif
 devait donc être conçu pour le téléphone en priorité, et non pour l'ordinateur.
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Attentes exprimées à l'égard d'un dispositif de visite à distance}
 \label{tab:attentes}
@@ -422,7 +386,7 @@ d'accès à un service tiers ne se trouve dans le navigateur}. Toute demande
 adressée à un modèle de langue, à un service de synthèse vocale ou à un service
 de paiement transite par une fonction serveur qui détient seule le secret.
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
 \centering
 \schema{architecture-generale}
 \caption{Architecture générale de la plateforme MUSÉA}
@@ -473,20 +437,13 @@ cinq temps.
         préfère inventer plutôt que de décevoir.
 \end{enumerate}
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
 \centering
 \includegraphics[width=\textwidth]{figures/rag-musea.pdf}
 \caption{Architecture de l'assistant conversationnel à ancrage documentaire (RAG)}
 \label{fig:rag}
 \source{Élaboré par nos soins.}
 \end{figure}
-
-Une contrainte d'exploitation mérite d'être signalée, car elle a dicté un choix
-d'implémentation. La plateforme d'exécution des fonctions serveur impose une
-limite de ressources : la vectorisation de dix-huit fragments passe en
-1,7~seconde, tandis que vingt fragments déclenchent l'interruption de la
-fonction. Les traitements sont donc découpés en lots de douze, valeur retenue
-avec une marge de sécurité délibérée.
 
 \subsubsection{Le moteur de visite immersive}
 
@@ -499,35 +456,37 @@ atteignables au clavier et restituables par un lecteur d'écran.
 
 \subsubsection{Chaîne de numérisation tridimensionnelle et réalité augmentée}
 
-Deux chaînes d'acquisition coexistent. La première repose sur la
-\textbf{photogrammétrie} : trois orbites de prises de vue guidées autour de
-l'objet, puis reconstruction sur une instance à processeur graphique. La
-seconde exploite le \textbf{capteur LiDAR} du téléphone, qui fournit directement
-une géométrie correctement dimensionnée.
+Il faut distinguer deux usages de la trois dimensions, car ils ne portent pas
+sur les mêmes sujets et n'appellent pas les mêmes traitements.
 
-La restitution en réalité augmentée a exigé un traitement particulier de la
-diversité des appareils. Trois colonnes ont été ajoutées à la description de
-chaque œuvre :
+\textbf{Les œuvres} sont numérisées par \textbf{photogrammétrie} : trois orbites
+de prises de vue guidées autour de la pièce, puis reconstruction sur une
+instance à processeur graphique. Le modèle obtenu est destiné à la consultation
+à l'écran, où le visiteur le fait pivoter et l'examine sous tous ses angles.
 
-\begin{itemize}
-  \item un \textbf{modèle au format USDZ} : les appareils Apple ne déclenchent
-        de session de réalité augmentée qu'à partir de ce format, quel que soit
-        l'hébergement ;
-  \item un \textbf{mode de pose}, au sol ou au mur : sans cette indication, un
-        masque destiné à être accroché se retrouve couché sur le plancher ;
-  \item un \textbf{facteur d'échelle} : un maillage exporté en centimètres
-        arriverait cent fois trop grand.
-\end{itemize}
+\textbf{Les habitations et les espaces à visiter} relèvent au contraire de la
+\textbf{réalité augmentée}. Ils sont relevés au moyen du \textbf{capteur LiDAR}
+d'un téléphone, qui mesure directement les distances et fournit en quelques
+minutes une géométrie correctement dimensionnée, puis exportés dans les deux
+formats du web immersif, \textbf{GLB} pour les appareils Android et
+\textbf{USDZ} pour ceux d'Apple. Le visiteur peut alors faire apparaître
+l'espace dans son propre environnement, à l'échelle, au moyen des visionneuses
+intégrées aux systèmes mobiles : \emph{AR Quick Look} sur iOS, et le composant
+\texttt{model-viewer} associé à \emph{Scene Viewer} sur Android. Aucune
+application n'a donc à être installée, ce qui était la condition posée par le
+public visé.
 
-L'objet est présenté à ses \textbf{dimensions réelles}, mesurées sur le maillage
-et non saisies à la main : autoriser l'agrandissement libre ruinerait le propos,
-qui est de faire éprouver la taille véritable de la pièce. Le modèle de
-démonstration mesure ainsi 45 $\times$ 52 $\times$ 45 centimètres.
+Cette dualité de formats n'est pas un détail : produire un seul des deux revient
+à priver de la fonction la moitié des visiteurs. Le système enregistre pour
+chaque espace le modèle GLB, le modèle USDZ et le facteur d'échelle appliqué à
+l'export, faute de quoi un relevé exprimé en centimètres arriverait cent fois
+trop grand dans la scène réelle. La restitution se fait aux dimensions relevées
+et non à une taille choisie par le visiteur, car l'intérêt du procédé est
+précisément de faire éprouver l'échelle véritable du lieu.
 
-Enfin, la réalité augmentée suppose un téléphone, alors qu'une soutenance se
-tient devant un ordinateur. Un encodeur de codes QR a donc été écrit afin que le
-public puisse scanner l'écran et faire apparaître l'objet dans la salle où il se
-trouve.
+Enfin, la réalité augmentée supposant un téléphone alors qu'une présentation se
+tient devant un ordinateur, un encodeur de codes QR a été écrit afin que le
+public puisse scanner l'écran et poursuivre sur son propre appareil.
 
 \subsubsection{Infrastructure d'hébergement}
 
@@ -545,9 +504,18 @@ profonde est demandée, faute de quoi les codes QR de réalité augmentée
 échoueraient, et les \textbf{durées de cache différenciées} selon la famille de
 fichiers, sans quoi le site resterait figé sur une version périmée.
 
-La figure~\ref{fig:cloud} restitue l'ensemble de cette infrastructure telle
+La figure~\ref{fig:cloud} restitue l'ensemble de cette
+infrastructure telle
 qu'elle est décrite dans le code Terraform du projet. Elle se lit sur deux
 plans, que la teinte des tuiles distingue.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=\textwidth]{figures/architecture-cloud-musea.pdf}
+\caption{Architecture de l'infrastructure d'hébergement en nuage}
+\label{fig:cloud}
+\source{Élaboré par nos soins d'après la description Terraform du projet.}
+\end{figure}
 
 \textbf{Ce qui est en service} figure en pleine couleur, et l'on y suit deux
 chemins. Le premier est celui d'une requête de visiteur : le navigateur
@@ -574,45 +542,20 @@ besoin et qu'elles coûteraient sans rien servir. Elles sont l'objet de
 l'intervention proposée au chapitre~\ref{chap:diagnostic}. Ce schéma dit donc
 deux choses à la fois : l'état déployé, et la trajectoire déjà écrite.
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\textwidth]{figures/architecture-cloud-musea.pdf}
-\caption{Architecture de l'infrastructure d'hébergement en nuage}
-\label{fig:cloud}
-\source{Élaboré par nos soins d'après la description Terraform du projet.}
-\end{figure}
 
 \subsubsection{La chaîne d'intégration et de déploiement continus}
 
-La chaîne mise en place comporte deux enchaînements.
+La chaîne mise en place comporte deux enchaînements, mis en regard à la
+figure~\ref{fig:devops-actuel}. Le premier, déclenché à
+chaque dépôt de modification, compile l'application et exécute une série de
+contrôles sur le résultat produit, présence des fichiers attendus, validité des
+modèles tridimensionnels, présence de l'adresse du service de données dans le
+paquet compilé ; ce dernier contrôle mérite un mot, car sans cette adresse le
+site s'affiche parfaitement et ne charge aucune donnée, la panne la plus
+déroutante qui soit. Cet enchaînement s'arrête net, sans rien publier, dès qu'un
+contrôle échoue.
 
-Le premier, déclenché à chaque dépôt de modification, compile l'application et
-exécute une série de contrôles sur le résultat produit : présence des fichiers
-attendus, validité des modèles tridimensionnels, présence de l'adresse du
-service de données dans le paquet compilé. Ce dernier contrôle mérite un mot :
-sans cette adresse, le site s'affiche parfaitement et ne charge aucune donnée, la panne la plus déroutante qui soit.
-
-Le second, déclenché sur la branche principale, publie l'application, purge le
-cache de diffusion, puis, point essentiel, \textbf{vérifie le site en ligne}.
-On ne contrôle pas ce que l'on croit avoir déployé, on contrôle ce que le
-visiteur reçoit.
-
-L'authentification auprès du fournisseur de nuage ne repose sur aucune clé
-permanente : un jeton de courte durée est présenté à chaque exécution, et le
-rôle correspondant est restreint au dépôt de code concerné, à ce seul espace de
-stockage et à cette seule distribution.
-
-La figure~\ref{fig:devops-actuel} met ces deux enchaînements en regard. La
-bande supérieure est celle qui se déclenche à chaque dépôt de modification :
-elle s'arrête net, sans rien publier, dès qu'un contrôle échoue. La bande
-inférieure n'est atteinte que si tous les contrôles passent, et seulement
-depuis la branche principale : le jeton de courte durée est alors présenté, la
-publication a lieu, le cache est purgé, puis le site est vérifié \emph{en
-ligne}. C'est cette dernière flèche qui distingue la chaîne d'une simple
-automatisation de copie : elle interroge ce que le visiteur reçoit
-effectivement, et non ce que la chaîne croit avoir déposé.
-
-\begin{figure}[htbp]
+\begin{figure}[!ht]
 \centering
 \includegraphics[width=\textwidth]{figures/deploiement-musea.pdf}
 \caption{Chaîne d'intégration et de déploiement continus en service}
@@ -620,15 +563,25 @@ effectivement, et non ce que la chaîne croit avoir déposé.
 \source{Élaboré par nos soins d'après les fichiers de description des chaînes du projet.}
 \end{figure}
 
+Le second n'est atteint que si tous les contrôles passent, et seulement depuis
+la branche principale. Il publie l'application, purge le cache de diffusion,
+puis, point essentiel, \textbf{vérifie le site en ligne} : on ne contrôle pas ce
+que l'on croit avoir déployé, on contrôle ce que le visiteur reçoit. C'est cette
+dernière vérification qui distingue la chaîne d'une simple automatisation de
+copie. L'authentification auprès du fournisseur de nuage ne repose enfin sur
+aucune clé permanente : un jeton de courte durée est présenté à chaque
+exécution, et le rôle correspondant est restreint au dépôt de code concerné, à
+ce seul espace de stockage et à cette seule distribution.
+
+
 % =============================================================================
 \subsubsection{Ressources mobilisées et coût du projet}
 
-\paragraph{Ressources matérielles.}
+\paragraph{Ressources matérielles, logicielles et de service.} Le détail des
+moyens mobilisés figure aux tableaux~\ref{tab:materiel}
+et~\ref{tab:logiciel}.
 
-Le tableau~\ref{tab:materiel} recense le matériel physique mobilisé pour la
-réalisation du projet.
-
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Ressources matérielles mobilisées}
 \label{tab:materiel}
@@ -650,21 +603,7 @@ Trépied et tête panoramique & Prises de vue à 360 degrés & 1 & 35 000 & 35 0
 \source{Relevé des prix pratiqués à Bafoussam et à Douala, juin 2026.}
 \end{table}
 
-Le tableau~\ref{tab:materiel} appelle une lecture : l'ensemble formé par le
-téléphone à capteur LiDAR et les accessoires de prise de vue (480 000 FCFA)
-dépasse le poste de développement lui-même (450 000 FCFA). La contrainte
-matérielle d'un tel projet tient donc à l'acquisition des images et des
-volumes, non à la programmation.
-
-\paragraph{Ressources logicielles et services.}
-
-Le tableau~\ref{tab:logiciel} recense les logiciels et services utilisés. Il
-convient de souligner que la quasi-totalité de la chaîne technique repose sur
-des logiciels libres ou sur des paliers gratuits, ce qui constitue en soi un
-résultat : le coût d'entrée d'un tel dispositif n'est pas logiciel, il est
-matériel et humain.
-
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Ressources logicielles et services mobilisés}
 \label{tab:logiciel}
@@ -689,20 +628,60 @@ Meshroom, Blender & Photogrammétrie et préparation des maillages, logiciels li
 \source{Factures et relevés de consommation, juin--août 2026.}
 \end{table}
 
-Le tableau~\ref{tab:logiciel} montre que 92 \% de ce poste tient au système
-d'exploitation et à la connexion Internet, c'est-à-dire à des dépenses qui
-existeraient de toute façon. La chaîne technique proprement dite — base de
-données, génération de texte, synthèse vocale, développement,
-industrialisation — n'a rien coûté.
+Ces deux relevés appellent une lecture. Le matériel, d'un montant de
+1~133~000~FCFA, est constitué à 91~\% d'un poste de travail réutilisable : il
+s'agit d'un investissement acquis une fois pour toutes, et non d'une dépense
+propre au projet. Les logiciels et services, d'un montant de 162~710~FCFA,
+tiennent à 92~\% au système d'exploitation et à la suite bureautique,
+c'est-à-dire à des postes qui existeraient de toute façon ; la chaîne technique
+proprement dite, base de données, génération de texte, synthèse vocale,
+développement et industrialisation, n'a rien coûté.
 
 \paragraph{Coût de l'infrastructure en nuage.}
 
 Le coût de l'infrastructure ne se devine pas, il se relève. Conformément aux
-principes exposés au chapitre~1, la dépense a été suivie au moyen de l'outil
-d'analyse des coûts du fournisseur. Le tableau~\ref{tab:finops} détaille la
-dépense par service.
+principes exposés au chapitre~1, la dépense a été estimée au moyen
+d'\textbf{Infracost}, un outil libre qui lit les fichiers Terraform décrivant
+l'infrastructure, identifie chacune des ressources qu'ils déclarent, interroge
+le barème public du fournisseur et en déduit le coût mensuel correspondant.
 
-\begin{table}[htbp]
+\textbf{Pourquoi cet outil plutôt qu'un relevé de facturation.} Trois raisons
+ont commandé ce choix, et elles tiennent toutes à la question posée par la
+Fondation lors des entretiens : \emph{combien cela coûtera-t-il une fois le
+stagiaire parti ?}
+
+D'abord, \textbf{le moment de la mesure}. Une console de facturation constate
+une dépense déjà engagée : elle apprend en fin de mois ce que l'on a consommé.
+Infracost, lui, chiffre la modification \emph{avant} qu'elle ne soit appliquée,
+c'est-à-dire au moment où l'on peut encore y renoncer. Ajouter une passerelle
+NAT ou un répartiteur de charge dans un fichier Terraform paraît anodin ; savoir
+que ce geste engage plusieurs dizaines de dollars par mois change la décision,
+et ce savoir doit intervenir avant la fusion du code, non après.
+
+Ensuite, \textbf{la reproductibilité}. Le relevé de facturation dépend du compte
+sur lequel il est établi et ne se transmet pas. L'estimation d'Infracost, elle,
+se déduit des seuls fichiers versionnés : n'importe qui, muni du dépôt, obtient
+le même chiffre. C'est ce qui rend le coût annoncé dans ce rapport vérifiable
+par un tiers, ce qu'un relevé de compte privé ne permettrait pas.
+
+Enfin, \textbf{l'inscription dans la chaîne d'intégration continue}. L'outil
+s'exécute automatiquement à chaque proposition de modification de
+l'infrastructure et en publie l'écart de coût. La maîtrise de la dépense cesse
+alors d'être un audit ponctuel pour devenir un contrôle permanent, ce qui
+correspond exactement au troisième temps de la démarche FinOps exposée au
+chapitre~1, \emph{opérer}.
+
+\textbf{Ce que l'outil ne dit pas.} Une réserve doit être posée, faute de quoi
+le chiffre serait mal lu. Infracost évalue le coût \emph{structurel} des
+ressources déclarées, celui qui existe indépendamment de l'usage : une zone
+hébergée, un certificat, un serveur allumé. Il ne peut pas deviner les postes
+proportionnels à la consommation, volume stocké et données transférées, qu'il
+laisse à zéro sauf à lui fournir un fichier d'hypothèses d'usage. Les montants
+du tableau~\ref{tab:finops} combinent donc les deux sources : l'estimation
+structurelle pour les ressources déclarées, la consommation constatée pour les
+postes variables. Le tableau détaille la dépense par service.
+
+\begin{table}[!ht]
 \centering
 \caption{Détail du coût de l'infrastructure en nuage (relevé FinOps)}
 \label{tab:finops}
@@ -721,20 +700,9 @@ EC2 (processeur graphique) & Reconstruction photogrammétrique, 6 heures, instan
 \rowcolor{keycetotal}
 \multicolumn{3}{|l|}{\textbf{Total infrastructure sur la période du stage}} & \textbf{3 360} \\ \hline
 \end{tabularx}
-\source{AWS Cost Explorer, période du 20 juin au 20 août 2026 (voir
-figure~\ref{fig:finops}).}
+\source{Estimation \emph{Infracost} établie sur les fichiers de description de
+l'infrastructure, période du 20 juin au 20 août 2026.}
 \end{table}
-
-\begin{figure}[htbp]
-\centering
-\acapturer{5.2cm}{Insérer la capture d'écran d'AWS Cost Explorer montrant la
-dépense mensuelle ventilée par service sur la période du stage. Veiller à ce que
-les montants et les noms de services soient lisibles, et à masquer tout
-identifiant de compte.}
-\caption{Relevé de la dépense mensuelle d'infrastructure par service}
-\label{fig:finops}
-\source{Console AWS Cost Explorer, août 2026.}
-\end{figure}
 
 Ce relevé appelle un commentaire qui dépasse la simple comptabilité. Le coût
 récurrent de l'hébergement s'établit à environ \textbf{730 FCFA par mois}, soit
@@ -749,7 +717,7 @@ telle sorte que la dépense reste proportionnée à l'usage réel.
 
 \paragraph{Coût total du projet.}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Coût total du projet}
 \label{tab:couttotal}
@@ -778,254 +746,217 @@ tableau~\ref{tab:finops}.
 \subsection{Les résultats obtenus}
 \label{sec:resultats}
 
-Cette section décrit chacune des fonctionnalités effectivement livrées et, pour
-chacune, la finalité qu'elle poursuit.
+Le dispositif livré compte une vingtaine de fonctionnalités. Les décrire toutes
+n'aurait pas d'intérêt : cette section retient celles qui portent les hypothèses
+de l'étude, et renvoie pour les autres au tableau~\ref{tab:mesures}, qui en
+donne les valeurs mesurées.
 
-\subsubsection{F1 : La gestion des collections}
+\subsubsection{La gestion des collections et le site public}
 
-\textbf{Ce que fait la fonctionnalité.} Le back-office permet d'enregistrer les
-musées, puis les salles qui les composent, puis les œuvres qu'abritent ces
-salles. Chaque œuvre porte un nom, un nom commun, une description, une histoire,
-des médias, une grille tarifaire, un indice de rareté et, le cas échéant, ses
-modèles tridimensionnels.
+Le back-office permet d'enregistrer les musées, puis les salles qui les
+composent, puis les œuvres qu'abritent ces salles, chaque œuvre portant un nom,
+une description, une histoire, des médias, une grille tarifaire et, le cas
+échéant, ses modèles tridimensionnels. Cette fonctionnalité est le socle de tout
+le reste : sans inventaire structuré, ni la visite immersive, ni l'assistant, ni
+le rapprochement documentaire ne disposent de matière.
 
-\textbf{Pourquoi elle existe.} Elle constitue le socle de tout le reste : sans
-inventaire structuré, ni la visite immersive, ni l'assistant, ni le
-rapprochement documentaire ne disposent de matière. Elle répond directement à
-l'absence de système de gestion relevée lors de l'étude de l'existant.
-
-\subsubsection{F2 : Le site public de l'institution}
-
-\textbf{Ce que fait la fonctionnalité.} Chaque institution dispose d'un site
-public présentant son identité, ses musées, son catalogue, ses événements et sa
-boutique.
-
-\textbf{Pourquoi elle existe.} Pour que l'institution reste maîtresse de son
-image. L'ensemble des éléments visibles, marque, couleurs, images d'accueil,
-textes des pages de connexion, blocs de la page d'accueil, est modifiable
-depuis le back-office. Aucun texte n'est figé dans le code : une institution qui
-change de charte graphique n'a pas besoin d'un développeur.
-
-\subsubsection{F3 : La visite immersive à 360 degrés}
-
-\textbf{Ce que fait la fonctionnalité.} Le visiteur entre dans une salle,
-pivote librement, zoome, passe à la salle suivante par un point de passage, et
-touche un objet pour en ouvrir la fiche. Une mini-carte et une barre de
-progression lui indiquent où il se trouve dans le parcours.
-
-\textbf{Pourquoi elle existe.} Elle répond à l'attente la plus fréquemment
-exprimée par les visiteurs interrogés, se déplacer dans les salles comme si
-l'on y était, et à la première limite relevée dans la problématique : la visite
-passive sans sensation d'espace.
-
-\textbf{Point de conception notable.} Un mode de démonstration dessine une salle
-stylisée au vol, avec plafond, cimaise, alcôves éclairées et sol, dans une
-teinte différente par salle. Le parcours est donc démontrable \emph{avant} les
-prises de vue réelles, ce qui, sur un terrain dépourvu de matière numérique
-préexistante, a conditionné la possibilité même de présenter le dispositif.
-
-\begin{figure}[htbp]
+\begin{figure}[!ht]
 \centering
-\acapturer{5.2cm}{Insérer la capture d'écran du parcours immersif côté visiteur :
-panorama à 360 degrés, points d'intérêt cliquables, mini-carte, barre de
-progression et fiche flottante d'une œuvre.}
-\caption{Site public : le parcours de visite immersive}
-\label{fig:cap-tour}
-\source{Capture d'écran de la plateforme MUSÉA, août 2026.}
+\capture{cap-01-erp-musees.png}
+\caption{Back-office : la gestion des musées de l'institution}
+\label{fig:cap-erp}
+\source{Capture d'écran de la plateforme MUSÉA, septembre 2026.}
 \end{figure}
 
-\subsubsection{F4 et F5 : La présentation en trois dimensions et la réalité augmentée}
+La figure~\ref{fig:cap-erp} montre l'écran de gestion des musées. Trois éléments
+méritent d'être relevés : l'interrupteur \emph{En ligne / Hors ligne} porté par
+chaque fiche, qui fait de la publication une décision explicite du personnel, le
+musée marqué \emph{Brouillon} restant invisible du public ; les boutons
+\emph{Exporter le modèle Excel} et \emph{Importer}, qui répondent à l'objection
+formulée en entretien d'avoir à ressaisir un inventaire déjà tenu sur tableur ;
+et l'organisation en fiches illustrées plutôt qu'en tableau de base de données,
+le vocabulaire affiché étant celui du métier et non celui du modèle relationnel.
 
-\textbf{Ce que font les fonctionnalités.} Depuis la fiche d'une œuvre, le
-visiteur fait pivoter le modèle tridimensionnel, l'examine sous tous ses angles,
-puis, s'il utilise un téléphone compatible, le pose dans son propre
-environnement, à ses dimensions véritables.
+Chaque institution dispose par ailleurs d'un site public présentant son
+identité, ses musées, son catalogue et sa boutique. L'ensemble des éléments
+visibles, marque, couleurs, images d'accueil, textes des pages de connexion, est
+modifiable depuis le back-office : aucun texte n'est figé dans le code, de sorte
+qu'une institution qui change de charte graphique n'a pas besoin d'un
+développeur.
 
-\textbf{Pourquoi elles existent.} Pour répondre à la deuxième attente des
-visiteurs et pour donner corps à ce que nous avons appelé le « retour au pays » :
-faire apparaître, dans le salon d'un membre de la diaspora, un objet conservé à
-Bangoulap, à sa taille réelle. Une photographie ne produit jamais cet effet.
+\begin{figure}[!ht]
+\centering
+\capture{cap-02-site-public.png}
+\caption{Site public : l'en-tête de l'institution et la section des œuvres modélisées}
+\label{fig:cap-public}
+\source{Capture d'écran de la plateforme MUSÉA, septembre 2026.}
+\end{figure}
 
-\textbf{Couverture des appareils.} La fonction est opérationnelle sur les trois
-familles d'appareils visées : Android équipé d'ARCore, sans condition ; iPhone et
-iPad, dès qu'un modèle au format USDZ est chargé sur l'œuvre ; Android dépourvu
-de l'interface WebXR, à condition que les modèles soient des fichiers statiques
-et non des adresses temporaires. Sur ordinateur, où la réalité augmentée n'a pas
-de sens, un code QR renvoie le visiteur vers son téléphone.
+La figure~\ref{fig:cap-public} donne à voir ce que rencontre le visiteur : une
+navigation réduite à trois entrées, \emph{Musées}, \emph{Nos boutiques} et
+\emph{Généalogie}, qui sont les trois fils du projet, et la section « Tournez
+autour de l'œuvre » où chaque pièce effectivement modélisée porte la pastille
+\emph{3D}. Le bouton \emph{Back-office} placé dans l'en-tête mérite d'être
+relevé : le site public et l'outil de gestion ne sont pas deux applications
+séparées, et un membre du personnel déjà connecté passe de l'un à l'autre sans
+changer d'adresse.
 
-\subsubsection{F6 : Les codes QR de passage à l'appareil mobile}
+\subsubsection{La restitution spatiale : visite à 360 degrés, 3D et réalité augmentée}
 
-\textbf{Ce que fait la fonctionnalité.} Un code QR affiché à l'écran renvoie
-vers une page autonome dédiée à la réalité augmentée pour l'œuvre concernée.
+La restitution repose sur trois dispositifs distincts, qui ne répondent pas à la
+même question. \textbf{Le parcours à 360 degrés} répond à « où suis-je ? » : le
+visiteur entre dans une salle, pivote librement, passe à la salle suivante par
+un point de passage et touche un objet pour en ouvrir la fiche. \textbf{Le
+modèle tridimensionnel d'une œuvre} répond à « à quoi ressemble-t-elle sous tous
+ses angles ? » : depuis la fiche, la pièce se fait pivoter à l'écran.
 
-\textbf{Pourquoi elle existe.} Parce que la réalité augmentée exige un téléphone
-tandis qu'une présentation se tient devant un ordinateur. Sans ce pont, la
-fonctionnalité la plus démonstrative du projet resterait invisible au public
-auquel on la présente.
+\textbf{La réalité augmentée}, enfin, répond à « quelle taille cela fait-il, et
+comment est-ce chez moi ? », et elle ne porte pas sur les œuvres mais sur
+\textbf{les habitations et les espaces à visiter}. Relevés au capteur LiDAR puis
+exportés en GLB et en USDZ, ces espaces se posent dans l'environnement réel du
+visiteur, à l'échelle, au moyen des visionneuses intégrées aux téléphones, sans
+installation d'application. C'est là que se joue le « retour au pays » : faire
+apparaître, dans le salon d'un membre de la diaspora, une case de Bangoulap à sa
+dimension véritable. Sur ordinateur, où la réalité augmentée n'a pas de sens, un
+code QR renvoie le visiteur vers son téléphone.
 
-\subsubsection{F7 : Le relief 2.5D}
+Un mode de démonstration dessine enfin une salle stylisée au vol, ce qui a rendu
+le parcours démontrable \emph{avant} les prises de vue réelles.
 
-\textbf{Ce que fait la fonctionnalité.} Une photographie plate révèle du volume
-lorsque l'utilisateur bouge : les sommets d'un maillage subdivisé sont déplacés
-selon une carte de profondeur estimée.
+\subsubsection{Le guide vocal en temps réel et l'assistant à ancrage documentaire}
 
-\textbf{Pourquoi elle existe.} Toutes les œuvres ne seront jamais numérisées en
-trois dimensions : l'opération est longue et suppose de manipuler la pièce. Le
-relief offre un intermédiaire entre la photographie plate et le modèle complet.
+C'est la fonctionnalité la plus démonstrative du dispositif. \textbf{Pendant que
+le visiteur fait tourner un objet en trois dimensions, il peut parler à l'œuvre
+et celle-ci lui répond de vive voix}, sans passer par le clavier. La chaîne est
+entièrement temps réel : la voix du visiteur est transmise à un service
+conversationnel vocal, transcrite, portée à l'assistant documentaire, et la
+réponse est restituée en synthèse vocale pendant que la manipulation du modèle
+se poursuit. L'objet cesse ainsi d'être une pièce que l'on regarde pour devenir
+un interlocuteur, ce qui est très exactement l'objet d'une médiation muséale :
+la médiation est d'abord orale, et l'écoute libère le regard, puisqu'on ne peut
+pas lire une notice et observer une œuvre en même temps.
 
-\textbf{Limite assumée.} L'illusion tient de face et s'effondre de profil.
-L'angle de parallaxe est donc borné à vingt degrés, au-delà desquels les zones
-absentes de la photographie apparaissent et s'étirent. Ce bridage est la
-condition du procédé, non un réglage de confort.
+La fiabilité de cette parole repose sur l'\textbf{ancrage documentaire}, ou
+génération augmentée par la recherche. Le principe tient en trois temps. Les
+documents de l'institution sont d'abord découpés en fragments, chacun converti
+en un vecteur numérique qui en résume le sens ; la question du visiteur est
+ensuite convertie de la même manière, ce qui permet de retrouver les fragments
+les plus proches, non par mots-clés mais par proximité de sens ; ces fragments
+sont enfin remis au modèle de langue avec la consigne de ne répondre qu'à partir
+d'eux. Le modèle ne puise donc pas dans ce qu'il a appris ailleurs : il
+reformule ce que l'institution a écrit, et cite ses sources.
 
-\subsubsection{F8 : L'assistant conversationnel à ancrage documentaire}
+Quatre garde-fous complètent le dispositif : un refus poli des sujets hors
+périmètre, prononcé sans même solliciter le modèle de langue ; une réponse
+chaleureuse aux salutations ; une restriction de la recherche au musée ou à la
+salle où se trouve le visiteur ; et une consigne interdisant d'énoncer un fait
+absent des documents fournis, assortie de l'autorisation explicite de déclarer
+son ignorance. Les questions restées sans réponse sont enfin consignées de
+manière anonyme et classées en huit thèmes, puis présentées au personnel sous
+forme de conseils : au lieu de constater un échec, le journal indique quoi
+documenter.
 
-\textbf{Ce que fait la fonctionnalité.} Le visiteur pose une question en
-français ou en anglais ; l'assistant répond à partir des documents de
-l'institution, cite ses sources et propose des liens vers les fiches concernées.
+\subsubsection{La mémoire réunifiée et la généalogie}
 
-\textbf{Pourquoi elle existe.} Pour répondre à la troisième limite de la
-problématique, l'absence d'aide face aux questions précises, sans encourir le
-risque que redoutait le personnel : qu'un dispositif automatique énonce des
-contrevérités sur le patrimoine.
+À partir de la notice d'une œuvre, le système interroge en parallèle cinq
+collections ouvertes, ordonne les résultats par proximité de sens, fait
+justifier les rapprochements les plus probables, puis les soumet au conservateur
+qui valide, écarte ou corrige. Les correspondances validées apparaissent sur la
+fiche publique avec le nom du musée détenteur et le numéro d'inventaire. Une
+mesure comparative établit le résultat le plus instructif de l'étude : une
+recherche formulée en français ramène 16 résultats dont le meilleur atteint 57
+sur 100, tandis que la même recherche reformulée dans le vocabulaire de
+catalogage anglais n'en ramène que 5, mais dont le meilleur atteint 85. Ce
+résultat est interprété au chapitre~\ref{chap:diagnostic}.
 
-\textbf{Garde-fous mis en place.} Quatre mécanismes concourent à la fiabilité :
-un refus poli des sujets hors périmètre, prononcé sans même solliciter le modèle
-de langue ; une réponse chaleureuse aux salutations, plutôt qu'une demande de
-précision déplacée ; une restriction de la recherche au musée ou à la salle où
-se trouve le visiteur ; et une consigne interdisant d'énoncer un fait absent des
-documents fournis, assortie de l'autorisation explicite de déclarer son
-ignorance.
+Un arbre généalogique bidirectionnel prolonge ce fil : ascendants à gauche,
+descendants à droite, personne consultée au centre, avec calcul du chemin de
+filiation par l'aïeul commun le plus proche. Il donne corps au fil narratif qui
+structure tout le projet, \emph{objet $\rightarrow$ chef qui l'a possédé
+$\rightarrow$ chefferie $\rightarrow$ lignée $\rightarrow$ autres objets de la
+lignée}, car un objet qui ne mène nulle part est un échec de conception.
 
-\subsubsection{F9 et F10 : Le guide vocal et le journal des questions}
+\subsubsection{Les adhésions et le cloisonnement multi-organisations}
 
-\textbf{Ce que font les fonctionnalités.} La première permet d'écouter le récit
-d'une œuvre ou d'une salle, avec une voix choisie par l'institution et pouvant
-varier d'un musée, voire d'une salle, à l'autre. La seconde consigne de manière
-anonyme les questions auxquelles l'assistant n'a pu répondre, les classe en huit
-thèmes (matière, datation, origine, usage, auteur, dimensions, valeur,
-conservation) et les présente au personnel sous forme de conseils.
+Un visiteur qui crée un compte sur le site d'une institution en devient
+l'adhérent ; l'institution dispose alors d'un fichier exportable et peut lui
+adresser des campagnes d'information dont les destinataires sont calculés par la
+base de données et restreints aux personnes ayant consenti à être contactées.
 
-\textbf{Pourquoi elles existent.} Le guide vocal répond au fait que la médiation
-muséale est d'abord orale et que l'écoute libère le regard : on ne peut pas lire
-une notice et observer une œuvre en même temps. Le journal, lui, retourne le
-dispositif au profit de l'institution : au lieu de constater un échec, il
-indique quoi documenter. Un conseil tel que « précisez la matière et la
-technique de fabrication » est directement actionnable, là où un simple décompte
-ne le serait pas.
+\begin{figure}[!ht]
+\centering
+\capture{cap-03-adhesion.png}
+\caption{Site public : la page d'adhésion à l'institution}
+\label{fig:cap-adhesion}
+\source{Capture d'écran de la plateforme MUSÉA, septembre 2026.}
+\end{figure}
 
-\subsubsection{F11 et F12 : La mémoire réunifiée et le cabinet de comparaison}
+La figure~\ref{fig:cap-adhesion} matérialise les trois cercles d'identité qui
+coexistent sans se confondre. Les onglets \emph{Se connecter} et \emph{Créer un
+compte} ouvrent le premier, celui du visiteur. La mention placée au bas du
+formulaire, « Membre du personnel ? Connectez-vous ici avec vos identifiants
+habituels : vous serez conduit directement à votre back-office », ouvre le
+deuxième : le personnel emprunte la même porte que le public, et c'est le
+système qui le reconnaît et le redirige, sans qu'une adresse d'administration
+séparée ait à circuler. Le troisième est celui du super-administrateur de la
+plateforme.
 
-\textbf{Ce que font les fonctionnalités.} À partir de la notice d'une œuvre, le
-système interroge en parallèle cinq collections ouvertes, ordonne les résultats
-par proximité de sens, fait justifier les rapprochements les plus probables,
-puis les soumet au conservateur qui valide, écarte ou corrige la justification.
-Les correspondances validées apparaissent alors sur la fiche publique de
-l'œuvre, avec le nom du musée détenteur et le numéro d'inventaire.
+Ce cloisonnement est appliqué par la base de données, au moyen de règles de
+sécurité au niveau de la ligne, et non par le code de l'application. La
+différence est décisive : même un composant détourné ou défectueux ne peut pas
+lire les données d'une autre institution, parce que c'est la base qui refuse et
+non le programme qui s'abstient de demander. Cinquante et une tables sont ainsi
+protégées, sans exception, par cent une politiques déclarées.
 
-\textbf{Pourquoi elles existent.} Pour répondre à la deuxième limite de la
-problématique, des objets isolés et une histoire incomplète, et au thème
-inattendu apparu lors des entretiens.
+\subsubsection{L'assistant d'installation et le pilotage}
 
-\textbf{Résultat marquant.} Une mesure comparative conduite sur les mêmes
-collections et au même seuil de notation établit ce qui suit : une recherche
-formulée directement en français ramène 16 résultats dont le meilleur atteint un
-score de 57 sur 100, tandis que la même recherche reformulée dans le vocabulaire
-de catalogage anglais n'en ramène que 5, mais dont le meilleur atteint 85. Ce
-résultat est développé et interprété au chapitre~4.
+Une institution qui vient de s'inscrire décrit ses collections en langage
+courant, et un agent crée pour elle les musées, les salles et les premières
+œuvres. Cette fonctionnalité existe parce que la page blanche est le premier
+obstacle à l'adoption : une institution qui doit saisir cent notices avant de
+voir quoi que ce soit abandonne. L'agent écrit avec le jeton de la personne qui
+l'utilise, jamais avec une clé privilégiée ; les règles de cloisonnement
+s'appliquent donc exactement comme si la personne cliquait elle-même, ses outils
+sont limités à une liste blanche sans aucune suppression, et le nombre de
+créations est plafonné.
 
-\subsubsection{F13 : La généalogie navigable}
+\begin{figure}[!ht]
+\centering
+\capture{cap-04-assistant-installation.png}
+\caption{Back-office : l'assistant d'installation}
+\label{fig:cap-setup}
+\source{Capture d'écran de la plateforme MUSÉA, septembre 2026.}
+\end{figure}
 
-\textbf{Ce que fait la fonctionnalité.} Un arbre bidirectionnel présente les
-ascendants à gauche, les descendants à droite et la personne consultée au
-centre. Un clic recentre l'arbre sur une autre personne. Une recherche
-instantanée met en évidence les cartes correspondantes. Le chemin de filiation
-entre deux personnes, par l'aïeul commun le plus proche, est calculé et mis en
-évidence. Une frise chronologique présente enfin la succession des règnes.
+La figure~\ref{fig:cap-setup} montre le traitement réservé à la page blanche.
+L'institution est mise devant une invite en langage courant plutôt que devant un
+formulaire vide, suivie de la réserve qui importe, « Vous pourrez tout modifier
+ensuite ». Trois exemples cliquables lèvent l'hésitation devant le degré de
+précision attendu. Le bloc inférieur ouvre la seconde voie d'entrée, le dépôt
+d'un inventaire déjà tenu en Excel ou en CSV, dont l'assistant reconnaît les
+colonnes et \emph{montre son plan avant de créer quoi que ce soit} : cette
+validation préalable est la contrepartie ergonomique des garde-fous techniques,
+l'agent ne devenant jamais l'auteur d'une écriture que la personne n'a pas vue.
 
-\textbf{Pourquoi elle existe.} Pour donner corps au fil narratif qui structure
-tout le projet : \emph{objet $\rightarrow$ chef qui l'a possédé $\rightarrow$
-chefferie $\rightarrow$ lignée $\rightarrow$ autres objets de la lignée}. Un
-objet qui ne mène nulle part est un échec de conception.
+\begin{figure}[!ht]
+\centering
+\capture{cap-05-tableau-de-bord.png}
+\caption{Back-office : le tableau de bord de pilotage}
+\label{fig:cap-dashboard}
+\source{Capture d'écran de la plateforme MUSÉA, septembre 2026.}
+\end{figure}
 
-\subsubsection{F14 et F15 : La billetterie et la boutique}
+La figure~\ref{fig:cap-dashboard} rassemble enfin ce que le dispositif produit de
+lui-même. Le bloc « Ce que le public regarde » relève 102 consultations sur
+trente jours et classe les œuvres, et ce classement est celui-là même qui
+commande la mise en avant sur la page d'accueil publique
+(figure~\ref{fig:cap-public}), sans qu'aucune décision éditoriale n'ait été
+prise. Le bandeau orange illustre le journal des questions : il ne se contente
+pas d'annoncer « 10 question(s) sans réponse sur vos notices », il énonce la
+conduite à tenir, « Précisez la matière et la technique de fabrication ». C'est
+la différence entre un compteur et un conseil, et c'est ce qui rend
+l'information exploitable par un personnel restreint.
 
-\textbf{Ce que font les fonctionnalités.} Le visiteur achète un billet ou un
-produit d'artisanat ; le billet est délivré sous forme de code QR ; le personnel
-le contrôle à l'entrée au moyen de la caméra d'un téléphone.
-
-\textbf{Pourquoi elles existent.} Pour ouvrir un canal de recette qui n'existait
-pas et pour remplacer le registre papier par un contrôle vérifiable. La boutique
-répond en outre à une préoccupation exprimée par la Fondation : donner un
-débouché à la production des ateliers indépendamment des visites physiques.
-
-\subsubsection{F16 : Les adhésions et les campagnes d'information}
-
-\textbf{Ce que fait la fonctionnalité.} Un visiteur qui crée un compte sur le
-site d'une institution en devient l'adhérent. L'institution dispose alors d'un
-fichier exportable et peut lui adresser des campagnes d'information, dont la
-rédaction peut être assistée.
-
-\textbf{Pourquoi elle existe.} Pour transformer une visite ponctuelle en
-relation durable, ce que l'absence de fichier de visiteurs interdisait
-totalement.
-
-\textbf{Garanties apportées.} Les destinataires sont calculés par la base de
-données et restreints aux adhérents ayant consenti à être contactés ; chaque
-message comporte un lien de désinscription ; le contenu saisi par
-l'administrateur est intégralement échappé, de sorte qu'aucun code ne puisse y
-être injecté ; et la rédaction assistée se voit interdire d'inventer une date,
-un horaire, un tarif ou un nom d'œuvre qui ne lui aurait pas été fourni.
-
-\subsubsection{F17 : Le cloisonnement multi-organisations}
-
-\textbf{Ce que fait la fonctionnalité.} Chaque institution vit sur son propre
-sous-domaine et ne voit que ses propres données. Trois cercles d'identité
-coexistent sans jamais se confondre : le super-administrateur de la plateforme,
-le personnel d'une institution, et le visiteur, lequel possède un compte global
-et adhère à une ou plusieurs institutions.
-
-\textbf{Pourquoi elle existe.} Pour répondre au quatrième objectif : permettre
-l'accueil de nouvelles institutions sans reconstruction. C'est la condition de
-la diffusion du dispositif au-delà de la Fondation.
-
-\textbf{Point de conception notable.} Le cloisonnement est appliqué par la base
-de données au moyen de règles de sécurité au niveau de la ligne, et non par le
-code de l'application. La différence est décisive : même un composant détourné
-ou défectueux ne peut pas lire les données d'une autre institution, parce que
-c'est la base qui refuse, et non le programme qui s'abstient de demander.
-
-\subsubsection{F18 : L'assistant d'installation}
-
-\textbf{Ce que fait la fonctionnalité.} Une institution qui vient de s'inscrire
-décrit ses collections en langage courant ; un agent crée pour elle les musées,
-les salles et les premières œuvres.
-
-\textbf{Pourquoi elle existe.} Parce que la page blanche est le premier obstacle
-à l'adoption. Une institution qui doit saisir cent notices avant de voir quoi
-que ce soit abandonne.
-
-\textbf{Garantie de sécurité.} L'agent écrit avec le jeton de la personne qui
-l'utilise, jamais avec une clé privilégiée. Les règles de cloisonnement
-s'appliquent donc exactement comme si la personne cliquait elle-même : un agent
-détourné par une consigne malveillante ne peut rien écrire hors de son
-institution. Les outils dont il dispose sont en outre limités à une liste
-blanche, création de musée, de salle, d'œuvre et d'identité, sans aucune
-suppression, et le nombre de créations est plafonné.
-
-\subsubsection{F19 et F20 : Les statistiques de fréquentation et la carte de partage}
-
-\textbf{Ce que font les fonctionnalités.} La première comptabilise les
-consultations des fiches d'œuvres et met automatiquement en avant, sur la page
-d'accueil, les pièces les plus regardées. La seconde produit une image carrée
-prête à être partagée sur les messageries, comportant la photographie de
-l'œuvre, son nom, sa salle, la marque de l'institution et un code QR renvoyant
-vers sa fiche.
-
-\textbf{Pourquoi elles existent.} L'une et l'autre travaillent sans que le
-personnel ait à saisir, à consulter ou à décider quoi que ce soit, critère
-retenu pour juger de leur utilité réelle dans une institution aux effectifs
-restreints.
 
 % =============================================================================
 \subsubsection{Synthèse des mesures}
@@ -1033,45 +964,40 @@ restreints.
 Le tableau~\ref{tab:mesures} rassemble les mesures relevées sur le système, qui
 serviront de base à la vérification des hypothèses au chapitre suivant.
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
-\caption{Synthèse des mesures relevées sur le système}
+\caption{Synthèse des mesures : la situation avant et après la mise en service}
 \label{tab:mesures}
 \small
-\begin{tabularx}{\textwidth}{|C{2.2cm}|X|C{3.0cm}|}
+\begin{tabularx}{\textwidth}{|X|C{3.4cm}|C{3.4cm}|}
 \hline
 \rowcolor{keycetete}
-\thead{Variable} & \thead{Indicateur} & \thead{Valeur relevée} \\ \hline
-Variable 1 & Dimensions mesurées sur le modèle de démonstration & 45 $\times$ 52 $\times$ 45 cm \\ \hline
-Variable 1 & Sommets du maillage de démonstration & 835 \\ \hline
-Variable 1 & Plateformes couvertes pour la réalité augmentée & 3 sur 3 \\ \hline
-Variable 1 & Angle de parallaxe admissible pour le relief & $\pm$ 20\textdegree \\ \hline
-Variable 2 & Collections ouvertes effectivement interrogées & 5 \\ \hline
-Variable 2 & Œuvres apparentées identifiées & 41 \\ \hline
-Variable 2 & Meilleur score de correspondance obtenu & 90 / 100 \\ \hline
-Variable 2 & Pays représentés sur le globe de dispersion & 137 \\ \hline
-Variable 2 & Score en recherche française brute (meilleur) & 57 / 100 \\ \hline
-Variable 2 & Score après reformulation en vocabulaire de catalogue & 85 / 100 \\ \hline
-Variable 2 & Séparation des scores en anglais (frères / bruit) & 0,898 / 0,779 \\ \hline
-Variable 2 & Séparation des scores en français (étendue) & 0,13 \\ \hline
-Variable 3 & Fonctions serveur déployées & 12 \\ \hline
-Variable 3 & Fragments vectorisables par appel & 18 (lots de 12 retenus) \\ \hline
-Variable 3 & Durée de vectorisation de 18 fragments & 1,7 s \\ \hline
-Variable 3 & Thèmes de classement des questions sans réponse & 8 \\ \hline
-Variable 4 & Tables de la base de données & 38 \\ \hline
-Variable 4 & Ressources d'infrastructure décrites par le code & 29 \\ \hline
-Variable 4 & Ressources effectivement créées à la mise en ligne & 19 \\ \hline
-Variable 4 & Coût récurrent mensuel de l'hébergement & 730 FCFA \\ \hline
+\thead{Ce qui est mesuré} & \thead{Avant} & \thead{Après} \\ \hline
+\textbf{Délai de réponse à une question de visiteur} & \textbf{10 à 20 jours}, parfois sans réponse & \textbf{Immédiat} \\ \hline
+Questions ayant reçu une réponse & --- & 60 sur 70 (85,7 \%) \\ \hline
+Questions sans réponse, classées et rendues actionnables & 0 & 10, en 8 thèmes \\ \hline
+Espaces parcourables en continu à distance & 0 & Parcours à 360\textdegree{} reliant les salles \\ \hline
+Œuvres examinables sous tous les angles & 0 & 3 \\ \hline
+Espaces posables à leur taille réelle en réalité augmentée & 0 & Sur iOS et Android \\ \hline
+Collections extérieures interrogées & 0 & 5 \\ \hline
+Œuvres apparentées identifiées à l'étranger & 0 & 41, dans 137 pays \\ \hline
+Meilleur score de correspondance obtenu & --- & 90 / 100 \\ \hline
+Inventaire structuré derrière le site & Aucun & Base de 51 tables \\ \hline
+Tables protégées par une règle de sécurité & 0 & 51 sur 51 \\ \hline
+\textbf{Institutions servies par le dispositif} & \textbf{1} & \textbf{6} \\ \hline
+\textbf{Code à modifier pour accueillir une institution} & \textbf{Réécriture complète} & \textbf{Aucune ligne} \\ \hline
+Coût récurrent mensuel de l'hébergement & --- & 730 FCFA \\ \hline
 \end{tabularx}
-\source{Mesures effectuées sur la plateforme, juillet--août 2026.}
+\source{Relevé sur la base de données de production et sur les journaux du
+système, septembre 2026 ; valeurs de départ issues de l'étude de l'existant.}
 \end{table}
 
-Ces vingt indicateurs se répartissent sur les quatre variables de l'étude, à
-raison de quatre indicateurs pour les variables 1, 3 et 4 et de huit pour la
-variable 2, la plus instrumentée. Trois d'entre eux seront particulièrement
-mobilisés au chapitre suivant : la couverture des trois familles d'appareils
-pour la variable 1, l'écart entre les scores obtenus en français et en anglais
-pour la variable 2, et le coût récurrent mensuel pour la variable 4.
+Trois écarts portent l'essentiel du résultat. Le premier est le délai de réponse
+à une question : de dix à vingt jours, il passe à l'instantané, et c'est ce que
+mesure le taux de 85,7~\%. Le deuxième est l'ouverture documentaire : de zéro
+collection interrogée à cinq, et 41 œuvres apparentées retrouvées. Le troisième
+commande la diffusion du dispositif : six institutions servies au lieu d'une,
+sans qu'une seule ligne de code ait été modifiée pour les accueillir.
 
 \conclchap
 
@@ -1082,10 +1008,9 @@ personnel et des visiteurs, l'implémentation du dispositif et les vingt
 fonctionnalités livrées.
 
 Deux enseignements s'en dégagent. D'une part, les insuffisances relevées lors de
-l'étude de l'existant, les thèmes issus des entretiens et les attentes mesurées
-auprès des visiteurs convergent vers les mêmes priorités, dans le même ordre :
-se déplacer dans les espaces, percevoir les objets, interroger, relier. D'autre
-part, le dispositif construit à partir de ces données a effectivement été livré
-et mesuré. Les mesures rassemblées en fin de chapitre constituent la matière
+l'étude de l'existant et les attentes mesurées auprès des visiteurs convergent
+vers les mêmes priorités, dans le même ordre : se déplacer dans les espaces,
+percevoir les objets, interroger, relier. D'autre part, le dispositif construit
+à partir de ces données a effectivement été livré et mesuré. Les mesures rassemblées en fin de chapitre constituent la matière
 factuelle du diagnostic, que le chapitre~\ref{chap:diagnostic} interprète au
 regard des hypothèses de l'étude.

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { supabase } from '@/services/supabase'
+import { supprimerOuEchouer } from '@/services/ecriture'
 import { scopeToTenant } from '@/services/tenant'
 
 // Campagnes e-mail adressées au public de l'organisation (V2 Phase 4).
@@ -69,8 +70,7 @@ export const useCampaignStore = defineStore('campaigns', () => {
   }
 
   async function remove(id) {
-    const { error } = await supabase.from('campaigns').delete().eq('id', id)
-    if (error) throw error
+    await supprimerOuEchouer(supabase.from('campaigns').delete().eq('id', id))
     items.value = items.value.filter((x) => x.id !== id)
   }
 

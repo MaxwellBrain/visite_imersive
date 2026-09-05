@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import Object3DViewer from '@/components/objects/Object3DViewer.vue'
 import GuideInline from '@/components/public/GuideInline.vue'
 import CabinetFreres from '@/components/public/CabinetFreres.vue'
+import ObjectGallery from '@/components/public/ObjectGallery.vue'
 import { pubObject, pubObjectModels, pubObjectChefs, pubDispersion, pubObjectRarity, marquerVue } from '@/services/publicApi'
 import RarityBadge from '@/components/public/RarityBadge.vue'
 import { useAccessStore } from '@/stores/useAccessStore'
@@ -42,6 +43,50 @@ const viewer = reactive({ visible: false })
 // mousgoum se traverse, elle ne se fait pas tourner dans un cadre. Le
 // conservateur le declare par objet (voir 20260828_ar_seulement.sql).
 const arSeulement = computed(() => object.value?.ar_seulement === true)
+
+// NE PLUS PROPOSER UNE RÉALITÉ AUGMENTÉE QU'ON N'A PAS.
+//
+// Le bouton s'affichait dès que le visiteur avait un accès, sans regarder si
+// l'objet possédait le moindre maillage. Une pièce sans modèle annonçait donc
+// « Réalité augmentée », et le visiteur arrivait devant une scène vide — sur une
+// fiche parfois payante.
+//
+// Et la RA n'est pas UNE fonction : c'est deux, avec deux formats.
+//   · iPhone et iPad passent par Quick Look, qui ne lit QUE le .usdz.
+//   · Android et le reste passent par Scene Viewer ou WebXR, qui lisent le .glb.
+// Un seul drapeau ne pouvait donc pas décider pour les deux. On regarde le
+// format que l'appareil DEVANT SOI sait ouvrir.
+//
+// iPadOS 13+ se déclare « Macintosh » : sans le test tactile, un iPad serait
+// pris pour un ordinateur et se verrait proposer une RA qu'il ne peut pas ouvrir.
+const estIOS = computed(() => {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent || ''
+  return /iPad|iPhone|iPod/.test(ua) ||
+    (/Macintosh/.test(ua) && (navigator.maxTouchPoints || 0) > 1)
+})
+
+// Sur ordinateur, la fiche RA sert de relais : elle affiche un QR à scanner avec
+// le téléphone, lequel ouvrira Scene Viewer. C'est donc le .glb qui compte.
+const arDisponible = computed(() =>
+  estIOS.value ? object.value?.a_ar_ios === true : object.value?.a_glb === true)
+
+// La visionneuse à l'écran, elle, n'existe que pour le .glb : aucun navigateur
+// n'affiche un .usdz dans une page.
+const vue3dDisponible = computed(() => object.value?.a_glb === true && !arSeulement.value)
+
+// La pastille posée sur la photo annonce ce que la pièce offre VRAIMENT. Elle
+// affichait « 3D · AR » dès qu'un modèle existait — donc sur une pièce sans
+// aucun .usdz, dont la RA est inaccessible à tout iPhone.
+const pastille = computed(() => {
+  const o = object.value
+  if (!o) return null
+  if (arSeulement.value) return { icone: 'pi pi-mobile', texte: t('ar.badgeArOnly') }
+  if (o.a_glb && o.a_ar_ios) return { icone: 'pi pi-box', texte: '3D · AR' }
+  if (o.a_glb) return { icone: 'pi pi-box', texte: '3D' }
+  if (o.a_ar_ios) return { icone: 'pi pi-mobile', texte: 'AR' }
+  return null
+})
 
 
 async function load() {
@@ -106,15 +151,19 @@ const suggestions = computed(() =>
       </router-link>
 
       <div class="obj">
-        <div class="obj__media ps-card">
-          <img v-if="object.photo" :src="object.photo" :alt="object.nom" />
-          <div v-else class="ps-ph"><i class="pi pi-box" /></div>
-          <!-- Annoncer « 3D » sur une pièce qui n'offre que la RA serait une
-               promesse non tenue : la pastille suit ce que la fiche propose. -->
-          <span v-if="object.a_3d" class="ps-tag ps-tag--primary badge3d">
-            <i :class="arSeulement ? 'pi pi-mobile' : 'pi pi-box'" />
-            {{ arSeulement ? $t('ar.badgeArOnly') : '3D · AR' }}
-          </span>
+        <!-- Plusieurs vues de la pièce : face, profil, revers, détail. La
+             couverture (`photo`) ouvre toujours la série ; les suivantes
+             viennent de `photos` (20260905_objet_galerie.sql). -->
+        <div class="obj__media">
+          <ObjectGallery :cover="object.photo" :photos="object.photos || []" :alt="object.nom">
+            <template #badge>
+              <!-- Annoncer « 3D » sur une pièce qui n'offre que la RA serait une
+                   promesse non tenue : la pastille suit ce que la fiche propose. -->
+              <span v-if="pastille" class="ps-tag ps-tag--primary badge3d">
+                <i :class="pastille.icone" /> {{ pastille.texte }}
+              </span>
+            </template>
+          </ObjectGallery>
         </div>
 
         <div class="obj__info">
@@ -132,13 +181,16 @@ const suggestions = computed(() =>
           <!-- 3D et réalité augmentée : réservées aux abonnés. -->
           <div class="obj__actions">
             <template v-if="unlocked">
-              <router-link :to="to(`/ar/${object.id}`)" class="ps-btn">
+              <!-- Le bouton n'existe que s'il y a un modèle que CET appareil sait
+                   ouvrir. Sinon rien : mieux vaut ne rien annoncer qu'ouvrir une
+                   scène vide. -->
+              <router-link v-if="arDisponible" :to="to(`/ar/${object.id}`)" class="ps-btn">
                 <i class="pi pi-mobile" /> {{ arSeulement ? $t('ar.ctaArOnly') : $t('ar.cta') }}
               </router-link>
               <!-- Pas de visionneuse 3D quand l'objet est une architecture :
                    la faire pivoter dans un cadre dit le contraire de ce que la
                    pièce raconte. Voir 20260828_ar_seulement.sql. -->
-              <button v-if="object.a_3d && !arSeulement" class="ps-btn ps-btn--line" @click="ouvrirVisionneuse">
+              <button v-if="vue3dDisponible" class="ps-btn ps-btn--line" @click="ouvrirVisionneuse">
                 <i class="pi pi-box" /> {{ $t('object.view3d') }}
               </button>
             </template>
@@ -224,6 +276,7 @@ const suggestions = computed(() =>
            précise — le guide paraissait bête alors qu'il était mal renseigné. -->
       <Object3DViewer
         v-model:visible="viewer.visible"
+        plein-ecran
         :src="modeles.model3d"
         :ios-src="modeles.model3d_ios"
         :title="object.nom"
@@ -248,9 +301,10 @@ const suggestions = computed(() =>
 .obj { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2.4rem; align-items: start; }
 @media (max-width: 820px) { .obj { grid-template-columns: 1fr; } }
 
-.obj__media { position: relative; overflow: hidden; aspect-ratio: 4/3; }
-.obj__media img { width: 100%; height: 100%; object-fit: cover; }
-.badge3d { position: absolute; bottom: 0.8rem; left: 0.8rem; }
+/* Le cadre, l'image et la bande de vignettes vivent dans ObjectGallery : ici
+   on ne garde que la colonne qui les porte. */
+.obj__media { min-width: 0; }
+.badge3d { position: absolute; bottom: 0.8rem; left: 0.8rem; z-index: 2; }
 
 .obj__info h1 {
   font-family: 'Anton', 'Inter', sans-serif; font-weight: 400; text-transform: uppercase;

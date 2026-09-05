@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { supabase } from '@/services/supabase'
+import { supprimerOuEchouer } from '@/services/ecriture'
 import { scopeToTenant } from '@/services/tenant'
 
 // Visites immersives (Phase 6) — côté ERP.
@@ -104,8 +105,7 @@ export const useTourStore = defineStore('tours', () => {
   }
 
   async function remove(id) {
-    const { error } = await supabase.from('tours').delete().eq('id', id)
-    if (error) throw error
+    await supprimerOuEchouer(supabase.from('tours').delete().eq('id', id))
     items.value = items.value.filter((x) => x.id !== id)
     if (openTourId.value === id) { openTourId.value = null; scenes.value = []; hotspots.value = [] }
   }
@@ -137,8 +137,7 @@ export const useTourStore = defineStore('tours', () => {
   }
 
   async function removeScene(id) {
-    const { error } = await supabase.from('tour_scenes').delete().eq('id', id)
-    if (error) throw error
+    await supprimerOuEchouer(supabase.from('tour_scenes').delete().eq('id', id))
     scenes.value = scenes.value.filter((x) => x.id !== id)
     hotspots.value = hotspots.value.filter((h) => h.sceneId !== id)
   }
@@ -183,8 +182,7 @@ export const useTourStore = defineStore('tours', () => {
   }
 
   async function removeHotspot(id) {
-    const { error } = await supabase.from('scene_hotspots').delete().eq('id', id)
-    if (error) throw error
+    await supprimerOuEchouer(supabase.from('scene_hotspots').delete().eq('id', id))
     hotspots.value = hotspots.value.filter((x) => x.id !== id)
   }
 

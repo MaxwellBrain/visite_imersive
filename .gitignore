@@ -45,3 +45,12 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Infracost : le binaire (136 Mo) ne doit JAMAIS partir dans le dépôt.
+# GitHub refuse tout fichier de plus de 100 Mo. Il vit dans le PATH, pas ici.
+infracost.exe
+infracost
+# Clé API Infracost, si jamais elle atterrit dans le projet.
+credentials.yml
+.infracost/
+infracost*.json

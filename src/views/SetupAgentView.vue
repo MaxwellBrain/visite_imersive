@@ -2,6 +2,7 @@
 import { ref, nextTick, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Button from 'primevue/button'
+import ImportFonds from '@/components/admin/ImportFonds.vue'
 import Textarea from 'primevue/textarea'
 import Message from 'primevue/message'
 import { supabase } from '@/services/supabase'
@@ -134,6 +135,18 @@ function icone(type) {
         <button v-for="k in EXEMPLES" :key="k" type="button" @click="envoyer($t(k))">{{ $t(k) }}</button>
       </div>
 
+      <!-- L'ASSISTANT N'EST PAS QUE CONVERSATIONNEL.
+           Décrire deux cents pièces au clavier, dans un fil de discussion, n'a
+           aucun sens quand le musée a déjà son inventaire dans un tableur. On
+           lui offre donc ici la deuxième porte : déposer ses fichiers — un ou
+           plusieurs, Excel ou CSV — et laisser l'import ranger, nettoyer et
+           créer. C'est le même composant que dans « Musées » et « Objets ». -->
+      <div class="sa__import">
+        <span class="sa__import-t"><i class="pi pi-table" /> {{ $t('setupAgent.importTitre') }}</span>
+        <p>{{ $t('setupAgent.importLead') }}</p>
+        <div class="sa__import-b"><ImportFonds /></div>
+      </div>
+
       <Message v-if="erreur" severity="warn" :closable="false" class="sa__err">{{ erreur }}</Message>
 
       <form class="sa__form" @submit.prevent="envoyer()">
@@ -157,6 +170,16 @@ function icone(type) {
 </template>
 
 <style scoped>
+/* L'import, posé entre le fil et le formulaire : visible sans voler la vedette
+   à la conversation, qui reste le mode par défaut de l'assistant. */
+.sa__import {
+  border: 1px dashed var(--p-content-border-color, #dcdedb);
+  border-radius: 8px; padding: 0.9rem 1rem; margin-bottom: 0.8rem;
+}
+.sa__import-t { display: flex; align-items: center; gap: 0.4rem; font-weight: 600; font-size: 0.92rem; }
+.sa__import p { margin: 0.3rem 0 0.7rem; font-size: 0.85rem; opacity: 0.75; line-height: 1.5; }
+.sa__import-b { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
 .sa { max-width: 860px; }
 .sa__fil {
   background: var(--vi-surface, #fff); border: 1px solid var(--vi-border, #E9EDF2);

@@ -10,6 +10,7 @@ import Select from 'primevue/select'
 import ToggleSwitch from 'primevue/toggleswitch'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
+import { messageSuppression } from '@/services/ecriture'
 import { useTourStore } from '@/stores/useTourStore'
 import { useMuseumStore } from '@/stores/useMuseumStore'
 import TourFormDialog from '@/components/tours/TourFormDialog.vue'
@@ -85,7 +86,7 @@ function remove(tr) {
         await store.remove(tr.id)
         toast.add({ severity: 'info', summary: t('admin.tours.deleted'), life: 2000 })
       } catch (e) {
-        toast.add({ severity: 'error', summary: t('admin.common.deleteFailed'), detail: e.message, life: 3000 })
+        toast.add({ severity: 'error', summary: t('admin.common.deleteFailed'), detail: messageSuppression(e, t), life: 3000 })
       }
     }
   })

@@ -1,0 +1,263 @@
+% =============================================================================
+%  PREMIÈRE DE COUVERTURE ET PAGE DE GARDE — LICENCE 3
+%
+%  Document AUTONOME : il ne fait PAS partie de rapport.tex et ne doit pas y
+%  être inclus. On l'imprime séparément et on le place devant le rapport.
+%
+%  Conforme au « Guide de rédaction scientifique KEYCE v3.0 » :
+%    · § 2.1  Première de couverture licence   (page 12 du guide)
+%    · § 2.2  Page de garde licence            (page 13 du guide)
+%    · § 2.1.1  A4, marge gauche 3 cm, autres marges 2,5 cm ; Times New Roman
+%    · § 2.1.3  la couverture n'est PAS numérotée
+%
+%  Compilation :  pdflatex couverture
+% =============================================================================
+\documentclass[12pt,a4paper,oneside]{article}
+
+% ------------------------------------------------------------------ encodage
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{mathptmx}                 % Times New Roman (clone Nimbus Roman)
+
+% ---------------------------------------------------------------- géométrie
+% Marges du guide (§ 2.1.1). Les marges hautes et basses sont ramenées à 2 cm :
+% une page de couverture n'a ni en-tête ni pied, et le guide ne fixe la marge
+% de 2,5 cm que pour les pages de texte courant.
+\usepackage[a4paper,left=3cm,right=2.5cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{setspace}
+\usepackage[hidelinks]{hyperref}
+
+\graphicspath{{figures/logos/}}
+
+% ------------------------------------------------------------------ couleurs
+% Palette reprise à l'identique du corps du rapport (rapport.tex).
+\definecolor{keyceblue}{HTML}{1F4D78}    % bleu foncé  — thème et intitulés
+\definecolor{keycemid}{HTML}{2E74B5}     % bleu moyen  — filets
+
+% =============================================================================
+%  DONNÉES À RENSEIGNER — tout se modifie ici, et nulle part ailleurs.
+% =============================================================================
+\newcommand{\Theme}{Mise en place d'un système de visite immersive des musées:
+                    cas de la Fondation Jean Félicien Gacha}
+
+\newcommand{\Etudiant}{DASSI KAMGANG Max-Brian}
+\newcommand{\Diplome}{Licence en Génie Informatique}
+
+% Option / spécialité — laisser VIDE si aucune option n'est mentionnée :
+% la ligne disparaît alors d'elle-même de la page de garde.
+\newcommand{\Option}{}
+
+\newcommand{\EncadreurAcad}{M. GOUDJOU Blondon}
+\newcommand{\GradeAcad}{encadreur académique}
+\newcommand{\EncadreurPro}{M. Adrien GHOMSI}
+\newcommand{\GradePro}{encadreur professionnel, Think Tank Fou'ndjem}
+
+% Jury et date de soutenance : à compléter dès que l'établissement les
+% communique. Les pointillés tiennent lieu de réserve jusque-là.
+\newcommand{\JuryPresident}{\reserve{6.4cm}}
+\newcommand{\JuryRapporteur}{\reserve{6.4cm}}
+\newcommand{\JuryMembres}{\reserve{6.4cm}}
+\newcommand{\JuryInvite}{\reserve{6.4cm}}
+\newcommand{\DateSoutenance}{\reserve{4.4cm}}
+
+\newcommand{\AnneeAcad}{2025 -- 2026}
+\newcommand{\VillePays}{BAFOUSSAM, CAMEROUN}
+
+% =============================================================================
+%  OUTILS DE MISE EN PAGE
+% =============================================================================
+\pagestyle{empty}                 % § 2.1.3 : la couverture n'est pas numérotée
+\setlength{\parindent}{0pt}
+
+% Réserve pointillée, de largeur fixe, pour les informations encore inconnues.
+\newcommand{\reserve}[1]{\makebox[#1][l]{\dotfill}}
+
+% Colonne de tutelle : lignes centrées et grasses, coupées à la main pour que
+% chaque intitulé tienne sur sa propre ligne (aucune césure automatique).
+\newcommand{\bloctutelle}[1]{%
+  \parbox[t]{\linewidth}{\centering\bfseries
+    \fontsize{10}{12.5}\selectfont #1}}
+
+% Filet fin centré, de la largeur du cartouche du thème.
+\newcommand{\filetTheme}{%
+  \centerline{\color{keycemid}\rule{0.90\textwidth}{0.6pt}}}
+
+% Cartouche du thème : deux filets encadrant le titre, comme dans le guide.
+\newcommand{\cartoucheTheme}{%
+  \filetTheme
+  \vspace{0.45cm}
+  \begin{center}
+    \color{keyceblue}\itshape\bfseries\fontsize{14.5}{18.5}\selectfont
+    \Theme
+  \end{center}
+  \vspace{0.45cm}
+  \filetTheme}
+
+% Intitulé de fonction du jury, sur une chasse constante, pour que les noms
+% s'alignent verticalement les uns sous les autres.
+\newcommand{\roleJury}[1]{\makebox[2.8cm][l]{\textbf{#1}}}
+
+% =============================================================================
+\begin{document}
+\selectlanguage{french}
+\setstretch{1.0}
+
+% ###########################################################################
+% #  PAGE 1 — PREMIÈRE DE COUVERTURE               (Guide KEYCE v3.0, § 2.1) #
+% ###########################################################################
+
+% --------------------------------------------------- tutelles FR / sceau / EN
+\noindent
+\begin{minipage}[t]{0.365\textwidth}
+  \bloctutelle{%
+    UNIVERSITÉ DE YAOUNDÉ I\\[9pt]
+    ÉCOLE NATIONALE SUPÉRIEURE\\ POLYTECHNIQUE DE YAOUNDÉ\\[9pt]
+    DÉPARTEMENT DE GÉNIE\\ INFORMATIQUE\\[9pt]
+    INSTITUT SUPÉRIEUR KEYCE\\ INFORMATIQUE \&\\ INTELLIGENCE ARTIFICIELLE}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.21\textwidth}
+  \centering
+  \vspace{0.5cm}
+  \includegraphics[width=2.3cm]{logo-uy1.png}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.365\textwidth}
+  \bloctutelle{%
+    UNIVERSITY OF YAOUNDE I\\[9pt]
+    NATIONAL ADVANCED\\ SCHOOL OF ENGINEERING\\ OF YAOUNDE\\[9pt]
+    DEPARTMENT OF COMPUTER\\ ENGINEERING\\[9pt]
+    HIGHER INSTITUTE KEYCE\\ OF COMPUTER SCIENCE AND\\ ARTIFICIAL INTELLIGENCE}
+\end{minipage}
+
+\vspace{1.0cm}
+
+% ------------------------------------------------------- cartouche du thème
+\cartoucheTheme
+
+\vspace{0.95cm}
+
+% --------------------------------------------------------- identité du travail
+\begin{center}
+  {\bfseries\fontsize{13}{16}\selectfont Rapport de fin d'études}
+
+  \vspace{0.65cm}
+
+  Présenté et soutenu par:\\[5pt]
+  {\bfseries\fontsize{13}{16}\selectfont \Etudiant}
+
+  \vspace{0.65cm}
+
+  En vue de l'obtention du\\[5pt]
+  {\bfseries\fontsize{12.5}{15}\selectfont Diplôme de \Diplome}
+
+  \vspace{0.65cm}
+
+  Sous l'encadrement de:\\[5pt]
+  {\bfseries \EncadreurAcad}, \textit{\GradeAcad}\\[4pt]
+  {\bfseries \EncadreurPro}, \textit{\GradePro}
+\end{center}
+
+\vspace{0.75cm}
+
+% -------------------------------------------------------------------- le jury
+\begin{center}
+  Devant le jury composé de:
+\end{center}
+
+\vspace{0.4cm}
+
+\begin{center}
+\begin{minipage}{0.88\textwidth}
+  \setstretch{1.32}
+  \makebox[0.75cm][l]{--}\roleJury{Président:}\JuryPresident\\
+  \makebox[0.75cm][l]{--}\roleJury{Rapporteur:}\JuryRapporteur\\
+  \makebox[0.75cm][l]{--}\roleJury{Membres:}\JuryMembres\\
+  \makebox[0.75cm][l]{--}\roleJury{Invité:}\JuryInvite
+\end{minipage}
+\end{center}
+
+\vfill
+
+% ------------------------------------------------------------ bas de couverture
+\begin{center}
+  Année académique: {\bfseries \AnneeAcad}\\[7pt]
+  Date de la soutenance: \DateSoutenance
+\end{center}
+
+\newpage
+
+% ###########################################################################
+% #  PAGE 2 — PAGE DE GARDE                        (Guide KEYCE v3.0, § 2.2) #
+% ###########################################################################
+% Le guide demande, dans l'ordre : les logos de l'ENSPY, de l'IUGEE, de KEYCE
+% Informatique, puis celui de la structure d'accueil du stage.
+
+\noindent
+\begin{minipage}[c]{0.155\textwidth}
+  \centering\includegraphics[height=2.15cm]{logo-enspy.png}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{0.385\textwidth}
+  \centering\includegraphics[width=\linewidth]{logo-iugee.png}
+\end{minipage}
+\hfill
+\begin{minipage}[c]{0.385\textwidth}
+  \centering\includegraphics[width=\linewidth]{logo-keyce.png}
+\end{minipage}
+
+\vspace{1.0cm}
+
+% ----------------------------------------------- structure d'accueil du stage
+\begin{center}
+  {\fontsize{10}{12.5}\selectfont\bfseries\color{keyceblue}
+   STRUCTURE D'ACCUEIL DU STAGE}\\[0.3cm]
+  \includegraphics[height=2.0cm]{logo-fondation.png}
+\end{center}
+
+\vspace{0.95cm}
+
+% ------------------------------------------------------- cartouche du thème
+\begin{center}
+  {\bfseries\fontsize{12}{15}\selectfont
+   THÈME DU RAPPORT DE FIN D'ÉTUDES}
+\end{center}
+
+\vspace{0.4cm}
+
+\cartoucheTheme
+
+\vspace{1.05cm}
+
+% --------------------------------------------------------- identité du travail
+\begin{center}
+  {\bfseries Rapport en vue de l'obtention du diplôme de:}\\[8pt]
+  {\color{keyceblue}\itshape\bfseries\fontsize{13}{16}\selectfont \Diplome}%
+  \ifx\Option\empty\else
+    \\[5pt]{\color{keyceblue}\itshape\bfseries Option: \Option}%
+  \fi
+
+  \vspace{0.9cm}
+
+  {\bfseries Présenté par:}\\[8pt]
+  {\color{keyceblue}\itshape\bfseries\fontsize{13}{16}\selectfont \Etudiant}
+
+  \vspace{0.9cm}
+
+  {\bfseries Sous l'encadrement de:}\\[8pt]
+  {\color{keyceblue}\itshape \EncadreurAcad} \textit{(\GradeAcad)}\\[4pt]
+  {\color{keyceblue}\itshape \EncadreurPro} \textit{(\GradePro)}
+\end{center}
+
+\vfill
+
+\begin{center}
+  {\itshape\bfseries\fontsize{13}{16}\selectfont \VillePays}\\[8pt]
+  {\itshape\bfseries\fontsize{13}{16}\selectfont
+   ANNÉE ACADÉMIQUE \AnneeAcad}
+\end{center}
+
+\end{document}

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { supabase } from '@/services/supabase'
+import { supprimerOuEchouer } from '@/services/ecriture'
 import { scopeToTenant } from '@/services/tenant'
 
 const aFrom = (r) => ({
@@ -98,8 +99,7 @@ export const useVoiceStore = defineStore('voice', () => {
     if (i !== -1) assistants.value[i] = aFrom(r)
   }
   async function removeAssistant(id) {
-    const { error } = await supabase.from('voice_assistants').delete().eq('id', id)
-    if (error) throw error
+    await supprimerOuEchouer(supabase.from('voice_assistants').delete().eq('id', id))
     assistants.value = assistants.value.filter((x) => x.id !== id)
     tracks.value = tracks.value.filter((t) => t.assistantId !== id)
   }
@@ -109,8 +109,7 @@ export const useVoiceStore = defineStore('voice', () => {
     tracks.value.push(tFrom(r))
   }
   async function removeTrack(id) {
-    const { error } = await supabase.from('audio_tracks').delete().eq('id', id)
-    if (error) throw error
+    await supprimerOuEchouer(supabase.from('audio_tracks').delete().eq('id', id))
     tracks.value = tracks.value.filter((t) => t.id !== id)
   }
   const tracksFor = (assistantId) => tracks.value.filter((t) => t.assistantId === assistantId)

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { supabase } from '@/services/supabase'
+import { supprimerOuEchouer } from '@/services/ecriture'
 import { scopeToTenant } from '@/services/tenant'
 
 // Livre d'or : les avis arrivent en attente (published = false) et sont modérés dans l'ERP.
@@ -32,8 +33,7 @@ export const useReviewStore = defineStore('reviews', () => {
     if (i !== -1) items.value[i] = fromRow(r)
   }
   async function remove(id) {
-    const { error } = await supabase.from('reviews').delete().eq('id', id)
-    if (error) throw error
+    await supprimerOuEchouer(supabase.from('reviews').delete().eq('id', id))
     items.value = items.value.filter((x) => x.id !== id)
   }
 

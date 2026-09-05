@@ -74,7 +74,11 @@ export function viderCachePublic() { cache.clear() }
 // ligne, elle peut se permettre les réglages d'immersion.
 const COLONNES_LISTE =
   'id, sector_id, nom, nom_commun, description, photo, photo_thumb,' +
-  ' published, published_at, seo, created_at, a_3d,' +
+  // `a_glb` et `a_ar_ios` disent CE QUI EST RÉELLEMENT DISPONIBLE, là où `a_3d`
+  // se contente de « il existe un modèle, quel qu'il soit ». Sans eux, la fiche
+  // proposait une visionneuse 3D à une pièce n'ayant qu'un .usdz, et une réalité
+  // augmentée à un iPhone qui n'a rien à ouvrir. Voir 20260902_ar_separee.sql.
+  ' published, published_at, seo, created_at, a_3d, a_glb, a_ar_ios,' +
   ' model3d_name, model3d_ios_name, ar_placement, ar_echelle, ar_seulement,' +
   ' depth_map_url, amplitude_relief'
 
@@ -128,6 +132,10 @@ export async function pubObjectsForMuseum(museumId) {
 // échelle la faute mesurée le 2026-08-19 — transporter partout ce qui n'est
 // utile qu'à un endroit. On les ajoute donc à la fiche, et à elle seule.
 const COLONNES_RA =
+  // Vues complémentaires (20260905_objet_galerie.sql). Sur la FICHE seulement :
+  // une liste de catalogue n'affiche qu'une vignette, lui envoyer huit URL par
+  // objet rejouerait en petit la faute mesurée le 2026-08-19.
+  ', photos' +
   ', ar_scale, ar_xr_environment, ar_shadow_intensity, ar_shadow_softness,' +
   ' ar_exposure, ar_camera_orbit, ar_min_orbit, ar_max_orbit,' +
   ' ar_interpolation_decay, ar_annotations,' +

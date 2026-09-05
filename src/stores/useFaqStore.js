@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { supabase } from '@/services/supabase'
+import { supprimerOuEchouer } from '@/services/ecriture'
 import { scopeToTenant } from '@/services/tenant'
 
 const fromRow = (r) => ({
@@ -42,8 +43,7 @@ export const useFaqStore = defineStore('faq', () => {
     items.value.sort(sortByOrdre)
   }
   async function remove(id) {
-    const { error } = await supabase.from('faq').delete().eq('id', id)
-    if (error) throw error
+    await supprimerOuEchouer(supabase.from('faq').delete().eq('id', id))
     items.value = items.value.filter((x) => x.id !== id)
   }
   async function toggleVisible(f) {

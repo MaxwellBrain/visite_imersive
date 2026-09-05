@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { supabase } from '@/services/supabase'
+import { supprimerOuEchouer } from '@/services/ecriture'
 import { scopeToTenant } from '@/services/tenant'
 
 const fromRow = (r) => ({
@@ -60,8 +61,7 @@ export const useSectorStore = defineStore('sectors', () => {
   }
 
   async function remove(id) {
-    const { error } = await supabase.from('sectors').delete().eq('id', id)
-    if (error) throw error
+    await supprimerOuEchouer(supabase.from('sectors').delete().eq('id', id))
     items.value = items.value.filter((x) => x.id !== id)
   }
 

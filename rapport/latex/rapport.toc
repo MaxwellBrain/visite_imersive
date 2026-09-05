@@ -19,143 +19,122 @@
 \contentsline {section}{3. Hypothèses de l'étude}{4}{Item.3}%
 \contentsline {subsection}{3.1. Hypothèse générale}{4}{section*.12}%
 \contentsline {subsection}{3.2. Hypothèses spécifiques}{4}{section*.12}%
-\contentsline {section}{4. Objectifs de l'étude}{4}{section*.12}%
-\contentsline {subsection}{4.1. Objectif général}{4}{section*.13}%
+\contentsline {section}{4. Objectifs de l'étude}{5}{section*.12}%
+\contentsline {subsection}{4.1. Objectif général}{5}{section*.13}%
 \contentsline {subsection}{4.2. Objectifs spécifiques}{5}{section*.13}%
-\contentsline {section}{5. Justification de l'étude}{5}{section*.13}%
-\contentsline {subsection}{5.1. Au plan scientifique}{5}{section*.14}%
+\contentsline {section}{5. Justification de l'étude}{6}{section*.13}%
+\contentsline {subsection}{5.1. Au plan scientifique}{6}{section*.14}%
 \contentsline {subsection}{5.2. Au plan pratique}{6}{section*.14}%
-\contentsline {section}{6. Délimitation de l'étude}{6}{section*.14}%
-\contentsline {chapter}{\numberline {1}Cadre conceptuel et état de l'art}{8}{chapter.1}%
-\contentsline {section}{\numberline {}Introduction}{8}{section*.15}%
-\contentsline {section}{\numberline {1.1}Cadre conceptuel}{8}{section.1.1}%
-\contentsline {subsection}{\numberline {1.1.1}Patrimoine culturel et valorisation numérique}{8}{subsection.1.1.1}%
-\contentsline {subsection}{\numberline {1.1.2}De la photographie à la visite immersive}{8}{subsection.1.1.2}%
-\contentsline {subsection}{\numberline {1.1.3}La réalité augmentée}{9}{subsection.1.1.3}%
+\contentsline {section}{6. Délimitation de l'étude}{7}{section*.14}%
+\contentsline {section}{7. Plan du mémoire}{7}{section*.14}%
+\contentsline {chapter}{\numberline {1}Cadre conceptuel et état de l'art}{9}{chapter.1}%
+\contentsline {section}{\numberline {}Introduction}{9}{section*.15}%
+\contentsline {section}{\numberline {1.1}Cadre conceptuel}{9}{section.1.1}%
+\contentsline {subsection}{\numberline {1.1.1}Patrimoine culturel et valorisation numérique}{9}{subsection.1.1.1}%
+\contentsline {subsection}{\numberline {1.1.2}De la photographie à la visite immersive}{9}{subsection.1.1.2}%
+\contentsline {subsection}{\numberline {1.1.3}La réalité augmentée}{10}{subsection.1.1.3}%
 \contentsline {subsection}{\numberline {1.1.4}Acquisition et modélisation en trois dimensions}{10}{subsection.1.1.4}%
-\contentsline {subsection}{\numberline {1.1.5}Progiciel de gestion intégré et cloisonnement des données}{10}{subsection.1.1.5}%
+\contentsline {subsection}{\numberline {1.1.5}Progiciel de gestion intégré et cloisonnement des données}{11}{subsection.1.1.5}%
 \contentsline {subsection}{\numberline {1.1.6}Intelligence artificielle générative et génération augmentée par la recherche}{11}{subsection.1.1.6}%
-\contentsline {subsection}{\numberline {1.1.7}DevOps : industrialiser la production du logiciel}{11}{subsection.1.1.7}%
-\contentsline {subsubsection}{Ce que recouvre le terme}{12}{subsubsection*.16}%
-\contentsline {subsubsection}{Pourquoi cette démarche s'imposait pour la Fondation}{12}{subsubsection*.17}%
+\contentsline {subsection}{\numberline {1.1.7}DevOps : industrialiser la production du logiciel}{12}{subsection.1.1.7}%
 \contentsline {subsection}{\numberline {1.1.8}FinOps : maîtriser le coût de l'infrastructure en nuage}{13}{subsection.1.1.8}%
-\contentsline {subsubsection}{Ce que recouvre le terme}{13}{subsubsection*.18}%
-\contentsline {subsubsection}{Pourquoi cette discipline s'imposait pour la Fondation}{13}{subsubsection*.19}%
 \contentsline {section}{\numberline {1.2}État de l'art}{13}{section.1.2}%
 \contentsline {subsection}{\numberline {1.2.1}La situation des musées camerounais}{13}{subsection.1.2.1}%
 \contentsline {subsection}{\numberline {1.2.2}Les dispositifs proposés à l'international}{14}{subsection.1.2.2}%
 \contentsline {subsection}{\numberline {1.2.3}Les collections ouvertes et leurs interfaces de programmation}{15}{subsection.1.2.3}%
-\contentsline {subsection}{\numberline {1.2.4}Les assistants conversationnels en contexte muséal}{16}{subsection.1.2.4}%
-\contentsline {subsection}{\numberline {1.2.5}Ce que notre travail apporte}{16}{subsection.1.2.5}%
-\contentsline {section}{\numberline {}Conclusion}{16}{Item.21}%
-\contentsline {chapter}{\numberline {2}Méthodologie de l'étude}{17}{chapter.2}%
-\contentsline {section}{\numberline {}Introduction}{17}{section*.22}%
-\contentsline {section}{\numberline {2.1}Nature de l'étude et approche méthodologique}{17}{section.2.1}%
-\contentsline {subsection}{\numberline {2.1.1}Niveau et type de recherche}{17}{subsection.2.1.1}%
-\contentsline {subsection}{\numberline {2.1.2}Approche méthodologique}{17}{subsection.2.1.2}%
-\contentsline {section}{\numberline {2.2}Variables et indicateurs de l'étude}{18}{section.2.2}%
-\contentsline {subsection}{\numberline {2.2.1}Identification des variables}{18}{subsection.2.2.1}%
-\contentsline {subsection}{\numberline {2.2.2}Opérationnalisation : les indicateurs}{18}{subsection.2.2.2}%
-\contentsline {section}{\numberline {2.3}Population et échantillon}{19}{section.2.3}%
-\contentsline {subsection}{\numberline {2.3.1}Population de l'étude}{19}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {1.2.4}Les assistants conversationnels en contexte muséal}{15}{subsection.1.2.4}%
+\contentsline {section}{\numberline {1.3}Cadre juridique et éthique}{16}{section.1.3}%
+\contentsline {subsection}{\numberline {1.3.1}Ce que notre travail apporte}{17}{subsection.1.3.1}%
+\contentsline {section}{\numberline {}Conclusion}{17}{Item.14}%
+\contentsline {chapter}{\numberline {2}Méthodologie de l'étude}{18}{chapter.2}%
+\contentsline {section}{\numberline {}Introduction}{18}{section*.18}%
+\contentsline {section}{\numberline {2.1}Nature de l'étude et approche méthodologique}{18}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Niveau et type de recherche}{18}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}Approche méthodologique}{18}{subsection.2.1.2}%
+\contentsline {section}{\numberline {2.2}Variables et indicateurs de l'étude}{19}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Identification des variables}{19}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Opérationnalisation : les indicateurs}{19}{subsection.2.2.2}%
+\contentsline {section}{\numberline {2.3}Population et échantillon}{20}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Population de l'étude}{20}{subsection.2.3.1}%
 \contentsline {subsection}{\numberline {2.3.2}Technique d'échantillonnage et taille de l'échantillon}{20}{subsection.2.3.2}%
-\contentsline {section}{\numberline {2.4}Outils de collecte et techniques d'analyse des données}{20}{section.2.4}%
-\contentsline {subsection}{\numberline {2.4.1}Outils de collecte}{20}{subsection.2.4.1}%
+\contentsline {section}{\numberline {2.4}Outils de collecte et techniques d'analyse des données}{21}{section.2.4}%
+\contentsline {subsection}{\numberline {2.4.1}Outils de collecte}{21}{subsection.2.4.1}%
 \contentsline {subsection}{\numberline {2.4.2}Techniques d'analyse}{21}{subsection.2.4.2}%
-\contentsline {section}{\numberline {2.5}Méthode de conduite du projet}{21}{section.2.5}%
-\contentsline {subsection}{\numberline {2.5.1}Le Scrumban comme méthode de travail}{21}{subsection.2.5.1}%
-\contentsline {subsection}{\numberline {2.5.2}Le DevOps comme démarche de livraison}{22}{subsection.2.5.2}%
-\contentsline {subsection}{\numberline {2.5.3}Les pratiques retenues}{23}{subsection.2.5.3}%
+\contentsline {section}{\numberline {2.5}Méthode de conduite du projet}{22}{section.2.5}%
+\contentsline {subsection}{\numberline {2.5.1}Le DevOps comme démarche de livraison}{23}{subsection.2.5.1}%
+\contentsline {subsection}{\numberline {2.5.2}Les pratiques retenues}{23}{subsection.2.5.2}%
 \contentsline {section}{\numberline {2.6}Outils et environnement de l'étude}{23}{section.2.6}%
-\contentsline {section}{\numberline {2.7}Difficultés rencontrées et limites méthodologiques}{24}{section.2.7}%
-\contentsline {section}{\numberline {}Conclusion}{25}{Item.39}%
+\contentsline {section}{\numberline {2.7}Difficultés rencontrées et limites méthodologiques}{25}{section.2.7}%
+\contentsline {section}{\numberline {}Conclusion}{25}{Item.25}%
 \contentsline {chapter}{\numberline {3}Présentation du site de l'étude, des données et des résultats}{26}{chapter.3}%
-\contentsline {section}{\numberline {}Introduction}{26}{section*.27}%
+\contentsline {section}{\numberline {}Introduction}{26}{section*.23}%
 \contentsline {section}{\numberline {3.1}Présentation du site de l'étude}{26}{section.3.1}%
 \contentsline {subsection}{\numberline {3.1.1}Identification de la structure}{26}{subsection.3.1.1}%
 \contentsline {subsection}{\numberline {3.1.2}Historique, missions et organisation}{26}{subsection.3.1.2}%
-\contentsline {subsection}{\numberline {3.1.3}Le Département \emph {Think Tank} Fou'ndjem et son rôle dans le projet}{27}{subsection.3.1.3}%
+\contentsline {subsection}{\numberline {3.1.3}Le Département \emph {Think Tank} Fou'ndjem et son rôle dans le projet}{28}{subsection.3.1.3}%
 \contentsline {subsection}{\numberline {3.1.4}Environnement technologique existant}{28}{subsection.3.1.4}%
 \contentsline {subsection}{\numberline {3.1.5}Cadre et déroulement du stage}{29}{subsection.3.1.5}%
-\contentsline {paragraph}{Justification du choix du terrain.}{29}{paragraph*.32}%
+\contentsline {paragraph}{Justification du choix du terrain.}{29}{paragraph*.28}%
 \contentsline {section}{\numberline {3.2}Présentation des données et des résultats}{30}{section.3.2}%
 \contentsline {subsection}{\numberline {3.2.1}Les données recueillies}{30}{subsection.3.2.1}%
-\contentsline {subsubsection}{Étude de l'existant}{30}{subsubsection*.33}%
-\contentsline {subsubsection}{Résultats des entretiens}{31}{subsubsection*.35}%
-\contentsline {subsubsection}{Résultats du questionnaire}{32}{subsubsection*.36}%
-\contentsline {subsection}{\numberline {3.2.2}L'implémentation du système}{32}{subsection.3.2.2}%
-\contentsline {subsubsection}{Architecture générale de la plateforme}{32}{subsubsection*.39}%
-\contentsline {subsubsection}{Architecture de l'assistant conversationnel à ancrage documentaire}{33}{subsubsection*.41}%
-\contentsline {subsubsection}{Le moteur de visite immersive}{34}{subsubsection*.43}%
-\contentsline {subsubsection}{Chaîne de numérisation tridimensionnelle et réalité augmentée}{34}{subsubsection*.44}%
-\contentsline {subsubsection}{Infrastructure d'hébergement}{36}{subsubsection*.45}%
-\contentsline {subsubsection}{La chaîne d'intégration et de déploiement continus}{36}{subsubsection*.47}%
-\contentsline {subsubsection}{Ressources mobilisées et coût du projet}{37}{subsubsection*.49}%
-\contentsline {paragraph}{Ressources matérielles.}{37}{paragraph*.50}%
-\contentsline {paragraph}{Ressources logicielles et services.}{39}{paragraph*.52}%
-\contentsline {paragraph}{Coût de l'infrastructure en nuage.}{39}{paragraph*.54}%
-\contentsline {paragraph}{Coût total du projet.}{40}{paragraph*.57}%
-\contentsline {subsection}{\numberline {3.2.3}Les résultats obtenus}{41}{subsection.3.2.3}%
-\contentsline {subsubsection}{F1 : La gestion des collections}{41}{subsubsection*.59}%
-\contentsline {subsubsection}{F2 : Le site public de l'institution}{41}{subsubsection*.60}%
-\contentsline {subsubsection}{F3 : La visite immersive à 360 degrés}{41}{subsubsection*.61}%
-\contentsline {subsubsection}{F4 et F5 : La présentation en trois dimensions et la réalité augmentée}{42}{subsubsection*.63}%
-\contentsline {subsubsection}{F6 : Les codes QR de passage à l'appareil mobile}{42}{subsubsection*.64}%
-\contentsline {subsubsection}{F7 : Le relief 2.5D}{42}{subsubsection*.65}%
-\contentsline {subsubsection}{F8 : L'assistant conversationnel à ancrage documentaire}{43}{subsubsection*.66}%
-\contentsline {subsubsection}{F9 et F10 : Le guide vocal et le journal des questions}{43}{subsubsection*.67}%
-\contentsline {subsubsection}{F11 et F12 : La mémoire réunifiée et le cabinet de comparaison}{43}{subsubsection*.68}%
-\contentsline {subsubsection}{F13 : La généalogie navigable}{44}{subsubsection*.69}%
-\contentsline {subsubsection}{F14 et F15 : La billetterie et la boutique}{44}{subsubsection*.70}%
-\contentsline {subsubsection}{F16 : Les adhésions et les campagnes d'information}{44}{subsubsection*.71}%
-\contentsline {subsubsection}{F17 : Le cloisonnement multi-organisations}{45}{subsubsection*.72}%
-\contentsline {subsubsection}{F18 : L'assistant d'installation}{45}{subsubsection*.73}%
-\contentsline {subsubsection}{F19 et F20 : Les statistiques de fréquentation et la carte de partage}{45}{subsubsection*.74}%
-\contentsline {subsubsection}{Synthèse des mesures}{45}{subsubsection*.75}%
-\contentsline {section}{\numberline {}Conclusion}{46}{table.caption.76}%
-\contentsline {chapter}{\numberline {4}La restitution numérique de la visite à la Fondation Jean Félicien Gacha : diagnostic et intervention}{47}{chapter.4}%
-\contentsline {section}{\numberline {}Introduction}{47}{section*.77}%
-\contentsline {section}{\numberline {4.1}Présentation et analyse de la situation}{47}{section.4.1}%
-\contentsline {subsection}{\numberline {4.1.1}Variable 1. La restitution spatiale : ce que l'espace exige et ce qu'il pardonne}{47}{subsection.4.1.1}%
-\contentsline {subsection}{\numberline {4.1.2}Variable 2. La mise en relation documentaire : le vocabulaire comme obstacle}{48}{subsection.4.1.2}%
+\contentsline {subsubsection}{Étude de l'existant}{30}{subsubsection*.29}%
+\contentsline {subsubsection}{Résultats du questionnaire}{31}{subsubsection*.31}%
+\contentsline {subsection}{\numberline {3.2.2}L'implémentation du système}{31}{subsection.3.2.2}%
+\contentsline {subsubsection}{Architecture générale de la plateforme}{31}{subsubsection*.34}%
+\contentsline {subsubsection}{Architecture de l'assistant conversationnel à ancrage documentaire}{32}{subsubsection*.36}%
+\contentsline {subsubsection}{Le moteur de visite immersive}{33}{subsubsection*.38}%
+\contentsline {subsubsection}{Chaîne de numérisation tridimensionnelle et réalité augmentée}{33}{subsubsection*.39}%
+\contentsline {subsubsection}{Infrastructure d'hébergement}{35}{subsubsection*.40}%
+\contentsline {subsubsection}{La chaîne d'intégration et de déploiement continus}{36}{subsubsection*.42}%
+\contentsline {subsubsection}{Ressources mobilisées et coût du projet}{36}{subsubsection*.44}%
+\contentsline {paragraph}{Ressources matérielles, logicielles et de service.}{36}{paragraph*.45}%
+\contentsline {paragraph}{Coût de l'infrastructure en nuage.}{37}{paragraph*.48}%
+\contentsline {paragraph}{Coût total du projet.}{39}{paragraph*.50}%
+\contentsline {subsection}{\numberline {3.2.3}Les résultats obtenus}{39}{subsection.3.2.3}%
+\contentsline {subsubsection}{La gestion des collections et le site public}{39}{subsubsection*.52}%
+\contentsline {subsubsection}{La restitution spatiale : visite à 360 degrés, 3D et réalité augmentée}{41}{subsubsection*.55}%
+\contentsline {subsubsection}{Le guide vocal en temps réel et l'assistant à ancrage documentaire}{41}{subsubsection*.56}%
+\contentsline {subsubsection}{La mémoire réunifiée et la généalogie}{42}{subsubsection*.57}%
+\contentsline {subsubsection}{Les adhésions et le cloisonnement multi-organisations}{42}{subsubsection*.58}%
+\contentsline {subsubsection}{L'assistant d'installation et le pilotage}{43}{subsubsection*.60}%
+\contentsline {subsubsection}{Synthèse des mesures}{44}{subsubsection*.63}%
+\contentsline {section}{\numberline {}Conclusion}{45}{table.caption.64}%
+\contentsline {chapter}{\numberline {4}La restitution numérique de la visite à la Fondation Jean Félicien Gacha : diagnostic et intervention}{46}{chapter.4}%
+\contentsline {section}{\numberline {}Introduction}{46}{section*.65}%
+\contentsline {section}{\numberline {4.1}Présentation et analyse de la situation}{46}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Variable 1. La restitution spatiale : ce que l'espace exige et ce qu'il pardonne}{46}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}Variable 2. La mise en relation documentaire : le vocabulaire comme obstacle}{47}{subsection.4.1.2}%
 \contentsline {subsection}{\numberline {4.1.3}Variable 3. L'ancrage documentaire : ce que l'assistant refuse de dire}{48}{subsection.4.1.3}%
-\contentsline {subsection}{\numberline {4.1.4}Variable 4. Le cloisonnement : pourquoi la garantie doit être portée par la base}{49}{subsection.4.1.4}%
-\contentsline {subsection}{\numberline {4.1.5}Analyse d'ensemble : forces et faiblesses}{50}{subsection.4.1.5}%
-\contentsline {section}{\numberline {4.2}Vérification des hypothèses}{50}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Modèle explicatif issu des résultats}{51}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Intervention proposée et justification}{51}{section.4.4}%
-\contentsline {subsection}{\numberline {4.4.1}Présentation de l'intervention}{51}{subsection.4.4.1}%
-\contentsline {subsection}{\numberline {4.4.2}Justification de l'intervention}{52}{subsection.4.4.2}%
-\contentsline {subsection}{\numberline {4.4.3}Objectifs d'intervention}{52}{subsection.4.4.3}%
-\contentsline {subsection}{\numberline {4.4.4}Composante 1 : Industrialisation par la conteneurisation}{52}{subsection.4.4.4}%
-\contentsline {subsubsection}{Principe de la chaîne cible}{53}{subsubsection*.81}%
-\contentsline {subsubsection}{Choix de l'orchestrateur}{54}{subsubsection*.83}%
-\contentsline {subsection}{\numberline {4.4.5}Composante 2 : Consolidation de la chaîne documentaire}{54}{subsection.4.4.5}%
-\contentsline {subsection}{\numberline {4.4.6}Composante 3 : Production des médias}{55}{subsection.4.4.6}%
-\contentsline {subsection}{\numberline {4.4.7}Composante 4 : Transfert de compétences}{55}{subsection.4.4.7}%
-\contentsline {subsection}{\numberline {4.4.8}Composante 5 : Ouverture aux institutions partenaires}{55}{subsection.4.4.8}%
-\contentsline {subsection}{\numberline {4.4.9}Planification de l'intervention}{55}{subsection.4.4.9}%
-\contentsline {subsection}{\numberline {4.4.10}Étude de faisabilité}{55}{subsection.4.4.10}%
-\contentsline {subsubsection}{Faisabilité technique}{55}{subsubsection*.86}%
-\contentsline {subsubsection}{Faisabilité économique}{56}{subsubsection*.87}%
-\contentsline {subsubsection}{Faisabilité organisationnelle}{56}{subsubsection*.89}%
-\contentsline {subsection}{\numberline {4.4.11}Risques et mesures d'atténuation}{56}{subsection.4.4.11}%
-\contentsline {section}{\numberline {}Conclusion}{57}{table.caption.90}%
-\contentsline {chapter}{CONCLUSION GÉNÉRALE}{58}{chapter*.91}%
-\contentsline {chapter}{PERSPECTIVES}{59}{chapter*.92}%
-\contentsline {section}{Axe 1 : Consolider ce qui existe}{59}{section*.93}%
-\contentsline {section}{Axe 2 : Enrichir l'expérience du visiteur}{59}{Item.73}%
-\contentsline {section}{Axe 3 : Ancrer le dispositif dans la culture locale}{60}{Item.79}%
-\contentsline {section}{Axe 4 : Industrialiser, pérenniser et essaimer}{60}{Item.82}%
-\contentsline {chapter}{RÉFÉRENCES BIBLIOGRAPHIQUES}{62}{chapter*.94}%
-\contentsline {section}{Ouvrages}{62}{section*.95}%
-\contentsline {section}{Articles de périodiques et actes de colloque}{62}{section*.95}%
-\contentsline {section}{Rapports et documents institutionnels}{63}{section*.95}%
-\contentsline {section}{Documents électroniques et documentation technique}{63}{section*.95}%
-\contentsline {section}{Documents non publiés}{63}{section*.95}%
-\contentsline {chapter}{ANNEXES}{64}{section*.95}%
-\contentsline {chapter}{Annexe 1 : Guide d'entretien semi-directif}{64}{chapter*.96}%
-\contentsline {chapter}{Annexe 2 : Questionnaire adressé aux visiteurs}{65}{chapter*.97}%
-\contentsline {chapter}{Annexe 3 : Grille d'évaluation de l'assistant}{66}{chapter*.98}%
-\contentsline {chapter}{Annexe 4 : Situation géographique de la Fondation}{67}{chapter*.100}%
-\contentsline {chapter}{Annexe 5 : Attestation de fin de stage}{68}{chapter*.101}%
+\contentsline {subsection}{\numberline {4.1.4}Variable 4. Le cloisonnement : pourquoi la garantie doit être portée par la base}{48}{subsection.4.1.4}%
+\contentsline {subsection}{\numberline {4.1.5}Analyse d'ensemble : forces et faiblesses}{49}{subsection.4.1.5}%
+\contentsline {section}{\numberline {4.2}Vérification des hypothèses}{49}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Modèle explicatif issu des résultats}{49}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Intervention proposée et justification}{50}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}Présentation de l'intervention}{50}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}Justification de l'intervention}{50}{subsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.4.3}Objectifs d'intervention}{50}{subsection.4.4.3}%
+\contentsline {subsection}{\numberline {4.4.4}Composante 1 : Industrialisation par la conteneurisation}{51}{subsection.4.4.4}%
+\contentsline {subsubsection}{Principe de la chaîne cible}{51}{subsubsection*.69}%
+\contentsline {subsubsection}{Choix de l'orchestrateur}{51}{subsubsection*.71}%
+\contentsline {subsection}{\numberline {4.4.5}Composante 2 : Consolidation de la chaîne documentaire}{52}{subsection.4.4.5}%
+\contentsline {subsection}{\numberline {4.4.6}Composante 3 : Production des médias et transfert de compétences}{53}{subsection.4.4.6}%
+\contentsline {subsection}{\numberline {4.4.7}Composante 4 : Ouverture aux institutions partenaires}{53}{subsection.4.4.7}%
+\contentsline {subsection}{\numberline {4.4.8}Planification de l'intervention}{53}{subsection.4.4.8}%
+\contentsline {subsection}{\numberline {4.4.9}Étude de faisabilité}{53}{subsection.4.4.9}%
+\contentsline {paragraph}{Sur le plan technique, la faisabilité est acquise.}{53}{paragraph*.74}%
+\contentsline {paragraph}{Sur le plan économique,}{54}{paragraph*.75}%
+\contentsline {paragraph}{Sur le plan organisationnel}{54}{paragraph*.77}%
+\contentsline {subsection}{\numberline {4.4.10}Risques et mesures d'atténuation}{54}{subsection.4.4.10}%
+\contentsline {section}{\numberline {}Conclusion}{55}{table.caption.78}%
+\contentsline {chapter}{CONCLUSION GÉNÉRALE}{56}{chapter*.79}%
+\contentsline {section}{Perspectives}{57}{section*.80}%
+\contentsline {chapter}{RÉFÉRENCES BIBLIOGRAPHIQUES}{58}{chapter*.81}%
+\contentsline {section}{Ouvrages}{58}{section*.82}%
+\contentsline {section}{Articles de périodiques et actes de colloque}{58}{section*.82}%
+\contentsline {section}{Rapports et documents institutionnels}{59}{section*.82}%
+\contentsline {section}{Documents électroniques et documentation technique}{59}{section*.82}%
+\contentsline {section}{Documents non publiés}{59}{section*.82}%
+\contentsline {chapter}{ANNEXES}{60}{section*.82}%
+\contentsline {chapter}{Annexe 1 : Guide d'entretien semi-directif}{60}{chapter*.83}%
+\contentsline {chapter}{Annexe 2 : Questionnaire adressé aux visiteurs}{61}{chapter*.84}%
+\contentsline {chapter}{TABLE DES MATIÈRES}{VIII}{Item.64}%

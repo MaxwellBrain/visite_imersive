@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { supabase } from '@/services/supabase'
+import { supprimerOuEchouer } from '@/services/ecriture'
 import { scopeToTenant } from '@/services/tenant'
 
 const fromTariff = (r) => ({
@@ -53,8 +54,7 @@ export const usePricingStore = defineStore('pricing', () => {
     objectTariffs.value.push(fromTariff(row))
   }
   async function removeObjectTariff(id) {
-    const { error } = await supabase.from('object_tariffs').delete().eq('id', id)
-    if (error) throw error
+    await supprimerOuEchouer(supabase.from('object_tariffs').delete().eq('id', id))
     objectTariffs.value = objectTariffs.value.filter((t) => t.id !== id)
   }
   async function addDonationTier(data) {
@@ -63,8 +63,7 @@ export const usePricingStore = defineStore('pricing', () => {
     donationTiers.value.push(fromDon(row))
   }
   async function removeDonationTier(id) {
-    const { error } = await supabase.from('donation_tiers').delete().eq('id', id)
-    if (error) throw error
+    await supprimerOuEchouer(supabase.from('donation_tiers').delete().eq('id', id))
     donationTiers.value = donationTiers.value.filter((t) => t.id !== id)
   }
 

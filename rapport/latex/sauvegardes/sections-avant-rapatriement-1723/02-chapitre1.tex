@@ -1,0 +1,454 @@
+% =============================================================================
+%  CHAPITRE 1 : CADRE CONCEPTUEL ET ÉTAT DE L'ART
+% =============================================================================
+\entete{Chapitre 1 : Cadre conceptuel et état de l'art}
+\chapter{Cadre conceptuel et état de l'art}
+\label{chap:cadre}
+
+\introchap
+
+Ce chapitre pose les bases du travail. Il commence par définir les notions
+employées tout au long du rapport. Cette clarification n'est pas une formalité :
+des mots comme « immersion », « visite virtuelle » ou « réalité augmentée » sont
+utilisés avec des sens très différents selon les auteurs et selon les produits
+commerciaux, au point qu'ils finissent par ne plus rien désigner de précis. Le
+chapitre examine ensuite ce qui existe déjà, d'abord dans les musées
+camerounais, puis à l'échelle internationale, afin de situer notre contribution.
+
+% =============================================================================
+\section{Cadre conceptuel}
+\label{sec:conceptuel}
+
+\subsection{Patrimoine culturel et valorisation numérique}
+
+Le patrimoine culturel désigne l'ensemble des biens, matériels et immatériels,
+qu'une communauté reconnaît comme porteurs de son identité et qu'elle entend
+transmettre ; la Convention de l'UNESCO (1972) distingue le patrimoine
+\emph{matériel}, monuments, ensembles architecturaux et objets, du patrimoine
+\emph{immatériel}, savoir-faire, rites et traditions orales. À la Fondation Jean
+Félicien Gacha, les deux dimensions coexistent : les objets exposés ne prennent
+leur sens que rapportés aux lignées, aux fonctions et aux usages dont ils
+procèdent.
+
+La \emph{valorisation numérique} consiste à produire, organiser et diffuser des
+représentations numériques de ces biens afin d'en élargir l'accès et d'en
+assurer la conservation documentaire. Elle se distingue de la simple
+\emph{numérisation}, opération technique convertissant un objet en fichier :
+numériser, c'est photographier ; valoriser, c'est rendre intelligible, relier et
+transmettre. La distinction est essentielle ici, car le problème posé par la
+Fondation n'était pas un manque de photographies, mais un manque de mise en
+relation et de récit.
+
+\subsection{De la photographie à la visite immersive}
+
+Une visite virtuelle est un parcours numérique permettant d'explorer un lieu
+sans s'y rendre, et trois formes en coexistent. \textbf{La galerie de
+photographies}, suite d'images fixes éventuellement légendées, est la plus
+répandue, la moins coûteuse et la moins immersive : c'est celle que la Fondation
+pratiquait. \textbf{Le parcours panoramique} enchaîne des prises de vue à
+360 degrés reliées par des points de passage, l'utilisateur pivotant librement
+et percevant les volumes de la salle. \textbf{La scène tridimensionnelle},
+enfin, reconstruit le lieu et laisse l'utilisateur y circuler comme il
+marcherait : la plus proche d'une visite réelle, mais exigeant une
+reconstruction lourde et une machine puissante côté visiteur.
+
+Un mot doit être précisé, car il est souvent employé à tort. Il convient de
+distinguer l'\emph{immersion}, propriété technique du dispositif (champ de
+vision, temps de réaction, qualité d'image), de la \emph{présence}, sentiment
+d'« être là » éprouvé par l'utilisateur (Slater et Wilbur, 1997) : un dispositif
+techniquement immersif ne produit pas automatiquement ce sentiment, auquel la
+continuité du déplacement et la qualité du récit contribuent autant que la
+technique. Ce constat oriente nos choix : plutôt que l'immersion maximale au
+prix d'un équipement inaccessible, nous avons cherché le meilleur sentiment de
+présence possible sur le matériel dont dispose réellement le public visé, un
+téléphone ou un ordinateur ordinaire.
+
+\subsection{La réalité augmentée}
+
+La réalité augmentée superpose des éléments virtuels, images ou objets en trois
+dimensions, sur le monde réel et en temps réel, au travers de l'écran d'un
+téléphone ou d'une tablette : l'appareil analyse ce que voit sa caméra, y détecte
+les surfaces, puis y ancre l'élément virtuel de telle sorte qu'il paraisse posé
+dans la pièce et y reste quand l'utilisateur se déplace autour de lui. Milgram
+et Kishino (1994) la situent sur un continuum allant du monde réel au monde
+entièrement virtuel : la réalité virtuelle remplace l'environnement de
+l'utilisateur, la réalité augmentée s'y ajoute.
+
+Trois choses souvent réunies sous le mot « 3D » doivent être distinguées, car
+elles répondent à des besoins différents. \textbf{Faire tourner un objet à
+l'écran} le montre sous tous ses angles, mais il reste enfermé dans l'écran et
+le visiteur ignore toujours s'il mesure dix centimètres ou un mètre : un écran
+n'a pas d'échelle. \textbf{Parcourir un lieu modélisé} représente non plus les
+objets mais l'espace lui-même, relevé puis reconstitué, où le visiteur se
+déplace comme s'il y marchait. \textbf{Poser l'objet chez soi en réalité
+augmentée}, enfin, le fait sortir de l'écran pour apparaître à sa taille
+véritable : c'est le seul dispositif qui réponde à la question « quelle taille
+cela fait-il ? ». Le dispositif construit emploie les trois, et se situe
+volontairement du côté de la réalité augmentée \emph{sans équipement}, au moyen
+de la seule caméra du téléphone : exiger un casque reviendrait à recréer, sous
+une autre forme, la barrière d'accès que le projet entend supprimer.
+
+\subsection{Acquisition et modélisation en trois dimensions}
+
+Trois voies permettent d'obtenir le modèle tridimensionnel d'un objet ou d'un
+lieu patrimonial. \textbf{La modélisation manuelle}, réalisée par un
+infographiste, offre un contrôle total sur le résultat mais coûte cher et ne
+garantit pas la fidélité aux dimensions réelles. \textbf{La photogrammétrie}
+reconstruit la géométrie à partir de photographies prises sous des angles
+différents, un même point vu depuis plusieurs positions permettant de calculer
+sa position dans l'espace ; elle demande peu de matériel, mais beaucoup de
+méthode dans la prise de vue et de la puissance de calcul. \textbf{La télémétrie
+par laser}, ou LiDAR, mesure directement les distances : depuis que ce capteur
+équipe les téléphones haut de gamme, elle fournit en quelques minutes une
+géométrie correctement dimensionnée.
+
+Les modèles obtenus doivent ensuite être diffusés. Le format retenu par
+l'industrie du web est le glTF, avec sa variante compacte GLB, que le consortium
+Khronos (2021) présente comme le format d'échange universel de la 3D ; les
+appareils d'Apple, eux, n'acceptent que l'USDZ. Cette dualité n'est pas un
+détail technique : produire un seul des deux formats revient à priver de la
+fonction la moitié des visiteurs.
+
+\subsection{Progiciel de gestion intégré et cloisonnement des données}
+
+Un progiciel de gestion intégré, ou ERP, centralise les processus de gestion
+d'une organisation, inventaire des collections, espaces, billetterie, boutique
+et événements, autour d'une base de données unique. Appliqué à une institution
+patrimoniale, il remplace les cahiers et les fichiers dispersés par un système
+consultable et sauvegardé.
+
+Le modèle du logiciel en tant que service consiste à faire fonctionner une seule
+instance de l'application pour plusieurs organisations clientes. On parle alors
+d'architecture multi-organisations. Chong et Carraro (2006) en distinguent trois
+mises en œuvre : une base de données par organisation, un schéma par
+organisation, ou une base commune avec cloisonnement ligne par ligne. La
+troisième est la plus économique et la plus délicate. Dans une architecture en
+nuage de ce type, l'isolation des données repose sur la \emph{sécurité au niveau
+de la ligne}, mécanisme du système de gestion de base de données qui filtre les
+lignes visibles selon l'identité de celui qui interroge. Ce mécanisme garantit
+qu'une organisation ne peut consulter que ses propres données, et cette garantie
+est appliquée par le moteur de la base lui-même, non par le programme qui
+l'interroge. La distinction se révélera décisive au moment du diagnostic.
+
+\subsection{Intelligence artificielle générative et génération augmentée par la recherche}
+
+Un grand modèle de langue est un réseau de neurones entraîné à prédire la suite
+d'un texte ; l'architecture qui domine aujourd'hui, le \emph{Transformer}, a été
+introduite par Vaswani et al. (2017). Ces modèles produisent un texte fluide et
+grammaticalement correct, mais ils ne disposent d'aucun mécanisme interne de
+vérification des faits : ils peuvent énoncer avec assurance des informations
+fausses, ce que la littérature nomme \emph{hallucination} (Ji et al., 2023).
+Dans un contexte de médiation culturelle, où l'exactitude prime sur l'aisance,
+ce défaut est rédhibitoire s'il n'est pas corrigé.
+
+La correction passe par deux notions. La première est le \emph{plongement}, ou
+\emph{embedding} : la représentation d'un texte sous forme de suite de nombres,
+construite de telle manière que deux textes de sens voisin soient représentés
+par deux suites proches. Cette représentation permet de chercher par le sens et
+non par les mots : une question portant sur un « masque de danse » fait alors
+remonter une notice décrivant un « masque cérémoniel », alors qu'aucun mot n'est
+commun aux deux formulations. L'interrogation rapide de ces représentations
+suppose un index adapté, la structure HNSW proposée par Malkov et Yashunin
+(2018) étant aujourd'hui la plus employée.
+
+La seconde notion est la \textbf{génération augmentée par la recherche}, en
+anglais \emph{retrieval-augmented generation}, formalisée par Lewis et al.
+(2020). Le principe consiste à ne pas demander au modèle de répondre de mémoire,
+mais à lui fournir, au moment de la question, les documents pertinents extraits
+d'une base maîtrisée, en lui imposant de fonder sa réponse sur eux seuls. Le
+mécanisme se décompose en cinq temps :
+
+\begin{enumerate}
+  \item \textbf{l'ingestion} : les documents de référence sont collectés et
+        découpés en fragments de taille homogène ;
+  \item \textbf{l'indexation} : chaque fragment est converti en plongement, puis
+        enregistré dans un index ;
+  \item \textbf{la recherche} : la question est convertie de la même manière et
+        comparée à l'index, qui renvoie les fragments les plus proches ;
+  \item \textbf{l'augmentation} : ces fragments sont insérés dans l'instruction
+        adressée au modèle, avec la consigne de n'affirmer que ce qui y figure ;
+  \item \textbf{la génération} : le modèle rédige la réponse et cite ses
+        sources ; s'il ne trouve pas l'information, il doit le dire.
+\end{enumerate}
+
+L'intérêt de ce dispositif pour une institution patrimoniale est direct : il
+procure la fluidité d'un guide et la fiabilité d'un catalogue, et il rend la
+mise à jour immédiate, puisque modifier une notice suffit à modifier les
+réponses, sans réentraîner quoi que ce soit.
+
+\subsection{DevOps : industrialiser la production du logiciel}
+
+Le DevOps est une manière d'organiser le travail qui vise à raccourcir le chemin
+séparant une modification écrite par un développeur de sa mise à disposition des
+utilisateurs. Son nom, contraction de \emph{development} et \emph{operations},
+dit le projet : supprimer la frontière entre ceux qui écrivent le logiciel et
+ceux qui le font fonctionner. Kim et al. (2016) en résument le principe par
+trois exigences, fluidifier le flux vers la production, raccourcir les boucles
+de retour et instaurer une culture d'apprentissage continu ; Bass, Weber et Zhu
+(2015) en précisent les conséquences sur l'architecture des systèmes.
+
+Deux pratiques, formalisées par Humble et Farley (2010), en constituent le cœur.
+L'\textbf{intégration continue} veut que chaque modification déposée déclenche
+automatiquement la compilation et une série de vérifications, de sorte qu'une
+anomalie soit signalée en quelques minutes et non le jour de la mise en ligne.
+Le \textbf{déploiement continu} veut qu'une modification acceptée soit publiée
+selon une procédure rigoureusement identique à chaque fois, ce qui supprime les
+erreurs de manipulation. Deux techniques les rendent possibles : le
+\textbf{conteneur}, qui enferme l'application avec tout ce dont elle a besoin
+pour fonctionner, de sorte que ce n'est plus le code seul qui voyage mais son
+environnement complet ; et l'\textbf{infrastructure décrite par le code}, qui
+consigne dans des fichiers versionnés l'ensemble des ressources à créer chez
+l'hébergeur, qu'un outil tel que Terraform (HashiCorp, 2024) crée ensuite et
+maintient conformes.
+
+Ce recours au DevOps n'est pas ici un choix de confort. Deux mois de stage ne
+laissent aucune marge pour reconstruire ce qui aurait été cassé sans qu'on s'en
+aperçoive, et la Fondation devra un jour exploiter le système sans nous : une
+mise en production qui repose sur une suite de gestes mémorisés par une seule
+personne n'est pas transmissible, une mise en production décrite dans un fichier
+l'est. La nature des pannes rencontrées le confirme : un modèle tridimensionnel
+servi avec une étiquette de type erronée s'affiche parfaitement dans le
+navigateur mais empêche toute session de réalité augmentée, anomalie qui ne se
+voit pas à l'œil et se vérifie automatiquement, ou passe inaperçue jusqu'au jour
+de la démonstration. Une équipe technique réduite, enfin, ne peut pas consacrer
+une journée à chaque mise en ligne : automatiser la publication, c'est rendre
+les mises à jour assez peu coûteuses pour qu'elles aient effectivement lieu.
+
+\subsection{FinOps : maîtriser le coût de l'infrastructure en nuage}
+
+L'hébergement en nuage transforme une dépense d'investissement en dépense de
+fonctionnement : on n'achète plus un serveur, on paie ce que l'on consomme.
+Cette souplesse a une contrepartie, car la dépense devient variable, diffuse et
+facilement invisible, personne ne recevant de facture avant d'avoir consommé. La
+discipline dite \emph{FinOps} (FinOps Foundation, 2023) vise à rendre ce coût
+visible, à l'attribuer à ceux qui le provoquent et à l'optimiser en continu ;
+elle procède en trois temps : \textbf{informer}, mesurer et répartir la dépense ;
+\textbf{optimiser}, supprimer le gaspillage et dimensionner au juste besoin ;
+\textbf{opérer}, inscrire ces contrôles dans le fonctionnement courant plutôt
+que de les réserver aux audits.
+
+Pour une institution à budget contraint, la question n'est pas de savoir si le
+dispositif fonctionne, mais combien il coûtera une fois le stagiaire parti ; elle
+a d'ailleurs été posée telle quelle lors des entretiens. Trois apports y
+répondent. D'abord un chiffre plutôt qu'une intuition : les montants
+d'infrastructure présentés dans ce rapport ne sont pas déduits d'un barème, ils
+sont calculés service par service par \emph{Infracost} à partir des fichiers qui
+décrivent l'infrastructure, et donc connus avant même que la dépense ne soit
+engagée. Ensuite une architecture pensée pour la dépense : servir l'application
+sous forme de fichiers statiques diffusés par un réseau de distribution, plutôt
+que par un serveur allumé en permanence, fait tomber le coût récurrent à
+quelques centaines de francs par mois, le seul poste réellement coûteux, le
+calcul graphique de la photogrammétrie, étant ponctuel et s'interrompant de
+lui-même hors usage. Enfin des garde-fous durables : étiqueter les ressources,
+poser des alarmes budgétaires et arrêter automatiquement les environnements
+d'essai ne coûte rien et évite la dérive silencieuse qui caractérise les
+dépenses de nuage.
+
+% =============================================================================
+\section{État de l'art}
+\label{sec:etatart}
+
+\subsection{La situation des musées camerounais}
+
+L'état de l'art doit d'abord être dressé là où se situe le problème, c'est-à-dire
+au Cameroun. Le pays compte une trentaine d'établissements muséaux, répartis
+entre musées nationaux, musées de chefferie et musées privés ou confessionnels.
+Le tableau~\ref{tab:museescmr}, reporté en annexe~13, présente les principaux
+d'entre eux et le mode de présentation qu'ils offrent aujourd'hui à un public
+distant.
+
+
+Ce relevé appelle trois constats.
+
+\begin{enumerate}
+  \item \textbf{Aucun musée camerounais ne propose de visite immersive à ses
+        visiteurs.} Là où une présentation en ligne existe, elle se limite à
+        des photographies accompagnées de notices descriptives. Cette pratique,
+        que l'on peut qualifier de photogrammétrie statique, consiste à
+        photographier l'objet et à le décrire : elle documente, mais elle ne
+        restitue ni le volume, ni l'échelle, ni le lieu.
+
+  \item \textbf{Le seul travail de visualisation en trois dimensions documenté
+        est expérimental.} Keumoe et Blot (2023) rapportent une initiative
+        conduite au Musée national du Cameroun autour de l'exposition
+        temporaire \emph{Contact(s) Zone}. Il s'agissait d'un projet pilote mené
+        par des chercheurs et non d'une commande de l'établissement ; la
+        modélisation a été réalisée sous Blender et restituée avec Unreal
+        Engine~5, la photogrammétrie, pourtant plus fidèle, ayant été écartée
+        faute de moyens. Le dispositif portait sur une exposition temporaire et
+        n'a pas été mis en service pour le public.
+
+  \item \textbf{Les obstacles sont connus et convergents.} Les mêmes auteurs
+        relèvent l'insuffisance des moyens techniques, l'absence de formation du
+        personnel aux sciences du patrimoine, le manque de plans architecturaux
+        fiables, la précarité financière et la faible synergie entre
+        institutions culturelles du pays.
+\end{enumerate}
+
+Il existe donc, au Cameroun, un écart entre la richesse du patrimoine conservé
+et les moyens de le faire connaître au-delà des murs. C'est cet écart que notre
+travail entend réduire, en montrant qu'un dispositif immersif complet peut être
+construit et exploité avec les moyens d'une institution ordinaire.
+
+\subsection{Les dispositifs proposés à l'international}
+
+Hors du Cameroun, le marché de la visite virtuelle s'est structuré autour de
+quelques familles de solutions, dont les caractéristiques sont résumées au
+tableau~\ref{tab:comparvv}, reporté en annexe~14.
+
+
+Une constante ressort de cette comparaison : ces solutions traitent la visite
+virtuelle comme un produit isolé, détaché de la gestion de l'institution et de
+sa documentation. Aucune ne relie le parcours immersif à un inventaire, à une
+billetterie, à une base de connaissances interrogeable ou à d'autres
+institutions. C'est précisément cette articulation qui fait défaut.
+
+\subsection{Les collections ouvertes et leurs interfaces de programmation}
+
+Plusieurs grands musées ont ouvert leurs catalogues au moyen d'interfaces de
+programmation publiques. Ces sources constituent la matière première du
+rapprochement documentaire recherché. Neuf d'entre elles ont été examinées.
+Cinq sont interrogeables sans clé d'accès et ont été retenues : le Metropolitan
+Museum of Art, dont la couverture africaine est la meilleure et qui a servi de
+source principale ; l'Art Institute of Chicago ; le Cleveland Museum of Art,
+dont les notices fournissent les numéros d'inventaire ; le Victoria and Albert
+Museum, riche en arts appliqués ; et Wikidata, qui relie objets, cultures et
+lieux sous forme de données structurées. Quatre autres, Europeana, le
+Rijksmuseum, la Smithsonian Institution et les Harvard Art Museums, exigent une
+clé que nous n'avons pu obtenir et ont dû être écartées.
+
+Le choix des sources n'a donc pas été dicté par leur richesse, mais par leur
+accessibilité effective dans les conditions du stage. Cette exclusion constitue
+une limite explicite de l'étude et non un oubli.
+
+\subsection{Les assistants conversationnels en contexte muséal}
+
+Les premiers agents conversationnels muséaux reposaient sur des arbres de
+questions prédéfinies : robustes mais rigides, ils ne répondaient qu'aux
+questions prévues. L'arrivée des grands modèles de langue a permis une
+conversation naturelle, au prix du risque d'invention évoqué plus haut. La
+littérature récente converge vers l'ancrage documentaire comme réponse à ce
+risque et formule trois exigences : la \textbf{traçabilité}, chaque affirmation
+devant pouvoir être rapportée à un document identifiable ; l'\textbf{aveu
+d'ignorance}, l'assistant devant pouvoir répondre qu'il ne sait pas, ce qui
+suppose que la consigne l'y autorise ; et le \textbf{périmètre}, l'assistant
+devant refuser poliment les questions hors sujet plutôt que d'y répondre
+approximativement. Ces trois exigences ont directement structuré la conception
+de notre assistant.
+% =============================================================================
+\section{Cadre juridique et éthique}
+\label{sec:juridique}
+
+La diffusion numérique d'un patrimoine n'est pas un acte techniquement neutre.
+Elle engage des droits, ceux des auteurs comme ceux des communautés d'origine,
+et le dispositif décrit dans ce rapport ne peut être présenté sans que ce cadre
+soit posé.
+
+\subsection{Les droits attachés aux images du patrimoine}
+
+Une confusion fréquente doit être levée d'emblée : \textbf{l'objet et son image
+ne relèvent pas du même régime}. La plupart des pièces conservées par une
+chefferie ou une fondation sont anciennes et anonymes ; à ce titre, elles
+échappent au droit d'auteur, dont la protection s'éteint soixante-dix ans après
+la mort de l'auteur en droit camerounais comme dans la plupart des législations.
+Mais la photographie de cet objet, et plus encore son modèle tridimensionnel,
+constituent des œuvres nouvelles : le photographe et l'opérateur de
+numérisation acquièrent sur elles un droit propre.
+
+La conséquence est directe pour notre travail. Numériser une œuvre libre de
+droits produit un fichier qui, lui, ne l'est pas, et dont la titularité doit
+être réglée. Deux principes ont donc été retenus. D'une part, les médias
+produits durant le stage, photographies, panoramas et maillages, ont vocation à
+appartenir à la Fondation, seule à même d'en autoriser la réutilisation.
+D'autre part, le système conserve pour chaque média la mention de son origine,
+de sorte qu'une réutilisation ultérieure puisse toujours être rapportée à son
+producteur. Un dispositif qui perd cette information rend le droit
+inapplicable, faute de pouvoir dire qui a produit quoi.
+
+\subsection{Les conditions posées par les collections interrogées}
+
+Le rapprochement documentaire décrit au chapitre~3 interroge des collections
+ouvertes qui ne diffusent pas toutes sous les mêmes conditions : certaines
+placent leurs notices dans le domaine public, d'autres n'autorisent qu'un usage
+non commercial, d'autres encore imposent la citation de l'établissement
+détenteur. Le dispositif s'y conforme en affichant systématiquement, pour chaque
+correspondance retenue, le nom du musée détenteur et le numéro d'inventaire de
+la pièce, et en ne stockant que la notice et son adresse, jamais le média
+lui-même. Ce choix n'est pas seulement juridique : il rend la vérification
+possible, puisque le lecteur peut remonter à la source.
+
+\subsection{Le consentement des communautés d'origine}
+
+Une question dépasse le droit. Certaines pièces ne sont pas de simples objets :
+elles portent une fonction rituelle, et la communauté qui les a produites peut
+légitimement estimer qu'elles n'ont pas à être exposées à tout regard, ni
+reproduites en volume. Aucune législation ne tranche cette question à la place
+des intéressés.
+
+C'est la raison pour laquelle la publication n'est jamais automatique dans le
+système : un musée, un secteur ou une œuvre demeure invisible du public tant
+qu'une personne de l'institution n'a pas posé l'acte de publication, et les
+correspondances documentaires ne s'affichent qu'après validation par le
+conservateur. Ces deux mécanismes, présentés plus loin comme des choix
+d'interface, sont d'abord des garanties éthiques : ils maintiennent la décision
+du côté de l'institution et de la communauté, non du côté de l'algorithme.
+
+La question de la restitution se pose enfin en arrière-plan. Sarr et Savoy
+(2018) ont montré l'ampleur de la dispersion du patrimoine africain et posé les
+termes du débat. Notre travail ne s'y substitue pas : rendre visible cette
+dispersion n'est pas restituer, et le dispositif décrit ici doit être compris
+comme un instrument de connaissance, non comme une réponse à une question qui
+relève des États et des institutions détentrices.
+
+\subsection{Les données des visiteurs}
+
+L'adhésion en ligne et les campagnes d'information supposent le traitement de
+données personnelles. Trois principes ont été appliqués : la finalité est
+limitée à la relation entre l'institution et son adhérent ; le consentement est
+recueilli explicitement et le destinataire peut se désinscrire à tout moment au
+moyen d'un lien porté par chaque message ; et la restriction des destinataires
+aux seules personnes ayant consenti est calculée par la base de données, non
+par le programme qui compose l'envoi. Ce dernier point rejoint un enseignement
+plus général du travail, développé au chapitre~4 : une garantie portée par la
+donnée résiste à l'erreur de programmation, une garantie portée par le code n'y
+résiste pas.
+
+
+
+\subsection{Ce que notre travail apporte}
+
+Au terme de cet examen, trois manques se dégagent, qui définissent l'espace de
+notre contribution.
+
+\begin{enumerate}
+  \item \textbf{L'absence de dispositif immersif dans les musées camerounais.}
+        Aucun établissement ne propose aujourd'hui à ses visiteurs distants
+        autre chose que des photographies légendées, et le seul travail de
+        modélisation documenté est resté expérimental. Nous proposons un
+        dispositif complet, en service, construit avec les moyens d'une
+        institution ordinaire.
+
+  \item \textbf{L'absence d'articulation.} Les solutions existantes séparent la
+        visite immersive, la gestion de l'institution et l'assistance au
+        visiteur. Nous les réunissons dans un ensemble où l'objet du parcours
+        immersif est le même que celui de l'inventaire, de la boutique et de la
+        base de connaissances de l'assistant.
+
+  \item \textbf{L'absence de mise en relation entre institutions et de modèle
+        reproductible.} Aucune solution examinée ne cherche, pour une œuvre
+        donnée, ses œuvres apparentées ailleurs dans le monde, et aucune ne se
+        transpose d'une institution à l'autre sans être reconstruite. Nous
+        proposons un dispositif de rapprochement documentaire assorti d'une
+        validation humaine, et une architecture ouverte dans laquelle l'accueil
+        d'une nouvelle structure ne demande aucun développement.
+\end{enumerate}
+
+\conclchap
+
+Ce chapitre a précisé le vocabulaire du rapport et situé le travail dans son
+paysage. Les briques techniques nécessaires sont individuellement disponibles et
+éprouvées, mais aucun musée camerounais n'en dispose aujourd'hui pour son public
+distant. Ce qui manque n'est donc pas la technologie, mais son
+\emph{assemblage} au service d'une institution à moyens limités. C'est cet
+assemblage qui constitue l'objet de notre travail, et le chapitre suivant expose
+la démarche adoptée pour le mener.

@@ -21,10 +21,25 @@
 // composant PrimeVue ne peut donc jamais se monter avant que le module soit là,
 // et il n'y a pas de course possible.
 
+import { ref } from 'vue'
+
 // Une seule installation par session, et une seule promesse partagée : deux
 // navigations rapprochées vers l'ERP ne doivent pas déclencher deux
 // téléchargements ni deux `app.use()`.
 let promesse = null
+
+// ÉTAT RÉACTIF — et c'est important, pas un détail de style.
+//
+// `App.vue` doit monter <Toast> et <ConfirmDialog> dès que le plugin est posé.
+// Il lisait auparavant `primeVuePret()` UNE SEULE FOIS, dans son `onMounted`.
+// Or sur le parcours réel — on arrive par le site public, marqué
+// `sansPrimeVue`, puis on entre dans l'ERP —, cette promesse n'existe pas
+// encore au montage de App : le test échouait et le drapeau restait faux POUR
+// TOUTE LA SESSION. Conséquence mesurée : `confirm.require()` n'ouvrait aucune
+// boîte, donc « Supprimer » ne supprimait rien, en silence, sans erreur.
+//
+// Un `ref` supprime la course : peu importe qui arrive en premier.
+export const primeVuePose = ref(false)
 
 // L'application, deposee au demarrage. Le garde de route appelle l'installation
 // sans avoir a transporter l'instance : elle n'a qu'un seul proprietaire, et le
@@ -98,6 +113,10 @@ export function installerPrimeVue(app = application) {
     app.use(ToastService)
     app.use(ConfirmationService)
     app.directive('tooltip', Tooltip)
+
+    // EN DERNIER, et seulement ici : les deux services doivent être posés avant
+    // que <Toast> et <ConfirmDialog> ne se montent, sinon leur injection échoue.
+    primeVuePose.value = true
   })()
 
   return promesse

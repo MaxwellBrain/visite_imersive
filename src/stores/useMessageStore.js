@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { supabase } from '@/services/supabase'
+import { supprimerOuEchouer } from '@/services/ecriture'
 import { scopeToTenant, currentTenantId } from '@/services/tenant'
 
 // Boîte de réception de l'organisation.
@@ -115,8 +116,7 @@ export const useMessageStore = defineStore('messages', () => {
   }
 
   async function remove(id) {
-    const { error } = await supabase.from('messages').delete().eq('id', id)
-    if (error) throw error
+    await supprimerOuEchouer(supabase.from('messages').delete().eq('id', id))
     items.value = items.value.filter((m) => m.id !== id)
     if (openId.value === id) close()
   }

@@ -17,7 +17,11 @@ const pad4 = (n) => (n + 3) & ~3
 // ---------------------------------------------------------------------------
 // Assemblage du conteneur
 // ---------------------------------------------------------------------------
-function buildGlb(gltf, bin) {
+// Exporté : `usdz.js` réutilise ce conteneur pour les scans iPhone convertis.
+// Un second assembleur GLB, ailleurs, finirait par diverger de celui-ci sur un
+// détail (le bourrage du bloc JSON se fait avec des ESPACES, pas des zéros) —
+// et un octet faux ici rend le fichier illisible sans le moindre message.
+export function buildGlb(gltf, bin) {
   const jsonText = JSON.stringify(gltf)
   const jsonBytes = new TextEncoder().encode(jsonText)
   const jsonLen = pad4(jsonBytes.length)

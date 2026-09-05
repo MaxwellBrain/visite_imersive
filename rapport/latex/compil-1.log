@@ -362,7 +362,7 @@ xib/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}] [2] [3]
 (C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omsztmcm.fd)
 (C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omxztmcm.fd)
 (C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ptm.fd))
-[6] (rapport.lof) [7] [8]) [9] (sections/01-introduction.tex
+[6] (rapport.lof) [7]) [8] (sections/01-introduction.tex
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
 (hyperref)                be the same. Added a new anchor on input line 11.
@@ -370,154 +370,159 @@ Package hyperref Warning: The anchor of a bookmark and its parent's must not
 [1]
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
-(hyperref)                be the same. Added a new anchor on input line 91.
+(hyperref)                be the same. Added a new anchor on input line 86.
 
 [2] [3]
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
-(hyperref)                be the same. Added a new anchor on input line 176.
-
-
-Package hyperref Warning: The anchor of a bookmark and its parent's must not
-(hyperref)                be the same. Added a new anchor on input line 218.
+(hyperref)                be the same. Added a new anchor on input line 191.
 
 [4]
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
-(hyperref)                be the same. Added a new anchor on input line 281.
+(hyperref)                be the same. Added a new anchor on input line 233.
 
-[5] [6]) (sections/02-chapitre1.tex [7]
+[5]
+
+Package hyperref Warning: The anchor of a bookmark and its parent's must not
+(hyperref)                be the same. Added a new anchor on input line 294.
+
+[6] [7]) (sections/02-chapitre1.tex [8]
 Chapitre 1.
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
 (hyperref)                be the same. Added a new anchor on input line 8.
 
-[8] [9] [10] [11] [12] [13] [14] [15]) (sections/03-chapitre2.tex [16]
+[9] [10] [11] [12] [13] [14] [15] [16]) (sections/03-chapitre2.tex [17]
 Chapitre 2.
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
 (hyperref)                be the same. Added a new anchor on input line 8.
 
-[17]
-Underfull \hbox (badness 10000) in paragraph at lines 150--150
-\T1/ptm/m/n/10 Restitution
+[18]
+Underfull \hbox (badness 10000) in paragraph at lines 138--138
+\T1/ptm/m/n/8 Mise en re-la-tion
 
-Underfull \hbox (badness 10000) in paragraph at lines 150--150
-\T1/ptm/m/n/10 Mise en re-la-tion
+Underfull \hbox (badness 10000) in paragraph at lines 138--138
+\T1/ptm/m/n/8 Ancrage do-cu-men-
 
-Underfull \hbox (badness 10000) in paragraph at lines 150--150
-\T1/ptm/m/n/10 Ancrage do-
+Underfull \hbox (badness 10000) in paragraph at lines 138--138
+\T1/ptm/m/n/8 Cloisonnement et
+[19] [20] [21] [22]
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1pcr.fd)
+Underfull \hbox (badness 10000) in paragraph at lines 402--402
+[]\T1/ptm/m/n/8 Intelligence ar-ti-fi-
 
-Underfull \hbox (badness 10000) in paragraph at lines 150--150
-\T1/ptm/m/n/10 cu-men-taire de
-
-Underfull \hbox (badness 10000) in paragraph at lines 150--150
-\T1/ptm/m/n/10 Cloisonnement et
-[18] [19] [20] [21] (figures/scrumban.tex
-(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ts1phv.fd))
-[22] (C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\t1pcr.fd)
-Underfull \hbox (badness 10000) in paragraph at lines 418--418
-[]\T1/ptm/m/n/10 Intelligence ar-ti-fi-
-
-Underfull \hbox (badness 10000) in paragraph at lines 418--418
-[]\T1/ptm/m/n/10 Conception et ré-dac-
+Underfull \hbox (badness 10000) in paragraph at lines 402--402
+[]\T1/ptm/m/n/8 Conception et ré-dac-
 [23] [24]) (sections/04-chapitre3.tex [25]
 Chapitre 3.
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
 (hyperref)                be the same. Added a new anchor on input line 14.
 
-[26] (figures/organigramme.tex) [27] [28] [29] [30] [31] [32]
-(figures/architecture-generale.tex) [33]
+[26] (figures/organigramme.tex) [27] [28] [29] [30] [31]
+(figures/architecture-generale.tex
+(C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ts1phv.fd))
+[32]
 
 pdfTeX warning: pdflatex.exe (file ./figures/rag-musea.pdf): PDF inclusion: fou
 nd PDF version <1.7>, but at most version <1.5> allowed
-[34] [35 <./figures/rag-musea.pdf>]
+[33] [34 <./figures/rag-musea.pdf>]
 
 pdfTeX warning: pdflatex.exe (file ./figures/architecture-cloud-musea.pdf): PDF
  inclusion: found PDF version <1.7>, but at most version <1.5> allowed
-[36]
+[35 <./figures/architecture-cloud-musea.pdf>]
 
 pdfTeX warning: pdflatex.exe (file ./figures/deploiement-musea.pdf): PDF inclus
 ion: found PDF version <1.7>, but at most version <1.5> allowed
-[37 <./figures/architecture-cloud-musea.pdf>] [38 <./figures/deploiement-musea.
-pdf>]
-Underfull \hbox (badness 1953) in paragraph at lines 688--688
- []|\T1/ptm/m/n/10 0|
 
-Underfull \hbox (badness 1953) in paragraph at lines 688--688
- []|\T1/ptm/m/n/10 0|
+Underfull \hbox (badness 2042) in paragraph at lines 627--627
+ []|\T1/ptm/m/n/8 0|
 
-Underfull \hbox (badness 1953) in paragraph at lines 688--688
- []|\T1/ptm/m/n/10 0|
+Underfull \hbox (badness 2042) in paragraph at lines 627--627
+ []|\T1/ptm/m/n/8 0|
 
-Underfull \hbox (badness 1953) in paragraph at lines 688--688
- []|\T1/ptm/m/n/10 0|
+Underfull \hbox (badness 2042) in paragraph at lines 627--627
+ []|\T1/ptm/m/n/8 0|
 
-Underfull \hbox (badness 1953) in paragraph at lines 688--688
- []|\T1/ptm/m/n/10 0|
+Underfull \hbox (badness 2042) in paragraph at lines 627--627
+ []|\T1/ptm/m/n/8 0|
 
-Underfull \hbox (badness 1117) in paragraph at lines 723--723
- []|\T1/ptm/m/n/10 90|
+Underfull \hbox (badness 2042) in paragraph at lines 627--627
+ []|\T1/ptm/m/n/8 0|
 
-Underfull \hbox (badness 1472) in paragraph at lines 723--723
- []|\T1/ptm/m/n/10 0|
+Underfull \hbox (badness 7451) in paragraph at lines 631--639
+[]\T1/ptm/m/n/12 Ces deux re-le-vés ap-pellent une lec-ture. Le ma-té-riel, d'u
+n mon-tant de
+[36] [37 <./figures/deploiement-musea.pdf>]
+Underfull \hbox (badness 1253) in paragraph at lines 702--702
+ []|\T1/ptm/m/n/8 90|
 
-Underfull \hbox (badness 1472) in paragraph at lines 723--723
- []|\T1/ptm/m/n/10 0|
+Underfull \hbox (badness 1546) in paragraph at lines 702--702
+ []|\T1/ptm/m/n/8 0|
 
-Underfull \hbox (badness 10000) in paragraph at lines 723--723
-[]|\T1/ptm/m/n/10 Reconstruction pho-to-gram-mé-trique, 6
+Underfull \hbox (badness 1546) in paragraph at lines 702--702
+ []|\T1/ptm/m/n/8 0|
 
-Underfull \hbox (badness 1117) in paragraph at lines 723--723
- []|\T1/ptm/m/n/10 ^^V|
-[39]
-Underfull \hbox (badness 1406) in paragraph at lines 767--767
- []|\T1/ptm/m/n/10 1 133 000|
+Underfull \hbox (badness 1253) in paragraph at lines 702--702
+ []|\T1/ptm/m/n/8 ^^V|
+[38]
+Underfull \hbox (badness 2088) in paragraph at lines 735--735
+ []|\T1/ptm/m/n/8 1 133 000|
 
-Underfull \hbox (badness 2042) in paragraph at lines 767--767
- []|\T1/ptm/m/n/10 162 710|
+Underfull \hbox (badness 2726) in paragraph at lines 735--735
+ []|\T1/ptm/m/n/8 162 710|
 
-Underfull \hbox (badness 1406) in paragraph at lines 767--767
- []|\T1/ptm/m/n/10 1 295 710|
+Underfull \hbox (badness 2088) in paragraph at lines 735--735
+ []|\T1/ptm/m/n/8 1 295 710|
 
-Underfull \hbox (badness 2556) in paragraph at lines 767--767
- []|\T1/ptm/m/n/10 38 871|
+Underfull \hbox (badness 3209) in paragraph at lines 735--735
+ []|\T1/ptm/m/n/8 38 871|
 
-Underfull \hbox (badness 1406) in paragraph at lines 767--767
- []|\T1/ptm/b/n/10 1 334 581|
-[40] [41] [42] [43] [44]
+Underfull \hbox (badness 2088) in paragraph at lines 735--735
+ []|\T1/ptm/b/n/8 1 334 581|
+[39] [40 <./figures/cap-01-erp-musees.png (PNG copy)> <./figures/cap-02-site-pu
+blic.png (PNG copy)>] [41] [42] [43 <./figures/cap-03-adhesion.png (PNG copy)> 
+<./figures/cap-04-assistant-installation.png (PNG copy)>]
 (C:\Users\maxib\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ts1ptm.fd)
-[45]) (sections/05-chapitre4.tex [46]
+[44 <./figures/cap-05-tableau-de-bord.png (PNG copy)>])
+(sections/05-chapitre4.tex [45]
 Chapitre 4.
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
 (hyperref)                be the same. Added a new anchor on input line 9.
 
-[47] [48]
-Underfull \hbox (badness 1264) in paragraph at lines 220--220
-[]\T1/ptm/m/n/10 Coût ré-cur-rent d'hé-ber-ge-ment très faible (730
+[46] [47] [48] [49] [50] (figures/devops-cible.tex)
+Underfull \hbox (badness 1189) in paragraph at lines 396--396
+[]|\T1/ptm/m/n/8 Coût fixe du plan de contrôle, in-dé-pen-dant de
+[51] [52]
+Underfull \hbox (badness 1348) in paragraph at lines 509--509
+ []|\T1/ptm/m/n/8 8 760|
 
-Underfull \hbox (badness 4353) in paragraph at lines 220--220
-[]\T1/ptm/m/n/10 Tissu dense d'ins-ti-tu-tions pa-tri-mo-niales dans
-[49] [50] [51] [52] (figures/devops-cible.tex)
-Underfull \hbox (badness 10000) in paragraph at lines 413--413
-[]|\T1/ptm/m/n/10 Aucun ; fac-tu-ra-tion à la res-source
-[53] [54]
-Underfull \hbox (badness 1048) in paragraph at lines 533--533
- []|\T1/ptm/m/n/10 8 760|
+Underfull \hbox (badness 1348) in paragraph at lines 509--509
+ []|\T1/ptm/m/n/8 9 000|
 
-Underfull \hbox (badness 1048) in paragraph at lines 533--533
- []|\T1/ptm/m/n/10 9 000|
+Underfull \hbox (badness 1082) in paragraph at lines 509--509
+ []|\T1/ptm/m/n/8 96 000|
 
-Underfull \hbox (badness 1048) in paragraph at lines 533--533
- []|\T1/ptm/m/n/10 6 000|
-[55] [56]) (sections/06-conclusion.tex [57] [58]
+Underfull \hbox (badness 1348) in paragraph at lines 509--509
+ []|\T1/ptm/m/n/8 6 000|
+
+Underfull \hbox (badness 1082) in paragraph at lines 509--509
+ []|\T1/ptm/m/n/8 12 000|
+
+Underfull \hbox (badness 1082) in paragraph at lines 509--509
+ []|\T1/ptm/m/n/8 12 600|
+
+Underfull \hbox (badness 1082) in paragraph at lines 509--509
+ []|\T1/ptm/m/n/8 60 000|
+[53] [54]) (sections/06-conclusion.tex [55]
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
-(hyperref)                be the same. Added a new anchor on input line 68.
+(hyperref)                be the same. Added a new anchor on input line 51.
 
-[59] [60]) (sections/07-bibliographie.tex [61]
+[56]) (sections/07-bibliographie.tex [57]
 
 Package hyperref Warning: The anchor of a bookmark and its parent's must not
 (hyperref)                be the same. Added a new anchor on input line 25.
@@ -534,21 +539,17 @@ rld graphs. \T1/ptm/m/it/12 IEEE
 Underfull \hbox (badness 1852) in paragraph at lines 64--68
 \T1/ptm/m/it/12 Tran-sac-tions on Pat-tern Ana-ly-sis and Ma-chine In-tel-li-ge
 nce, 42\T1/ptm/m/n/12 (4), 824--836.
-[62]) (sections/08-annexes.tex [63]
-Underfull \hbox (badness 1205) in paragraph at lines 51--53
+[58]) (sections/08-annexes.tex [59]
+Underfull \hbox (badness 1205) in paragraph at lines 60--62
 []\T1/ptm/m/n/12 Existe-t-il, à votre connais-sance, des ÷uvres com-pa-rables a
 ux vôtres conser-vées
-[64] [65] [66] [67]) [68]
-pdfTeX warning (ext4): destination with the same identifier (name{page.IX}) has
- been already used, duplicate ignored
+[60]) [61]
+pdfTeX warning (ext4): destination with the same identifier (name{page.VIII}) h
+as been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.476 
-       [9] [10] [11] [12] [13] (rapport.aux)
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
- )
+l.527 
+       [8] [9] [10] [11] [12] (rapport.aux) )
 (see the transcript file for additional information)<C:/Users/maxib/AppData/Loc
 al/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/maxib/Ap
 pData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb><C:/
@@ -564,6 +565,6 @@ es/utmbi8a.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/type1/urw/ti
 mes/utmr8a.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/type1/urw/ti
 mes/utmri8a.pfb><C:/Users/maxib/AppData/Local/Programs/MiKTeX/fonts/type1/urw/z
 apfding/uzdr.pfb>
-Output written on rapport.pdf (82 pages, 867968 bytes).
+Output written on rapport.pdf (74 pages, 2500072 bytes).
 Transcript written on rapport.log.
 pdflatex: major issue: So far, you have not checked for MiKTeX updates.

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { supabase } from '@/services/supabase'
+import { supprimerOuEchouer } from '@/services/ecriture'
 import { scopeToTenant } from '@/services/tenant'
 
 // Événements & expositions temporaires.
@@ -49,8 +50,7 @@ export const useEventStore = defineStore('events', () => {
     if (i !== -1) items.value[i] = fromRow(r)
   }
   async function remove(id) {
-    const { error } = await supabase.from('events').delete().eq('id', id)
-    if (error) throw error
+    await supprimerOuEchouer(supabase.from('events').delete().eq('id', id))
     items.value = items.value.filter((x) => x.id !== id)
   }
   async function togglePublished(e) {

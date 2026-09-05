@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Tabs from 'primevue/tabs'
@@ -12,6 +12,8 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Tag from 'primevue/tag'
 import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
+import { useToast } from 'primevue/usetoast'
 import { useGenealogyStore } from '@/stores/useGenealogyStore'
 import { normalise } from '@/services/genealogy'
 import GenealogyTree from '@/components/genealogy/GenealogyTree.vue'
@@ -19,6 +21,7 @@ import IndividuFormDialog from '@/components/genealogy/IndividuFormDialog.vue'
 
 const router = useRouter()
 const { t } = useI18n()
+const toast = useToast()
 const store = useGenealogyStore()
 const indDialog = ref(false)
 
@@ -38,6 +41,66 @@ watch(
 
 // L'arbre prend désormais la population entière et la personne à centrer :
 // il déduit lui-même ascendants ET descendants (services/genealogy.js).
+// ----------------------------------------------------- dynastie par classeur
+const fichierClasseur = ref(null)
+const classeur = reactive({
+  export: false, lecture: false, ecriture: false,
+  apercu: false, pretes: [], problemes: [], total: 0
+})
+
+async function exporterModele() {
+  classeur.export = true
+  try {
+    const { modeleClasseur } = await import('@/services/genealogieClasseur')
+    const { telechargerClasseur } = await import('@/services/xlsx')
+    telechargerClasseur(
+      modeleClasseur({ personnes: store.individus }),
+      `musea-genealogie-${new Date().toISOString().slice(0, 10)}`
+    )
+  } catch (e) {
+    toast.add({ severity: 'error', summary: t('admin.genealogy.exportEchec'), detail: e?.message || '', life: 6000 })
+  } finally {
+    classeur.export = false
+  }
+}
+
+async function onClasseur(e) {
+  const f = e.target.files?.[0]
+  e.target.value = ''
+  if (!f) return
+  classeur.lecture = true
+  try {
+    const { analyserClasseur } = await import('@/services/genealogieClasseur')
+    const r = await analyserClasseur(f, { personnes: store.individus })
+    Object.assign(classeur, { pretes: r.pretes, problemes: r.problemes, total: r.total, apercu: true })
+  } catch (err) {
+    console.warn('[genealogie/classeur]', err?.message || err)
+    toast.add({ severity: 'error', summary: t('admin.genealogy.importEchec'), detail: err?.message || '', life: 8000 })
+  } finally {
+    classeur.lecture = false
+  }
+}
+
+async function confirmerImport() {
+  classeur.ecriture = true
+  try {
+    const { importerPersonnages } = await import('@/services/genealogieClasseur')
+    const r = await importerPersonnages(classeur.pretes, { personnes: store.individus })
+    await store.load()
+    classeur.apercu = false
+    toast.add({
+      severity: 'success',
+      summary: t('admin.genealogy.importFait', { n: r.crees }),
+      detail: t('admin.genealogy.importLiens', { n: r.liens }),
+      life: 6000
+    })
+  } catch (e) {
+    toast.add({ severity: 'error', summary: t('admin.genealogy.importEchec'), detail: e?.message || '', life: 9000 })
+  } finally {
+    classeur.ecriture = false
+  }
+}
+
 const personnes = computed(() => normalise(store.individus))
 const objetsLies = computed(() => (selectedChefId.value ? store.objetsLies(selectedChefId.value) : []))
 
@@ -64,9 +127,55 @@ function individuName(id) {
           :placeholder="$t('admin.genealogy.chooseChef')"
           style="min-width: 16rem"
         />
+        <!-- La dynastie se remplit dans un tableau, hors ligne, puis se relit
+             ici. Voir services/genealogieClasseur.js -->
+        <Button
+          :label="$t('admin.genealogy.exportModele')" icon="pi pi-download"
+          outlined severity="secondary" :loading="classeur.export" @click="exporterModele"
+        />
+        <Button
+          :label="$t('admin.genealogy.importer')" icon="pi pi-upload"
+          outlined severity="secondary" :loading="classeur.lecture" @click="fichierClasseur?.click()"
+        />
+        <input
+          ref="fichierClasseur" type="file"
+          accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+          style="display: none" @change="onClasseur"
+        />
         <Button :label="$t('admin.genealogy.newIndividu')" icon="pi pi-user-plus" @click="indDialog = true" />
       </div>
     </div>
+
+    <!-- On montre avant d'écrire : une filiation fausse ne se rattrape pas. -->
+    <Dialog
+      v-model:visible="classeur.apercu" modal :header="$t('admin.genealogy.importTitre')"
+      :style="{ width: '38rem', maxWidth: '95vw' }"
+    >
+      <p class="gimp-resume">
+        {{ $t('admin.genealogy.importResume', { n: classeur.pretes.length, t: classeur.total }) }}
+      </p>
+      <div v-if="classeur.problemes.length" class="gimp-pb">
+        <strong>{{ $t('admin.genealogy.importProblemes', classeur.problemes.length) }}</strong>
+        <ul>
+          <li v-for="(p, i) in classeur.problemes.slice(0, 12)" :key="i">
+            <b>{{ $t('admin.genealogy.importLigne', { n: p.ligne }) }}</b>
+            {{ $t('admin.genealogy.gimpErr_' + p.motif) }}
+            <em v-if="p.detail">— {{ p.detail }}</em>
+          </li>
+        </ul>
+        <small v-if="classeur.problemes.length > 12">
+          {{ $t('admin.genealogy.importReste', { n: classeur.problemes.length - 12 }) }}
+        </small>
+      </div>
+      <template #footer>
+        <Button :label="$t('common.cancel')" text @click="classeur.apercu = false" />
+        <Button
+          :label="$t('admin.genealogy.importConfirmer', { n: classeur.pretes.length })"
+          icon="pi pi-check" :disabled="!classeur.pretes.length || classeur.ecriture"
+          :loading="classeur.ecriture" @click="confirmerImport"
+        />
+      </template>
+    </Dialog>
 
     <Tabs v-model:value="activeTab">
       <TabList>
@@ -154,6 +263,20 @@ function individuName(id) {
 </template>
 
 <style scoped>
+/* Aperçu d'import : chaque problème renvoie à une ligne du classeur, que le
+   musée corrigera chez lui avant de renvoyer le fichier. */
+.gimp-resume { margin: 0 0 1rem; font-size: 0.95rem; }
+.gimp-pb {
+  background: color-mix(in srgb, var(--p-red-500, #c0392b) 8%, transparent);
+  border-left: 2px solid var(--p-red-500, #c0392b);
+  border-radius: 4px; padding: 0.8rem 1rem;
+}
+.gimp-pb strong { display: block; font-size: 0.9rem; margin-bottom: 0.5rem; }
+.gimp-pb ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.gimp-pb li { font-size: 0.86rem; line-height: 1.5; }
+.gimp-pb em { opacity: 0.75; font-style: normal; }
+.gimp-pb small { display: block; margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.8; }
+
 .gen-actions {
   display: flex;
   gap: 0.5rem;

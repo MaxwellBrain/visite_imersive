@@ -8,11 +8,13 @@ import Select from 'primevue/select'
 import { useRouter } from 'vue-router'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
+import { messageSuppression } from '@/services/ecriture'
 import { useObjectStore } from '@/stores/useObjectStore'
 import { useSectorStore } from '@/stores/useSectorStore'
 import { useMuseumStore } from '@/stores/useMuseumStore'
 import ObjectFormDialog from '@/components/objects/ObjectFormDialog.vue'
 import Object3DViewer from '@/components/objects/Object3DViewer.vue'
+import ImportFonds from '@/components/admin/ImportFonds.vue'
 import ShareCardDialog from '@/components/objects/ShareCardDialog.vue'
 
 const { t } = useI18n()
@@ -25,7 +27,10 @@ const router = useRouter()
 
 const dialogVisible = ref(false)
 const editing = ref(null)
-const viewer = reactive({ visible: false, src: '', title: '' })
+const viewer = reactive({ visible: false, src: '', iosSrc: '', title: '' })
+// Identifiant de l'objet dont on va chercher le modèle : le bouton concerné
+// tourne, les autres restent cliquables.
+const chargement3d = ref(null)
 const partage = reactive({ visible: false, objet: null, lieu: '' })
 
 const museumOptions = computed(() => museumStore.items.map((m) => ({ label: m.nom, value: m.id })))
@@ -72,9 +77,43 @@ function locationLabel(obj) {
   const museum = museumStore.getById(sector.museumId)
   return `${museum?.nom ?? '—'} › ${sector.nom}`
 }
-function view3d(obj) {
-  viewer.src = obj.model3d || ''
-  viewer.title = obj.nom
+// LES MODÈLES NE SONT PAS DANS LA LISTE — et c'est voulu.
+//
+// `COLONNES_LISTE` (useObjectStore) écarte délibérément `model3d` et
+// `model3d_ios` : colonnes lourdes, qui faisaient télécharger plusieurs
+// méga-octets pour afficher un tableau de noms. Les médias d'UN objet se
+// demandent à la carte, par `chargerMedias()`.
+//
+// Cette fonction, elle, avait continué de lire `obj.model3d` — donc toujours
+// `undefined` depuis ce découpage. Le dialogue s'ouvrait sur « aucun modèle 3D
+// n'a été chargé pour cet objet », y compris pour un objet qui en avait un.
+// C'est la fiche qui le faisait correctement (`ObjectDetailView`), pas la liste.
+//
+// On charge AVANT d'ouvrir : ouvrir d'abord montrerait l'état vide une fraction
+// de seconde avant de se corriger, ce qui ressemble encore à une panne.
+async function view3d(obj) {
+  if (obj.model3d === undefined) {
+    chargement3d.value = obj.id
+    try {
+      await store.chargerMedias(obj.id)
+    } catch (e) {
+      toast.add({
+        severity: 'error',
+        summary: t('admin.objects.model3dFailed'),
+        detail: e?.message || '',
+        life: 5000
+      })
+      return
+    } finally {
+      chargement3d.value = null
+    }
+  }
+  // `chargerMedias` remplace l'entrée du tableau : la référence reçue en
+  // argument est périmée, on relit donc l'objet à jour.
+  const o = store.getById(obj.id) || obj
+  viewer.src = o.model3d || ''
+  viewer.iosSrc = o.model3dIos || ''
+  viewer.title = o.nom
   viewer.visible = true
 }
 // Carte de partage WhatsApp. Le lieu est passé ici et non recalculé dans le
@@ -110,7 +149,7 @@ function remove(obj) {
         await store.remove(obj.id)
         toast.add({ severity: 'info', summary: t('admin.objects.deleted'), life: 2000 })
       } catch (e) {
-        toast.add({ severity: 'error', summary: t('admin.common.deleteFailed'), detail: e.message, life: 3000 })
+        toast.add({ severity: 'error', summary: t('admin.common.deleteFailed'), detail: messageSuppression(e, t), life: 3000 })
       }
     }
   })
@@ -126,7 +165,10 @@ function remove(obj) {
           {{ $t('admin.objects.subtitle', { shown: filtered.length, total: store.items.length }) }}
         </p>
       </div>
-      <Button :label="$t('admin.objects.new')" icon="pi pi-plus" @click="openCreate" />
+      <div class="vi-page__actions">
+        <ImportFonds />
+        <Button :label="$t('admin.objects.new')" icon="pi pi-plus" @click="openCreate" />
+      </div>
     </div>
 
     <div class="list-layout">
@@ -161,7 +203,7 @@ function remove(obj) {
               <div class="obj-card__actions-right">
                 <Button icon="pi pi-id-card" size="small" text :aria-label="$t('admin.objects.detail')" v-tooltip.top="$t('admin.objects.detail')" @click="router.push('/objets/' + o.id)" />
                 <Button icon="pi pi-whatsapp" size="small" text :aria-label="$t('share.action')" v-tooltip.top="$t('share.action')" @click="partager(o)" />
-                <Button icon="pi pi-box" size="small" text :aria-label="$t('admin.objects.view3d')" v-tooltip.top="$t('admin.objects.view3d')" @click="view3d(o)" />
+                <Button icon="pi pi-box" size="small" text :loading="chargement3d === o.id" :aria-label="$t('admin.objects.view3d')" v-tooltip.top="$t('admin.objects.view3d')" @click="view3d(o)" />
                 <Button icon="pi pi-pencil" size="small" text @click="openEdit(o)" />
                 <Button icon="pi pi-trash" size="small" text severity="danger" @click="remove(o)" />
               </div>
@@ -214,12 +256,15 @@ function remove(obj) {
     </div>
 
     <ObjectFormDialog v-model:visible="dialogVisible" :object="editing" />
-    <Object3DViewer v-model:visible="viewer.visible" :src="viewer.src" :title="viewer.title" />
+    <!-- `ios-src` transmis comme sur la fiche : un objet qui n'a qu'un .usdz
+         reste ouvrable en Quick Look depuis un iPhone. -->
+    <Object3DViewer v-model:visible="viewer.visible" :src="viewer.src" :ios-src="viewer.iosSrc" :title="viewer.title" />
     <ShareCardDialog v-model:visible="partage.visible" :object="partage.objet" :lieu="partage.lieu" />
   </div>
 </template>
 
 <style scoped>
+
 .obj-card {
   background: var(--vi-surface);
   border: 1px solid var(--vi-border);

@@ -42,6 +42,22 @@ const importScan = reactive({ visible: false })
 const jobsRef = ref(null)
 const lieu = computed(() => `${museum.value?.nom ?? '—'} › ${sector.value?.nom ?? '—'}`)
 
+// Vues de la pièce : la couverture d'abord, puis les vues complémentaires
+// (20260905_objet_galerie.sql). Le conservateur doit VOIR ce qu'il a déposé
+// sans rouvrir le formulaire — sinon il redépose, et l'objet finit avec la
+// même photo trois fois.
+const vues = computed(() => {
+  const o = object.value
+  if (!o) return []
+  const liste = o.photo ? [{ url: o.photo, legende: '' }] : []
+  for (const v of o.photos || []) if (v?.url) liste.push({ url: v.url, legende: v.legende || '' })
+  return liste
+})
+const vueIndex = ref(0)
+const vue = computed(() => vues.value[vueIndex.value] || null)
+// Changer d'objet remet la fiche sur sa couverture.
+watch(() => object.value?.id, () => { vueIndex.value = 0 })
+
 // La liste ne transporte plus les médias lourds : cette fiche les demande pour
 // le seul objet consulté. Sans cela, la photo et le bouton 3D disparaîtraient.
 watch(
@@ -69,7 +85,7 @@ watch(
       <!-- OBJET (gauche) -->
       <section class="fiche__col">
         <div class="fiche__media">
-          <img v-if="object.photo" :src="object.photo" :alt="object.nom" />
+          <img v-if="vue" :src="vue.url" :alt="vue.legende || object.nom" />
           <div v-else class="fiche__ph"><i class="pi pi-box" /></div>
           <Tag
             :value="object.published ? $t('admin.common.published') : $t('admin.common.draft')"
@@ -77,6 +93,22 @@ watch(
             class="fiche__status"
           />
         </div>
+        <p v-if="vue?.legende" class="fiche__legende">{{ vue.legende }}</p>
+
+        <!-- Bande des vues : n'apparaît que s'il y en a plus d'une. -->
+        <ul v-if="vues.length > 1" class="fiche__vues">
+          <li v-for="(v, i) in vues" :key="v.url + i">
+            <button
+              type="button"
+              :class="['fiche__vue', { 'fiche__vue--on': i === vueIndex }]"
+              :aria-label="v.legende || $t('gallery.viewN', { n: i + 1 })"
+              v-tooltip.bottom="v.legende || $t('gallery.viewN', { n: i + 1 })"
+              @click="vueIndex = i"
+            >
+              <img :src="v.url" :alt="v.legende || $t('gallery.viewN', { n: i + 1 })" loading="lazy" />
+            </button>
+          </li>
+        </ul>
         <p v-if="object.nomCommun" class="fiche__common">{{ object.nomCommun }}</p>
         <p class="fiche__desc">{{ object.description || $t('admin.objectDetail.noDescription') }}</p>
         <div class="fiche__actions">
@@ -210,6 +242,18 @@ watch(
 .fiche__media img { width: 100%; height: 100%; object-fit: cover; }
 .fiche__ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--vi-muted); font-size: 3rem; }
 .fiche__status { position: absolute; top: 0.7rem; left: 0.7rem; }
+/* La legende monte juste sous l'image : separee, elle se lirait comme un
+   debut de description. */
+.fiche__legende { margin: -0.5rem 0 0.6rem; font-size: 0.82rem; font-style: italic; color: var(--vi-muted); }
+.fiche__vues { list-style: none; display: flex; gap: 0.45rem; margin: 0 0 0.9rem; padding: 0.15rem; overflow-x: auto; }
+.fiche__vue {
+  width: 62px; height: 48px; flex: 0 0 62px; padding: 0; cursor: pointer; opacity: 0.7;
+  border: 2px solid transparent; border-radius: 8px; overflow: hidden; background: var(--vi-surface-2);
+  transition: border-color 0.15s ease, opacity 0.15s ease;
+}
+.fiche__vue img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fiche__vue:hover { opacity: 1; }
+.fiche__vue--on { border-color: var(--p-primary-color, #0e6f5c); opacity: 1; }
 .fiche__common { margin: 0 0 0.5rem; font-style: italic; color: var(--vi-muted); }
 .fiche__desc { margin: 0 0 1rem; line-height: 1.55; color: var(--vi-text); }
 .fiche__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }

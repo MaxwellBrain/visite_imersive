@@ -1,41 +1,66 @@
 % -----------------------------------------------------------------------------
 %  Figure 3.1 — Organigramme de la Fondation Jean Félicien Gacha
-%  Le Département Think Tank Fou'ndjem est en position d'état-major, rattaché
-%  directement à la direction, et mis en évidence en orange : c'est l'entité
-%  d'accueil du stage.
+%  Structure à trois niveaux : direction générale, secrétariat général, puis
+%  les départements. Le Département Think Tank Fou'ndjem figure au dernier
+%  rang, à droite, et est mis en évidence : c'est l'entité d'accueil du stage.
 % -----------------------------------------------------------------------------
-\begin{tikzpicture}
+\begin{tikzpicture}[node distance=0pt]
 
-  % --- direction générale ----------------------------------------------------
-  \node[blocfort, text width=3.8cm, minimum height=9mm] (dir) at (0,0)
+  % --- niveau 1 : conseil et direction ---------------------------------------
+  \node[blocfort, text width=4.2cm, minimum height=8mm] (ca) at (0,0)
+       {Conseil d'administration};
+  \node[blocfort, text width=4.2cm, minimum height=8mm] (dg) at (0,-1.3)
        {Direction générale};
+  \draw[lien] (ca.south) -- (dg.north);
 
-  % --- département d'accueil (état-major) ------------------------------------
-  \node[bloc, draw=keyceorange, fill=keycesoft, line width=1.1pt,
-        text width=3.3cm, minimum height=9mm] (tt) at (5.9,0)
-       {\textbf{Département \emph{Think Tank} Fou'ndjem}\\[1pt]
-        {\tiny\itshape entité d'accueil du stage}};
-  \draw[lien, draw=keyceorange, line width=1pt] (dir.east) -- (tt.west);
+  % --- niveau 2 : secrétariat général ----------------------------------------
+  \node[bloc, text width=3.4cm, minimum height=8mm] (sg) at (0,-2.6)
+       {Secrétariat général};
+  \draw[lien] (dg.south) -- (sg.north);
 
-  % --- bus horizontal des pôles opérationnels --------------------------------
-  \draw[lien] (dir.south) -- (0,-1.5);
-  \draw[lien] (-6.0,-1.5) -- (6.0,-1.5);
+  % --- bus horizontal des départements ---------------------------------------
+  \draw[lien] (sg.south) -- (0,-3.4);
+  \draw[lien] (-6.4,-3.4) -- (6.4,-3.4);
 
   \foreach \x/\nom in {%
-      -6.0/{Conservation\\ et exposition},
-      -3.0/{Ateliers\\ et résidences},
-       0.0/{Accueil\\ du public},
-       3.0/{Communication},
-       6.0/{Administration\\ et finances}}
+      -6.4/{Département\\ \textbf{Scolaire}},
+      -3.2/{Département\\ \textbf{Culture et\\ patrimoine}},
+       0.0/{Département\\ \textbf{Artisanat et\\ création}},
+       3.2/{Département\\ \textbf{Développement\\ communautaire}},
+       6.4/{Département\\ \textbf{Administration\\ et finances}}}
   {%
-    \draw[lien] (\x,-1.5) -- (\x,-1.95);
-    \node[bloc, text width=2.4cm, anchor=north, minimum height=10mm]
-         at (\x,-1.95) {\nom};
+    \draw[lien] (\x,-3.4) -- (\x,-3.9);
+    \node[bloc, text width=2.6cm, anchor=north, minimum height=13mm]
+         at (\x,-3.9) {\nom};
   }
 
+  % --- niveau 4 : unités rattachées aux départements -------------------------
+  \foreach \x/\nom in {%
+      -6.4/{\textbf{ISBB}\\ {\tiny établissement\\ d'enseignement}},
+      -3.2/{Espaces d'exposition\\ et collections},
+       0.0/{Ateliers et\\ résidences d'artistes},
+       3.2/{Accueil du public\\ et communication},
+       6.4/{Comptabilité\\ et ressources humaines}}
+  {%
+    \draw[lien] (\x,-5.35) -- (\x,-5.85);
+    \node[bloc, fill=white, text width=2.6cm, anchor=north, minimum height=12mm]
+         at (\x,-5.85) {\nom};
+  }
+
+  % --- le Think Tank, au dernier rang, rattaché au bus des départements ------
+  \draw[lien, draw=keyceorange, line width=1pt] (6.4,-3.4) -- (9.3,-3.4);
+  \draw[lien, draw=keyceorange, line width=1pt] (9.3,-3.4) -- (9.3,-7.4);
+  \node[bloc, draw=keyceorange, fill=keycesoft, line width=1.1pt,
+        text width=3.2cm, anchor=north, minimum height=13mm] (tt) at (9.3,-7.4)
+       {Département\\ \textbf{\emph{Think Tank} Fou'ndjem}\\[1pt]
+        {\tiny\itshape entité d'accueil du stage}};
+
   % --- légende ---------------------------------------------------------------
-  \node[blocnote, anchor=north west, text width=13.5cm] at (-6.9,-3.5)
-       {Trait orange : rattachement d'état-major (conseil et réflexion).
-        Traits gris : rattachement hiérarchique (pôles opérationnels).};
+  \node[blocnote, anchor=north west, text width=15.5cm] at (-7.7,-9.3)
+       {Le Département \emph{Think Tank} Fou'ndjem, en orange, est une structure
+        de réflexion et de recherche : il ne conduit aucune activité
+        opérationnelle et n'exerce aucune autorité hiérarchique sur les autres
+        départements. L'ISBB, rattaché au Département Scolaire, est
+        l'établissement d'enseignement de la Fondation.};
 
 \end{tikzpicture}

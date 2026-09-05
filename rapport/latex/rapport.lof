@@ -5,14 +5,16 @@
 \babel@toc {french}{}\relax 
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces Le tableau Scrumban adopté pour la conduite du projet}}{22}{figure.caption.25}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Organigramme de la Fondation Jean Félicien Gacha}}{27}{figure.caption.29}%
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Architecture générale de la plateforme MUSÉA}}{33}{figure.caption.40}%
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Architecture de l'assistant conversationnel à ancrage documentaire (RAG)}}{35}{figure.caption.42}%
-\contentsline {figure}{\numberline {3.4}{\ignorespaces Architecture de l'infrastructure d'hébergement en nuage}}{37}{figure.caption.46}%
-\contentsline {figure}{\numberline {3.5}{\ignorespaces Chaîne d'intégration et de déploiement continus en service}}{38}{figure.caption.48}%
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Relevé de la dépense mensuelle d'infrastructure par service}}{40}{figure.caption.56}%
-\contentsline {figure}{\numberline {3.7}{\ignorespaces Site public : le parcours de visite immersive}}{42}{figure.caption.62}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Organigramme de la Fondation Jean Félicien Gacha}}{27}{figure.caption.25}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Architecture générale de la plateforme MUSÉA}}{32}{figure.caption.35}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Architecture de l'assistant conversationnel à ancrage documentaire (RAG)}}{34}{figure.caption.37}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Architecture de l'infrastructure d'hébergement en nuage}}{35}{figure.caption.41}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Chaîne d'intégration et de déploiement continus en service}}{37}{figure.caption.43}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Back-office : la gestion des musées de l'institution}}{40}{figure.caption.53}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Site public : l'en-tête de l'institution et la section des œuvres modélisées}}{40}{figure.caption.54}%
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Site public : la page d'adhésion à l'institution}}{43}{figure.caption.59}%
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Back-office : l'assistant d'installation}}{43}{figure.caption.61}%
+\contentsline {figure}{\numberline {3.10}{\ignorespaces Back-office : le tableau de bord de pilotage}}{44}{figure.caption.62}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Chaîne DevOps cible : de la modification du code à la production par conteneurs}}{53}{figure.caption.82}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Chaîne DevOps cible : de la modification du code à la production par conteneurs}}{52}{figure.caption.70}%

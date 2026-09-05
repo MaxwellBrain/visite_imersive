@@ -1,0 +1,11 @@
+Dépose ici les 5 captures d'écran, sous EXACTEMENT ces noms :
+
+  cap-01-erp-musees.png            -> Back-office, Gestion des Musées
+  cap-02-site-public.png           -> Site public, page d'accueil / Œuvres à la une
+  cap-03-adhesion.png              -> Site public, page de connexion / créer un compte
+  cap-04-assistant-installation.png-> Back-office, Assistant d'installation
+  cap-05-tableau-de-bord.png       -> Back-office, Tableau de bord
+
+Je m'occupe du recadrage (barre des tâches, chrome du navigateur) et de la
+mise à niveau pour l'impression, puis je les range dans figures/ et je
+recompile. Ne recadre rien toi-même.

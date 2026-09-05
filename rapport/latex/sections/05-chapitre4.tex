@@ -37,27 +37,31 @@ grossièrement maillée, détruisent immédiatement l'illusion. L'espace pardonn
 la simplification ; il ne pardonne pas la discontinuité.
 
 D'autre part, \textbf{la perception des dimensions est un phénomène distinct de
-la perception de l'espace}, et elle relève d'un autre dispositif. Aucune
-rotation d'un modèle à l'écran ne renseigne sur la taille véritable d'un objet :
-l'écran n'a pas d'échelle. Seule la projection dans l'environnement réel du
-visiteur la restitue. C'est pourquoi la réalité augmentée n'a pas été traitée
-comme un supplément d'agrément mais comme la seule réponse possible à une
-question précise : \emph{quelle taille cela fait-il ?} Le refus de
-l'agrandissement libre, au profit d'une échelle fixe mesurée sur le maillage,
-découle directement de cette analyse.
+la perception de l'espace}, et elle relève d'un autre dispositif appliqué à un
+autre objet. Un modèle que l'on fait pivoter à l'écran ne renseigne jamais sur
+la taille véritable de ce qu'il représente : l'écran n'a pas d'échelle. Seule la
+projection dans l'environnement réel du visiteur la restitue, et c'est pourquoi
+la réalité augmentée a été réservée aux \emph{habitations et aux espaces à
+visiter}, relevés au capteur LiDAR, plutôt qu'aux œuvres. Poser une case à sa
+dimension véritable dans le salon de quelqu'un lui apprend quelque chose que
+nulle photographie ne transmet ; poser un masque sur une table ne lui apprend
+guère plus qu'une bonne image. Le refus de l'agrandissement libre, au profit de
+l'échelle relevée, découle directement de cette analyse.
 
 Ce constat éclaire enfin une difficulté rencontrée : la couverture des appareils
 n'est pas une question de programmation mais de \emph{format}. Un appareil Apple
 ne déclenchera jamais de session de réalité augmentée à partir d'un fichier
-GLB, quelle que soit la qualité du code. La couverture s'obtient en produisant
-les deux formats, non en écrivant davantage de logique.
+GLB, quelle que soit la qualité du code, et un appareil Android ne fera rien
+d'un USDZ. La couverture s'obtient en produisant les deux formats et en
+s'appuyant sur les visionneuses déjà installées sur les téléphones, non en
+écrivant davantage de logique.
 
 \subsection{Variable 2. La mise en relation documentaire : le vocabulaire comme obstacle}
 
 C'est ici que se situe le résultat le plus instructif de l'étude. La mesure
 comparative rapportée au chapitre~3 est reprise au tableau~\ref{tab:comparrech}.
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Effet de la reformulation de la requête sur la recherche documentaire}
 \label{tab:comparrech}
@@ -116,23 +120,16 @@ d'affirmer}.
 Trois mécanismes se sont révélés déterminants, et leur ordre d'efficacité est
 inverse de leur complexité technique.
 
-\begin{enumerate}
-  \item \textbf{Le filtrage en amont}, le plus simple, est le plus efficace.
-        Écarter les questions manifestement hors périmètre avant même de
-        solliciter le modèle de langue supprime une classe entière d'erreurs, à
-        coût nul.
-
-  \item \textbf{La restriction du périmètre documentaire} au musée ou à la salle
-        où se trouve le visiteur réduit mécaniquement le risque de confusion
-        entre deux œuvres homonymes ou similaires.
-
-  \item \textbf{L'autorisation explicite d'ignorer}, enfin, est le mécanisme le
-        moins intuitif et le plus important. Un modèle de langue à qui l'on
-        demande une réponse en produira une. Il faut donc lui accorder
-        formellement le droit de n'en pas produire. Sans cette clause, la
-        consigne d'ancrage documentaire reste insuffisante : le modèle comble
-        les vides.
-\end{enumerate}
+\textbf{Le filtrage en amont}, le plus simple, est le plus efficace. Écarter
+les questions manifestement hors périmètre avant même de solliciter le modèle
+de langue supprime une classe entière d'erreurs, à coût nul ; \textbf{la
+restriction du périmètre documentaire} au musée ou à la salle où se trouve le
+visiteur réduit mécaniquement le risque de confusion entre deux œuvres
+homonymes ou similaires ; \textbf{l'autorisation explicite d'ignorer}, enfin,
+est le mécanisme le moins intuitif et le plus important. Un modèle de langue à
+qui l'on demande une réponse en produira une. Il faut donc lui accorder
+formellement le droit de n'en pas produire. Sans cette clause, la consigne
+d'ancrage documentaire reste insuffisante : le modèle comble les vides.
 
 Le journal des questions restées sans réponse apporte un enseignement
 complémentaire, d'ordre organisationnel. Il transforme une défaillance de
@@ -170,7 +167,7 @@ du code ; il doit être une propriété de la donnée.}
 
 \subsection{Analyse d'ensemble : forces et faiblesses}
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Analyse des forces, faiblesses, opportunités et menaces du dispositif}
 \label{tab:swot}
@@ -228,7 +225,7 @@ du code ; il doit être une propriété de la donnée.}
 Le tableau~\ref{tab:hypotheses} confronte chaque hypothèse aux résultats
 obtenus.
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Vérification des hypothèses de l'étude}
 \label{tab:hypotheses}
@@ -239,12 +236,12 @@ obtenus.
 \thead{Hypothèse} & \thead{Éléments de vérification} & \thead{Conclusion} \\ \hline
 \textbf{Spécifique 1} &
 Le parcours à 360 degrés restitue le déplacement de salle en salle ; la
-présentation tridimensionnelle permet l'examen sous tous les angles ; la réalité
-augmentée restitue les dimensions véritables (45 $\times$ 52 $\times$ 45 cm
-mesurés sur le maillage) sur les trois familles d'appareils visées. La
+présentation tridimensionnelle des œuvres permet l'examen sous tous les
+angles ; la réalité augmentée restitue les habitations et les espaces à leur
+échelle relevée, sur les deux familles d'appareils visées, iOS et Android. La
 perception des dimensions, en revanche, n'est obtenue que par la réalité
 augmentée, et non par la rotation à l'écran. &
-\textbf{Confirmée}, avec la précision que deux dispositifs distincts sont
+\textbf{Confirmée}, avec la précision que trois dispositifs distincts sont
 requis \\ \hline
 \textbf{Spécifique 2} &
 Cinq collections ouvertes interrogées ; 41 œuvres apparentées identifiées ;
@@ -259,7 +256,7 @@ périmètre, cite ses sources et déclare son ignorance. Le journal des question
 sans réponse objective les limites restantes. &
 \textbf{Confirmée} \\ \hline
 \textbf{Spécifique 4} &
-38 tables protégées par des règles de sécurité au niveau de la ligne ;
+51 tables protégées sans exception par des règles de sécurité au niveau de la ligne, au moyen de 101 politiques déclarées ;
 rattachement automatique à l'insertion ; accueil d'une nouvelle institution sans
 modification du code ; deux fuites détectées et corrigées, l'une et l'autre
 d'origine applicative et non structurelle. &
@@ -281,19 +278,15 @@ L'ensemble du diagnostic peut être ramené à une proposition unique :
 \textbf{la restitution numérique d'une visite repose sur quatre continuités,
 dont la rupture de l'une suffit à faire échouer l'ensemble}.
 
-\begin{itemize}
-  \item \textbf{La continuité spatiale} : le visiteur doit pouvoir passer d'un
-        point de vue au suivant sans rupture. Une galerie d'images la brise.
-  \item \textbf{La continuité d'échelle} : l'objet doit conserver ses
-        dimensions. L'écran, dépourvu d'échelle, la brise ; la réalité augmentée
-        la rétablit.
-  \item \textbf{La continuité documentaire} : chaque affirmation doit être
-        rattachable à une source. L'invention la brise ; l'ancrage documentaire
-        la maintient.
-  \item \textbf{La continuité narrative} : chaque écran doit permettre de
-        poursuivre le fil, de l'objet au chef, du chef à la lignée, de la
-        lignée aux œuvres apparentées. Un écran sans issue la brise.
-\end{itemize}
+\textbf{La continuité spatiale} : le visiteur doit pouvoir passer d'un point
+de vue au suivant sans rupture. Une galerie d'images la brise ; \textbf{la
+continuité d'échelle} : l'objet doit conserver ses dimensions. L'écran,
+dépourvu d'échelle, la brise ; la réalité augmentée la rétablit ; \textbf{la
+continuité documentaire} : chaque affirmation doit être rattachable à une
+source. L'invention la brise ; l'ancrage documentaire la maintient ;
+\textbf{La continuité narrative} : chaque écran doit permettre de poursuivre
+le fil, de l'objet au chef, du chef à la lignée, de la lignée aux œuvres
+apparentées. Un écran sans issue la brise.
 
 % =============================================================================
 \section{Intervention proposée et justification}
@@ -303,36 +296,29 @@ dont la rupture de l'une suffit à faire échouer l'ensemble}.
 
 L'intervention proposée consiste à \textbf{faire passer la plateforme MUSÉA de
 l'état de démonstration éprouvée à celui de service exploité durablement par la
-Fondation}. Elle comporte cinq composantes : l'industrialisation de la chaîne de
+Fondation}. Elle comporte quatre composantes : l'industrialisation de la chaîne de
 production par la conteneurisation, la consolidation de la chaîne documentaire
-de l'assistant, la campagne de production des médias, le transfert de
-compétences, et l'ouverture aux institutions partenaires.
+de l'assistant, la production des médias assortie du transfert de compétences,
+et l'ouverture aux institutions partenaires.
 
 \subsection{Justification de l'intervention}
 
 Trois constats issus du diagnostic la rendent nécessaire.
-
-\begin{enumerate}
-  \item \textbf{L'architecture actuelle atteint sa limite fonctionnelle.} Le
-        dispositif d'hébergement retenu, un stockage d'objets servi par un
-        réseau de diffusion, convient parfaitement à un site statique et son
-        coût est dérisoire. Mais plusieurs traitements identifiés comme
-        nécessaires ne peuvent s'y exécuter : l'ingestion périodique des
-        documents dans l'index vectoriel, la reconstruction photogrammétrique,
-        la production des cartes de profondeur, et l'interrogation programmée
-        des collections. Ces traitements exigent un environnement d'exécution
-        durable, que seul un service de conteneurs peut fournir à coût maîtrisé.
-
-  \item \textbf{La reprise par la Fondation suppose la reproductibilité.} Tant
-        que l'environnement de production diffère de l'environnement de
-        développement, la reprise reste risquée. Le conteneur supprime cet écart
-        en transportant l'environnement complet et non le seul code.
-
-  \item \textbf{La pérennité suppose la maîtrise du coût.} Passer à des
-        conteneurs augmente mécaniquement la dépense. Cette augmentation doit
-        donc être instruite, plafonnée et suivie, d'où la place accordée au
-        FinOps dans la présente proposition.
-\end{enumerate}
+\textbf{L'architecture actuelle atteint sa limite fonctionnelle} : le stockage
+d'objets servi par un réseau de diffusion convient parfaitement à un site
+statique et son coût est dérisoire, mais plusieurs traitements nécessaires ne
+peuvent s'y exécuter, ingestion périodique des documents dans l'index vectoriel,
+reconstruction photogrammétrique, production des cartes de profondeur,
+interrogation programmée des collections, tous exigeant un environnement
+d'exécution durable que seul un service de conteneurs fournit à coût maîtrisé.
+\textbf{La reprise par la Fondation suppose la reproductibilité} : tant que
+l'environnement de production diffère de l'environnement de développement, la
+reprise reste risquée, et le conteneur supprime cet écart en transportant
+l'environnement complet et non le seul code. \textbf{La pérennité suppose enfin
+la maîtrise du coût}, car passer à des conteneurs augmente mécaniquement la
+dépense : cette augmentation doit être instruite \emph{avant} d'être engagée,
+ce que permet l'estimation par \emph{Infracost} décrite au chapitre~3, puis
+plafonnée et suivie.
 
 \subsection{Objectifs d'intervention}
 
@@ -365,25 +351,20 @@ déposée est vérifiée, puis publiée automatiquement, mais substitue à la
 publication de fichiers la construction et le déploiement d'une \emph{image de
 conteneur}. Son enchaînement est le suivant :
 
-\begin{enumerate}
-  \item le développeur dépose sa modification sur le dépôt de code ;
-  \item l'intégration continue installe les dépendances, compile l'application
-        et exécute les contrôles de non-régression ;
-  \item une \textbf{image Docker} multi-étapes est construite : une première
-        étape compile l'application, une seconde ne conserve que le résultat et
-        le serveur de diffusion, ce qui produit une image légère et dépourvue
-        d'outils de compilation ;
-  \item l'image est signée et déposée dans le \textbf{registre d'images} ;
-  \item le déploiement en \textbf{pré-production} est automatique ; les essais
-        de bout en bout y sont exécutés ;
-  \item le déploiement en \textbf{production} intervient après validation, par
-        remplacement progressif des instances, sans interruption de service ;
-  \item la vérification a posteriori du service en ligne conditionne la
-        clôture ; en cas d'échec, le retour à la version précédente est
-        automatique.
-\end{enumerate}
+le développeur dépose sa modification sur le dépôt de code ; l'intégration
+continue installe les dépendances, compile l'application et exécute les
+contrôles de non-régression ; une \textbf{image Docker} multi-étapes est
+construite : une première étape compile l'application, une seconde ne conserve
+que le résultat et le serveur de diffusion, ce qui produit une image légère et
+dépourvue d'outils de compilation ; l'image est signée et déposée dans le
+\textbf{registre d'images} ; le déploiement en \textbf{pré-production} est
+automatique ; les essais de bout en bout y sont exécutés ; le déploiement en
+\textbf{production} intervient après validation, par remplacement progressif
+des instances, sans interruption de service ; la vérification a posteriori du
+service en ligne conditionne la clôture ; en cas d'échec, le retour à la
+version précédente est automatique.
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
 \centering
 \schema{devops-cible}
 \caption{Chaîne DevOps cible : de la modification du code à la production par conteneurs}
@@ -394,9 +375,11 @@ conteneur}. Son enchaînement est le suivant :
 \subsubsection{Choix de l'orchestrateur}
 
 Le choix entre les deux orchestrateurs disponibles a été instruit ; ses termes
-sont présentés au tableau~\ref{tab:orchestrateur}.
+sont présentés au tableau~\ref{tab:orchestrateur}. La
+comparaison porte sur le coût fixe, la charge d'administration, la courbe
+d'apprentissage et la capacité de montée en charge.
 
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Comparaison des orchestrateurs de conteneurs envisagés}
 \label{tab:orchestrateur}
@@ -426,45 +409,33 @@ services distincts fonctionnant en permanence.}
 
 \subsection{Composante 2 : Consolidation de la chaîne documentaire}
 
-Trois actions sont proposées.
+Trois actions sont proposées. \textbf{Automatiser l'ingestion} d'abord : l'export
+des notices, leur découpage, leur normalisation et leur vectorisation, aujourd'hui
+déclenchés à la main, doivent devenir une tâche planifiée exécutée quotidiennement
+dans un conteneur. \textbf{Éprouver la chaîne complète en conditions réelles}
+ensuite : chaque maillon a été vérifié séparément, mais l'enchaînement complet,
+de la mise en cache à la proposition de rapprochement, n'a jamais été exécuté de
+bout en bout avec un compte du personnel. \textbf{Obtenir les clés d'accès
+manquantes} enfin, auprès d'Europeana, du Rijksmuseum, de la Smithsonian
+Institution et des Harvard Art Museums : ces quatre sources élargiraient
+sensiblement la couverture, la liste blanche technique étant déjà prête à les
+accueillir.
 
-\begin{enumerate}
-  \item \textbf{Automatiser l'ingestion.} L'export des notices vers le dépôt
-        documentaire, leur découpage, leur normalisation en anglais et leur
-        vectorisation doivent devenir une tâche planifiée, exécutée
-        quotidiennement dans un conteneur. Aujourd'hui, cette chaîne est
-        déclenchée manuellement.
-
-  \item \textbf{Éprouver la chaîne complète de rapprochement en conditions
-        réelles.} Chaque maillon a été vérifié séparément ; l'enchaînement
-        complet (mise en cache, vectorisation, reclassement, proposition) n'a jamais été exécuté de bout en bout avec un compte du personnel. Cet
-        essai constitue une priorité immédiate.
-
-  \item \textbf{Obtenir les clés d'accès manquantes.} Les demandes auprès
-        d'Europeana, du Rijksmuseum, de la Smithsonian Institution et des
-        Harvard Art Museums doivent être introduites : ces quatre sources
-        élargiraient sensiblement la couverture, la liste blanche technique
-        étant déjà prête à les accueillir.
-\end{enumerate}
-
-\subsection{Composante 3 : Production des médias}
+\subsection{Composante 3 : Production des médias et transfert de compétences}
 
 Le dispositif est prêt ; le contenu reste à produire. Cette composante prévoit
-une campagne de prises de vue à 360~degrés couvrant l'ensemble des espaces, la
-numérisation d'un premier ensemble d'œuvres emblématiques par capteur LiDAR et
-par photogrammétrie, la production des versions au format USDZ nécessaires aux
-appareils Apple, ainsi que la génération des cartes de profondeur pour les
-œuvres non numérisées en trois dimensions. Elle prévoit également
-l'enregistrement ou la synthèse des récits associés aux pièces principales.
+une campagne de prises de vue à 360~degrés couvrant l'ensemble des espaces, le
+relevé au capteur LiDAR des habitations destinées à la réalité augmentée avec
+production des deux formats GLB et USDZ, la numérisation par photogrammétrie
+d'un premier ensemble d'œuvres emblématiques, et l'enregistrement des récits
+associés aux pièces principales.
 
-\subsection{Composante 4 : Transfert de compétences}
+Elle prévoit également le transfert des compétences, car un dispositif qu'une
+seule personne sait exploiter n'est pas pérenne : formation du personnel à
+l'administration courante et à la production des médias, remise d'une
+documentation d'exploitation, désignation d'un référent interne.
 
-Un dispositif qu'une seule personne sait exploiter n'est pas un dispositif
-pérenne. Cette composante prévoit une formation du personnel à l'administration
-courante, une formation à la production des médias, la remise d'une
-documentation d'exploitation, et la désignation d'un référent interne.
-
-\subsection{Composante 5 : Ouverture aux institutions partenaires}
+\subsection{Composante 4 : Ouverture aux institutions partenaires}
 
 L'ouverture de l'architecture ne sera véritablement établie qu'après avoir été
 éprouvée. Cette composante prévoit l'accueil de deux institutions partenaires,
@@ -472,7 +443,15 @@ la mesure du délai réel d'installation, et le recueil de leurs retours.
 
 \subsection{Planification de l'intervention}
 
-\begin{table}[htbp]
+L'intervention se déroule sur douze mois, selon le calendrier prévisionnel
+présenté au tableau~\ref{tab:planning}. Les deux
+premiers trimestres portent l'industrialisation et la consolidation
+documentaire, qui conditionnent les composantes suivantes ; la production des
+médias et le transfert de compétences se poursuivent ensuite en continu, et
+l'ouverture aux institutions partenaires n'intervient qu'une fois la chaîne
+éprouvée.
+
+\begin{table}[!ht]
 \centering
 \caption{Planification prévisionnelle de l'intervention}
 \label{tab:planning}
@@ -497,21 +476,18 @@ Objectif 5 & Accueil de deux institutions partenaires & 4 semaines & Direction \
 
 \subsection{Étude de faisabilité}
 
-\subsubsection{Faisabilité technique}
-
-Elle est acquise. L'ensemble des briques nécessaires existe et a été éprouvé :
+\paragraph{Sur le plan technique, la faisabilité est acquise.} L'ensemble des briques nécessaires existe et a été éprouvé :
 l'image de conteneur est déjà décrite et sert d'ores et déjà à reproduire en
 local le comportement de production ; l'authentification sans clé permanente est
 en service ; l'infrastructure est décrite par le code. Le passage aux conteneurs
 consiste à substituer une cible de déploiement à une autre, non à reconstruire
 la chaîne.
 
-\subsubsection{Faisabilité économique}
+\paragraph{Sur le plan économique,} le tableau~\ref{tab:coutfonctionnement}
+présente le coût de fonctionnement annuel projeté dans l'hypothèse de la chaîne
+cible.
 
-Le tableau~\ref{tab:coutfonctionnement} présente le coût de fonctionnement
-annuel projeté, dans l'hypothèse de la chaîne cible.
-
-\begin{table}[htbp]
+\begin{table}[!ht]
 \centering
 \caption{Coût de fonctionnement annuel projeté après intervention}
 \label{tab:coutfonctionnement}
@@ -542,17 +518,25 @@ est \textbf{mutualisable} : le catalogue mondial des objets externes étant
 partagé, l'arrivée d'institutions partenaires n'en augmente pas la partie la
 plus coûteuse, mais en répartit la charge.
 
-\subsubsection{Faisabilité organisationnelle}
-
-Elle constitue le point le plus délicat. Elle suppose la désignation d'un
+\paragraph{Sur le plan organisationnel}, la faisabilité constitue le point le plus délicat : elle suppose la désignation d'un
 référent interne, la formation effective du personnel, et l'inscription de la
-production des médias dans les activités courantes de la Fondation. La
-composante~4 y pourvoit, mais son succès dépend d'une décision institutionnelle
+production des médias dans les activités courantes de la Fondation. La composante~4 y pourvoit, mais son succès dépend d'une décision institutionnelle
 qui échappe au périmètre technique.
 
 \subsection{Risques et mesures d'atténuation}
 
-\begin{table}[htbp]
+Sept risques ont été identifiés et assortis d'une mesure d'atténuation ; le
+tableau~\ref{tab:risques} les recense avec leur
+probabilité et leur gravité. Deux d'entre eux commandent les autres. La mise en
+sommeil de la base de données faute de trafic, probable et grave, se traite par
+la souscription du palier payant ou, à défaut, par une sollicitation périodique
+programmée. Le départ du référent technique, moins probable mais tout aussi
+grave, appelle une documentation d'exploitation et la formation d'un second
+référent : c'est le risque que la démarche DevOps décrite au chapitre~1 réduit
+le plus directement, une mise en production décrite dans un fichier étant
+transmissible là où une suite de gestes mémorisés ne l'est pas.
+
+\begin{table}[!ht]
 \centering
 \caption{Risques identifiés et mesures d'atténuation proposées}
 \label{tab:risques}
@@ -582,7 +566,7 @@ deux enseignements qui dépassent le cas étudié : \emph{le décalage de
 vocabulaire constitue une seconde dispersion des œuvres, documentaire celle-là},
 et \emph{l'isolement des données ne peut être une propriété du code, il doit
 être une propriété de la donnée}. Le modèle des quatre continuités en offre une
-formulation synthétique. Sur cette base, une intervention en cinq composantes a
+formulation synthétique. Sur cette base, une intervention en quatre composantes a
 été proposée, planifiée, chiffrée et assortie de son analyse de risques. La
 conclusion générale en tire les enseignements d'ensemble et ouvre les
 perspectives.

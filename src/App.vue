@@ -9,24 +9,27 @@
 // LE v-if N'EST PAS UNE PRÉCAUTION DÉCORATIVE : ces deux composants exigent que
 // le plugin soit installé (ils lisent des services injectés). Les monter avant
 // produirait une erreur d'injection au premier rendu.
-import { defineAsyncComponent, shallowRef, onMounted } from 'vue'
-import { primeVuePret } from '@/services/primevue'
+//
+// ⚠️ CE DRAPEAU DOIT ÊTRE RÉACTIF — corrigé le 2026-08-04.
+//
+// Il était calculé une seule fois, dans un `onMounted`, à partir de la promesse
+// d'installation. Sur le parcours réel, cette promesse n'existe pas encore à ce
+// moment-là : le visiteur arrive par le site public, qui est marqué
+// `sansPrimeVue` et n'installe donc rien. Le test échouait, le drapeau restait
+// faux POUR TOUTE LA SESSION, et plus aucune boîte de confirmation ni aucun
+// toast ne se montait ensuite dans l'ERP — « Supprimer » ne supprimait rien, en
+// silence. Le service `primevue.js` expose désormais un `ref` : peu importe qui
+// arrive en premier.
+import { defineAsyncComponent } from 'vue'
+import { primeVuePose } from '@/services/primevue'
 
 const Toast = defineAsyncComponent(() => import('primevue/toast'))
 const ConfirmDialog = defineAsyncComponent(() => import('primevue/confirmdialog'))
-
-const primeVueInstalle = shallowRef(false)
-onMounted(() => {
-  // Le garde de route installe PrimeVue avant d'entrer sur un écran qui en a
-  // besoin ; on se contente d'attendre cette promesse si elle existe.
-  const p = primeVuePret()
-  if (p) p.then(() => { primeVueInstalle.value = true })
-})
 </script>
 
 <template>
   <router-view />
-  <template v-if="primeVueInstalle">
+  <template v-if="primeVuePose">
     <Toast position="top-right" />
     <ConfirmDialog />
   </template>
