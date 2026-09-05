@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import Object3DViewer from '@/components/objects/Object3DViewer.vue'
 import GuideInline from '@/components/public/GuideInline.vue'
 import CabinetFreres from '@/components/public/CabinetFreres.vue'
+import AgentVivant from '@/components/public/AgentVivant.vue'
 import ObjectGallery from '@/components/public/ObjectGallery.vue'
 import { pubObject, pubObjectModels, pubObjectChefs, pubDispersion, pubObjectRarity, marquerVue } from '@/services/publicApi'
 import RarityBadge from '@/components/public/RarityBadge.vue'
@@ -248,6 +249,16 @@ const suggestions = computed(() =>
         />
         <p class="disp__note"><i class="pi pi-info-circle" /> {{ $t('object.dispersionNote') }}</p>
       </section>
+
+      <!-- L'œuvre elle-même, à qui l'on peut parler. Le guide écrit ci-dessous
+           reste disponible : tout le monde n'est pas dans une salle où l'on
+           peut parler à voix haute, ni équipé d'un micro. -->
+      <AgentVivant
+        v-if="object"
+        :object-id="object.id"
+        :tenant-id="object.tenant_id || null"
+        :nom="object.nom"
+      />
 
       <!-- Guide contextuel sur cette œuvre (§2.4⑤ — réservé aux abonnés) -->
       <div class="obj-guide">
